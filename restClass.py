@@ -56,8 +56,8 @@ class restCalls(object):
 
     def get(self, choice):
         """GET RESTconf call
-            :param data_file: String selection of YANG model and local YANG
-            :type data_file: str
+            :param choice: String selection of YANG model and local YANG
+            :type choice: str
             :return: Return the response object
             :rtype: Response object
         """
@@ -69,8 +69,8 @@ class restCalls(object):
 
     def delete(self, choice):
         """GET RESTconf call
-            :param data_file: String selection of YANG model and local YANG
-            :type data_file: str
+            :param choice: String selection of YANG model and container
+            :type choice: str
             :return: Return the response object
             :rtype: Response object
         """
