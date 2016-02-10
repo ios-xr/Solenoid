@@ -17,6 +17,7 @@ model available, you will not be able to use it. Examples of YANG models can be
 found here:
 
 OpenConfig: [https://github.com/openconfig/public]
+
 YangModels: [https://github.com/YangModels/yang]
 
 For GET and DELETE you must know the name of the YANG module and container that
