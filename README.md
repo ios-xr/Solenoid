@@ -33,6 +33,8 @@ response = rest_object.put(data_file)
 ```
 
 ```
+#GET (same for DELETE)
+
 rest_object = restCalls(username, password, ip_address_port)
 response = rest_object.get('yang_module:container')
 ```
