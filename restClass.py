@@ -4,6 +4,7 @@ from requests.auth import HTTPBasicAuth
 import requests
 import re
 import sys
+import json
 
 
 class restCalls(object):
@@ -20,40 +21,40 @@ class restCalls(object):
         self.auth = HTTPBasicAuth(username, password)
         self.ip_address_port = ip_address_port
 
-    def put(self, data_file):
+    def put(self, data):
         """PUT RESTconf call
-            :param data_file: JSON or XML file with config changes
-            :type data_file: File object
+            :param data: JSON or XML with config changes
+            :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers(data_file)
+        headers = self.create_headers_data(data)
         response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self.auth, data=data_file)
+                                auth=self.auth, data=data)
         return response
 
-    def post(self, data_file):
+    def post(self, data):
         """POST RESTconf call
-            :param data_file: JSON or XML file with config changes
-            :type data_file: File object
+            :param data: JSON or XML file with config changes
+            :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers(data_file)
+        headers = self.create_headers_data(data)
         response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self.auth, data=data_file)
+                                auth=self.auth, data=data)
         return response
 
-    def patch(self, data_file):
+    def patch(self, data):
         """PATCH RESTconf call
-            :param data_file: JSON or XML file with config changes
-            :type data_file: File object
+            :param data: JSON or XML with config changes
+            :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers(data_file)
+        headers = self.create_headers_data(data)
         response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self.auth, data=data_file)
+                                auth=self.auth, data=data)
         return response
 
     def get(self, choice):
@@ -63,7 +64,7 @@ class restCalls(object):
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers(choice)
+        headers = self.create_headers_choice(choice)
         url = headers[0] + "?content=config"
         response = requests.get(url=url, headers=headers[1],
                                 auth=self.auth)
@@ -76,74 +77,80 @@ class restCalls(object):
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers(choice)
+        headers = self.create_headers_choice(choice)
         response = requests.delete(url=headers[0], headers=headers[1],
                                    auth=self.auth)
         return response
 
-    def create_headers(self, data_source):
+    def create_headers_data(self, data_source):
         """Generate the headers
-            :param data_source: The file or yang model name
-            :type data_source: Either a string or file object
+            :param data_source: The JSON or XML config
+            :type data_source: str
             :return: Return a tuple with the header information
             :rtype: tuple
 
         """
-        if isinstance(data_source, file):
-            data_type = self.check_data_type(data_source)
-            headers = ({
-                'Accept': 'application/yang.errors+{}'.format(
-                    data_type[0]),
-                'Content-Type': 'application/yang.data+{}'.format(
-                    data_type[0])
-                })
-            url = "http://{}/restconf/data/{}".format(
-                self.ip_address_port, data_type[1])
-        #If the second argument is a string it must be a GET or DELETE
-        elif isinstance(data_source, str):
+        data_type = self.check_data_type(data_source)
+        headers = ({
+            'Accept': 'application/yang.errors+{}'.format(
+                data_type[0]),
+            'Content-Type': 'application/yang.data+{}'.format(
+                data_type[0])
+            })
+        url = "http://{}/restconf/data/{}".format(
+            self.ip_address_port, data_type[1])
+
+        return (url, headers)
+
+    def create_headers_choice(self, data_source):
+        """Generate the headers
+            :param data_source: The yang model name
+            :type data_source: str
+            :return: Return a tuple with the header information
+            :rtype: tuple
+
+        """
+        if type(data_source) == str:
             url = "http://{}/restconf/data/{}".format(
                 self.ip_address_port, data_source)
             headers = ({
                 'Accept':
-                'application/yang.data+json, application/yang.errors+json',
-                'Content-Type': 'application/yang.data+json'
+                'application/yang.data+json, application/yang.errors+json'
                 })
+            return (url, headers)
         else:
-            #If it isnt a file or a string something is wrong
-            raise Exception("You need to enter a file or string.")
-        return (url, headers)
+            raise Exception("GET and DELETE require a string input.")
 
     def check_data_type(self, data_source):
-        """Check the data type of file and the YANG model
+        """Check the data's type and the YANG model
 
-            :param data_source: The file with JSON or XML
-            :type data_source: Open file object
+            :param data_source: The JSON or XML
+            :type data_source: str
             :return: Returns the type of data in the file and the
                      yang model name and local name
             :rtype: tuple(string, string)
 
         """
-        #Grab the first two lines in the file
-        line = [next(data_source) for x in xrange(2)]
-        first_string = line[0]
-        if first_string[:1] == '{' or first_string[:1] == '[':
+        try:
+            json.loads(data_source)
             data_type = 'json'
-            section = re.search(r'"(.*?)"', line[1])
+            section = re.search(r'"(.*?)"', data_source)
             #If the data file only has the container name
-            if re.match(r':', section.group(1)):
+            if bool(re.search(r':', section.group(1))):
                 return (data_type, section.group(1))
             else:
                 module = raw_input("Please enter the YANG module name: ")
                 section = module + ':' + section.group(1)
                 return (data_type, section)
-        elif first_string[:1] == '<':
-            data_type = 'xml'
-            section = re.search(r'<(.*?)>', line[0])
-            if re.match(r':', section.group(1)):
-                return (data_type, section.group(1))
+        except ValueError:
+            if data_source[0] == "<":
+                data_type = 'xml'
+                section = re.search(r'<(.*?)>', data_source)
+                if bool(re.search(r':', section.group(1))):
+                    return (data_type, section.group(1))
+                else:
+                    module = raw_input("Please enter the YANG module name: ")
+                    section = module + ':' + section.group(1)
+                    return (data_type, section)
             else:
-                module = raw_input("Please enter the YANG module name: ")
-                section = module + ':' + section.group(1)
-                return (data_type, section)
-        else:
-            sys.exit("Your data file has malformed XML or JSON.")
+                sys.exit("Your data has malformed XML or JSON.")
