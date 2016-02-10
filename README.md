@@ -4,38 +4,35 @@
 
 ## Description:
 
-A collection of python scripts implementing RESTconf calls. These scripts
-utilize both Cisco and OpenConfig YANG modules. 
+This repository contains a module for making RESTconf calls with python. 
 
-## Usage:
+You must add your ip address and port, username, and password for the 
+constructor.
 
-Be sure to change the username, password, and ip address/port in order
-to run these scripts. 
+### Usage:
 
-To call a write method, choose either PUT, POST, PATCH, or DELETE. 
+For PUT, POST, and PATCH, you must have a data file of either JSON or XML
+formatted using a valid YANG model. If your device does not have the YANG
+model available, you will not be able to use it. Examples of YANG models can be
+found here:
 
-Create a JSON or XML file that contains the changes you want to make to
-your device. 
+OpenConfig: [https://github.com/openconfig/public]
+YangModels: [https://github.com/YangModels/yang]
 
-On your command line, run (for everything except delete):
+For GET and DELETE you must know the name of the YANG module and container that
+you wish the make changes too. 
 
-    $ python rest_write.py <your data filename> <your rest command>
+### Examples:
 
-Example:
+```
+#PUT (works same for POST and PATCH)
 
-    $ python rest_write.py data.json put
-    $ python rest_write.py data.xml post
+rest_object = restCalls(username, password, ip_address_port)
+response = rest_object.put(data_file)
 
-For DELETE, you do not need a JSON or XML file. Example:
+```
 
-    $ python rest_write delete
-
-To call a get method, determine your YANG model. To see a list of options,
-run:
-
-    $ python rest_get.py options
-
-    Example:
-
-    $ python rest_get.py oc_bgp
-    $ python rest_get.py cisco_isis
+```
+rest_object = restCalls(username, password, ip_address_port)
+response = rest_object.get('yang_module:container')
+```
