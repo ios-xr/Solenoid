@@ -34,7 +34,7 @@ class restCallsCase(unittest.TestCase):
             data_type = classObject.check_data_type(data_file)
             self.assertIsInstance(data_type, tuple)
             self.assertEqual(data_type[0], 'json')
-            self.assertEqual(data_type[1].group(1), 'yang_module:container')
+            self.assertEqual(data_type[1], 'yang_module:container')
 
     def test_check_data_xml(self):
         """Test the check_data_type method for xml"""
@@ -44,7 +44,7 @@ class restCallsCase(unittest.TestCase):
             data_type = classObject.check_data_type(data_file)
             self.assertIsInstance(data_type, tuple)
             self.assertEqual(data_type[0], 'xml')
-            self.assertEqual(data_type[1].group(1), 'yang_module:container')
+            self.assertEqual(data_type[1], 'yang_module:container')
 
     def test_header_creation(self):
         """Test the create_header method"""
@@ -90,6 +90,13 @@ class restCallsCase(unittest.TestCase):
 #        self.assertIsInstance(item.content, str)
         #204 or 200 statuses are good
 #        self.assertEqual(item.status_code, 204)
+
+    def test_incorrect_get_request(self):
+        """Test if a bad GET request sends correct exception."""
+        classObject = restCalls(self.username, self.password,
+                                self.ip_address_port)
+        with self.assertRaises(Exception):
+            classObject.get(0)
 
 #    def test_put_request(self):
 #        """Test if PUT adds a configuration"""

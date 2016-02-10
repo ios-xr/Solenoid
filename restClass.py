@@ -98,7 +98,7 @@ class restCalls(object):
                     data_type[0])
                 })
             url = "http://{}/restconf/data/{}".format(
-                self.ip_address_port, data_type[1].group(1))
+                self.ip_address_port, data_type[1])
         #If the second argument is a string it must be a GET or DELETE
         elif isinstance(data_source, str):
             url = "http://{}/restconf/data/{}".format(
@@ -110,8 +110,7 @@ class restCalls(object):
                 })
         else:
             #If it isnt a file or a string something is wrong
-            url = "error"
-            headers = "error"
+            raise Exception("You need to enter a file or string.")
         return (url, headers)
 
     def check_data_type(self, data_source):
@@ -130,10 +129,21 @@ class restCalls(object):
         if first_string[:1] == '{' or first_string[:1] == '[':
             data_type = 'json'
             section = re.search(r'"(.*?)"', line[1])
-            return (data_type, section)
+            #If the data file only has the container name
+            if re.match(r':', section.group(1)):
+                return (data_type, section.group(1))
+            else:
+                module = raw_input("Please enter the YANG module name: ")
+                section = module + ':' + section.group(1)
+                return (data_type, section)
         elif first_string[:1] == '<':
             data_type = 'xml'
             section = re.search(r'<(.*?)>', line[0])
-            return (data_type, section)
+            if re.match(r':', section.group(1)):
+                return (data_type, section.group(1))
+            else:
+                module = raw_input("Please enter the YANG module name: ")
+                section = module + ':' + section.group(1)
+                return (data_type, section)
         else:
             sys.exit("Your data file has malformed XML or JSON.")
