@@ -12,14 +12,14 @@ class restCalls(object):
 
         :param username: Username for device login
         :param password: Password for device login
-        :param ip_address_port: The ip address and port number for the device
+        :param _ip_address_port: The ip address and port number for the device
         :type password: str
         :type username: str
-        :type ip_address_port: str
+        :type _ip_address_port: str
     """
     def __init__(self, username, password, ip_address_port):
-        self.auth = HTTPBasicAuth(username, password)
-        self.ip_address_port = ip_address_port
+        self._auth = HTTPBasicAuth(username, password)
+        self._ip_address_port = ip_address_port
 
     def put(self, data):
         """PUT RESTconf call
@@ -30,7 +30,7 @@ class restCalls(object):
         """
         headers = self.create_headers_data(data)
         response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self.auth, data=data)
+                                auth=self._auth, data=data)
         return response
 
     def post(self, data):
@@ -42,7 +42,7 @@ class restCalls(object):
         """
         headers = self.create_headers_data(data)
         response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self.auth, data=data)
+                                auth=self._auth, data=data)
         return response
 
     def patch(self, data):
@@ -54,7 +54,7 @@ class restCalls(object):
         """
         headers = self.create_headers_data(data)
         response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self.auth, data=data)
+                                auth=self._auth, data=data)
         return response
 
     def get(self, choice):
@@ -67,7 +67,7 @@ class restCalls(object):
         headers = self.create_headers_choice(choice)
         url = headers[0] + "?content=config"
         response = requests.get(url=url, headers=headers[1],
-                                auth=self.auth)
+                                auth=self._auth)
         return response
 
     def delete(self, choice):
@@ -79,7 +79,7 @@ class restCalls(object):
         """
         headers = self.create_headers_choice(choice)
         response = requests.delete(url=headers[0], headers=headers[1],
-                                   auth=self.auth)
+                                   auth=self._auth)
         return response
 
     def create_headers_data(self, data_source):
@@ -98,7 +98,7 @@ class restCalls(object):
                 data_type[0])
             })
         url = "http://{}/restconf/data/{}".format(
-            self.ip_address_port, data_type[1])
+            self._ip_address_port, data_type[1])
 
         return (url, headers)
 
@@ -112,7 +112,7 @@ class restCalls(object):
         """
         if type(data_source) == str:
             url = "http://{}/restconf/data/{}".format(
-                self.ip_address_port, data_source)
+                self._ip_address_port, data_source)
             headers = ({
                 'Accept':
                 'application/yang.data+json, application/yang.errors+json'
