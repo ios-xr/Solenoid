@@ -41,8 +41,8 @@ class restCalls(object):
             :rtype: Response object
         """
         headers = self.create_headers_data(data)
-        response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self._auth, data=data)
+        response = requests.post(url=headers[0], headers=headers[1],
+                                 auth=self._auth, data=data)
         return response
 
     def patch(self, data):
@@ -53,8 +53,8 @@ class restCalls(object):
             :rtype: Response object
         """
         headers = self.create_headers_data(data)
-        response = requests.put(url=headers[0], headers=headers[1],
-                                auth=self._auth, data=data)
+        response = requests.patch(url=headers[0], headers=headers[1],
+                                  auth=self._auth, data=data)
         return response
 
     def get(self, choice):
