@@ -40,5 +40,8 @@ response = rest_object.put(data)
 
 rest_object = restCalls(username, password, ip_address_port)
 response = rest_object.get('yang_module:container')
+print response.content # prints the GET object as a string
+print response.json() # prints the GET object as a dictionary
+print response.status_code # prints the status code of the response
 
 ```
