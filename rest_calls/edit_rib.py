@@ -4,6 +4,12 @@ from jinja2 import Environment, PackageLoader
 from restClass import restCalls
 
 
+# Probably delete these
+username = ''
+password = ''
+ip_address = ''
+
+
 def render_config(update_json):
     """Take a exa command and translate it into yang formatted JSON
     :param update_json: The exa bgp string that is sent to stdout
@@ -41,20 +47,20 @@ def rib_announce(rendered_config):
             We should trigger this script every time a change is made to the
             file.
         """
-        rest_object = restCalls('lisa', 'timCp4tn6m!', '10.200.96.52:2580')
+        rest_object = restCalls(username, password, ip_address)
         response = rest_object.patch(rendered_config)
         #print response.raise_for_status()
         print response.status_code
 
 
 def rib_withdraw(new_config):
-    rest_object = restCalls('lisa', 'timCp4tn6m!', '10.200.96.52:2580')
+    rest_object = restCalls(username, password, ip_address)
     response = rest_object.put(new_config)
     print response.status_code
 
 
 def get_config():
-        rest_object = restCalls('lisa', 'timCp4tn6m!', '10.200.96.52:2580')
+        rest_object = restCalls(username, password, ip_address)
         response = rest_object.get('Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix')
         if not response.raise_for_status():
             return response.json()
