@@ -1,0 +1,34 @@
+{
+  "router-static": {
+    "default-vrf": {
+      "address-family": {
+        "vrfipv4": {
+          "vrf-unicast": {
+            "vrf-prefixes": {
+              "vrf-prefix": [
+              {% for values in data -%}
+                {% for prefix in values -%}
+                {% set prefix, length = prefix.split('/') %}
+                {
+                  "prefix": "{{ prefix }}",
+                  "prefix-length": "{{ length }}",
+                  "vrf-route": {
+                    "segment-route-next-hop-table": {
+                      "vrf-next-hop-next-hop-address": [
+                      {
+                        "next-hop-address":" "{{ next_hop }}"
+                      }
+                    ]
+                    }
+                  }
+                }
+              {%- endfor %}
+              {%- endfor %}
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
