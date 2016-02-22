@@ -16,9 +16,6 @@ def render_config(update_json):
     :type update_json: str
 
     """
-
-    #import pdb
-    #pdb.set_trace()
     if 'announce' in update_json['neighbor']['message']['update']:
         prefixes = update_json['neighbor']['message']['update']['announce']['ipv4 unicast'].values()
         next_hop = update_json['neighbor']['message']['update']['announce']['ipv4 unicast'].keys()[0]
@@ -42,10 +39,10 @@ def render_config(update_json):
 
 
 def rib_announce(rendered_config):
-        """Make REST call to change the rib table
-            This script will need the file of network commands to be filled
-            We should trigger this script every time a change is made to the
-            file.
+        """Add networks to the RIB table.
+
+        :param rendered_config: Jinja2 rendered configuration file
+        :type rendered_config: str --check this?
         """
         rest_object = restCalls(username, password, ip_address)
         response = rest_object.patch(rendered_config)
@@ -54,22 +51,33 @@ def rib_announce(rendered_config):
 
 
 def rib_withdraw(new_config):
+    """Take newly created configuration file and PUT it.
+        This will overwrite the previous config with the new one.
+
+        :param new_config: The new RIB configuration
+        :type new_config: str
+    """
     rest_object = restCalls(username, password, ip_address)
     response = rest_object.put(new_config)
     print response.status_code
 
 
 def get_config():
-        rest_object = restCalls(username, password, ip_address)
-        response = rest_object.get('Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix')
-        if not response.raise_for_status():
-            return response.json()
-        else:
-            response.raise_for_status()
+    """Grab the current RIB config off of the box
+
+        :return: return the json HTTP response object
+        :rtype: unicode string --check this?
+    """
+    rest_object = restCalls(username, password, ip_address)
+    response = rest_object.get('Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix')
+    if not response.raise_for_status():
+        return response.json()
+    else:
+        response.raise_for_status()
 
 
 def update_watcher():
-    """Watches for BGP updates from neighbors"""
+    """Watches for BGP updates from neighbors and triggers RIB change."""
     while True:
         raw_update = sys.stdin.readline().strip()
         update_json = json.loads(raw_update)
