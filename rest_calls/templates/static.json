@@ -16,7 +16,7 @@
                     "segment-route-next-hop-table": {
                       "vrf-next-hop-next-hop-address": [
                       {
-                        "next-hop-address":" "{{ next_hop }}"
+                        "next-hop-address": "{{ next_hop }}"
                       }
                     ]
                     }
