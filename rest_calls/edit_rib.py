@@ -7,12 +7,6 @@ from jinja2 import Environment, PackageLoader
 from restClass import restCalls
 
 
-# Probably delete these
-username = ''
-password = ''
-ip_address = ''
-
-
 def _prefixed(level, message):
     now = time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime())
     return "%s %-8s %-6d %s" % (now, level, os.getpid(), message)
@@ -47,6 +41,14 @@ def render_config(update_json):
         rib_withdraw(current_config)
 
 
+def create_rest_object():
+    with open('edit_rib.config', 'r') as f:
+        lines = f.readlines()
+    return restCalls(lines[0].replace("\r\n", ""),
+                     lines[1].replace("\r\n", ""),
+                     lines[2].replace("\r\n", ""))
+
+
 def rib_announce(rendered_config):
         """Add networks to the RIB table.
 
@@ -54,11 +56,11 @@ def rib_announce(rendered_config):
         :type rendered_config: unicode
 
         """
-        rest_object = restCalls(username, password, ip_address)
+        rest_object = create_rest_object()
         response = rest_object.patch(rendered_config)
         print response.status_code
-#        status = response.status_code
-#        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        status = response.status_code
+        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
 
 
 def rib_withdraw(new_config):
@@ -68,7 +70,7 @@ def rib_withdraw(new_config):
         :param new_config: The new RIB configuration
         :type new_config: str
     """
-    rest_object = restCalls(username, password, ip_address)
+    rest_object = create_rest_object()
     response = rest_object.put(new_config)
     status = response.status_code
     syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
@@ -80,7 +82,7 @@ def get_config():
         :return: return the json HTTP response object
         :rtype: unicode string --check this?
     """
-    rest_object = restCalls(username, password, ip_address)
+    rest_object = create_rest_object()
     response = rest_object.get('Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix')
     if not response.raise_for_status():
         return response.json()
