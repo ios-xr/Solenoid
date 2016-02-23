@@ -8,9 +8,9 @@ from restClass import restCalls
 
 
 # Probably delete these
-username = 'lisa'
-password = 'timCp4tn6m!'
-ip_address = '10.200.96.52:2580'
+username = ''
+password = ''
+ip_address = ''
 
 
 def _prefixed(level, message):
