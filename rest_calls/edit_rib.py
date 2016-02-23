@@ -1,13 +1,21 @@
 import json
+import syslog
+import time
+import os
 import sys
 from jinja2 import Environment, PackageLoader
 from restClass import restCalls
 
 
 # Probably delete these
-username = ''
-password = ''
-ip_address = ''
+username = 'lisa'
+password = 'timCp4tn6m!'
+ip_address = '10.200.96.52:2580'
+
+
+def _prefixed(level, message):
+    now = time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime())
+    return "%s %-8s %-6d %s" % (now, level, os.getpid(), message)
 
 
 def render_config(update_json):
@@ -21,6 +29,7 @@ def render_config(update_json):
         next_hop = update_json['neighbor']['message']['update']['announce']['ipv4 unicast'].keys()[0]
         # set env variable for jinja2
         env = Environment(loader=PackageLoader('edit_rib', 'templates'))
+        env.filters['to_json'] = json.dumps
         template = env.get_template('static.json')
         rib_announce(template.render(next_hop=next_hop, data=prefixes))
     elif 'withdraw' in update_json['neighbor']['message']['update']:
@@ -42,12 +51,14 @@ def rib_announce(rendered_config):
         """Add networks to the RIB table.
 
         :param rendered_config: Jinja2 rendered configuration file
-        :type rendered_config: str --check this?
+        :type rendered_config: unicode
+
         """
         rest_object = restCalls(username, password, ip_address)
         response = rest_object.patch(rendered_config)
-        #print response.raise_for_status()
         print response.status_code
+#        status = response.status_code
+#        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
 
 
 def rib_withdraw(new_config):
@@ -59,7 +70,8 @@ def rib_withdraw(new_config):
     """
     rest_object = restCalls(username, password, ip_address)
     response = rest_object.put(new_config)
-    print response.status_code
+    status = response.status_code
+    syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
 
 
 def get_config():
@@ -73,9 +85,11 @@ def get_config():
     if not response.raise_for_status():
         return response.json()
     else:
-        response.raise_for_status()
+        # needs to be tested
+        error = response.raise_for_status()
+        syslog.syslog(syslog.LOG_ALERT, _prefixed('ERROR', error))
 
-
+'''
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
     while True:
@@ -84,18 +98,16 @@ def update_watcher():
         if update_json['type'] == 'update':
             render_config(update_json)
             #update = sys.stdin.readline().strip()
-
-
 '''
+
+
 def tester():
-    with open('/vagrant/rest_calls/json.dataw', 'r') as f:
+    with open('/vagrant/BGP-filter/rest_calls/json.data', 'r') as f:
         fr = f.read()
-        update_json = json.loads(fr)
+        update_json = json.loads(fr)  # make json object python
         # A seperate RIB table change will be made for each update
         if update_json['type'] == 'update':
-            render_jinja(update_json)
-'''
-
+            render_config(update_json)
 
 if __name__ == "__main__":
-    update_watcher()
+    tester()

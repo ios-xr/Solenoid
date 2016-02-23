@@ -1,5 +1,5 @@
 {
-  "router-static": {
+  "Cisco-IOS-XR-ip-static-cfg:router-static": {
     "default-vrf": {
       "address-family": {
         "vrfipv4": {
@@ -10,18 +10,21 @@
                 {% for prefix in values -%}
                 {% set prefix, length = prefix.split('/') %}
                 {
-                  "prefix": "{{ prefix }}",
-                  "prefix-length": "{{ length }}",
+                  "prefix": {{ prefix | to_json }},
+                  "prefix-length": {{ length | to_json}},
                   "vrf-route": {
                     "segment-route-next-hop-table": {
                       "vrf-next-hop-next-hop-address": [
-                      {
-                        "next-hop-address": "{{ next_hop }}"
-                      }
-                    ]
+                        {
+                          "next-hop-address": {{ next_hop | to_json }}
+                        }
+                      ]
                     }
                   }
-                }
+                } 
+                {% if not loop.last %}
+                ,
+                {%endif %}
               {%- endfor %}
               {%- endfor %}
               ]
