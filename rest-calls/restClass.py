@@ -12,10 +12,10 @@ class restCalls(object):
 
         :param username: Username for device login
         :param password: Password for device login
-        :param _ip_address_port: The ip address and port number for the device
+        :param ip_address_port: The ip address and port number for the device
         :type password: str
         :type username: str
-        :type _ip_address_port: str
+        :type ip_address_port: str
     """
     def __init__(self, username, password, ip_address_port):
         self._auth = HTTPBasicAuth(username, password)
@@ -28,7 +28,7 @@ class restCalls(object):
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers_data(data)
+        headers = self._create_headers_data(data)
         response = requests.put(url=headers[0], headers=headers[1],
                                 auth=self._auth, data=data)
         return response
@@ -40,7 +40,7 @@ class restCalls(object):
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers_data(data)
+        headers = self._create_headers_data(data)
         response = requests.post(url=headers[0], headers=headers[1],
                                  auth=self._auth, data=data)
         return response
@@ -52,7 +52,7 @@ class restCalls(object):
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers_data(data)
+        headers = self._create_headers_data(data)
         response = requests.patch(url=headers[0], headers=headers[1],
                                   auth=self._auth, data=data)
         return response
@@ -64,7 +64,7 @@ class restCalls(object):
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers_choice(choice)
+        headers = self._create_headers_choice(choice)
         url = headers[0] + "?content=config"
         response = requests.get(url=url, headers=headers[1],
                                 auth=self._auth)
@@ -77,12 +77,12 @@ class restCalls(object):
             :return: Return the response object
             :rtype: Response object
         """
-        headers = self.create_headers_choice(choice)
+        headers = self._create_headers_choice(choice)
         response = requests.delete(url=headers[0], headers=headers[1],
                                    auth=self._auth)
         return response
 
-    def create_headers_data(self, data_source):
+    def _create_headers_data(self, data_source):
         """Generate the headers
             :param data_source: The JSON or XML config
             :type data_source: str
@@ -90,7 +90,7 @@ class restCalls(object):
             :rtype: tuple
 
         """
-        data_type = self.check_data_type(data_source)
+        data_type = self._check_data_type(data_source)
         headers = ({
             'Accept': 'application/yang.errors+{}'.format(
                 data_type[0]),
@@ -102,7 +102,7 @@ class restCalls(object):
 
         return (url, headers)
 
-    def create_headers_choice(self, data_source):
+    def _create_headers_choice(self, data_source):
         """Generate the headers
             :param data_source: The yang model name
             :type data_source: str
@@ -121,7 +121,7 @@ class restCalls(object):
         else:
             raise Exception("GET and DELETE require a string input.")
 
-    def check_data_type(self, data_source):
+    def _check_data_type(self, data_source):
         """Check the data's type and the YANG model
 
             :param data_source: The JSON or XML
@@ -134,7 +134,7 @@ class restCalls(object):
         try:
             json.loads(data_source)
             data_type = 'json'
-            section = re.search(r'"(.*?)"', data_source)
+            section = re.search(r'"(.*?)"', data_source[1:])
             #If the data file only has the container name
             if bool(re.search(r':', section.group(1))):
                 return (data_type, section.group(1))
