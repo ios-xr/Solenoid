@@ -33,9 +33,9 @@ Step 2: Make sure RESTconf calls are working from your device to the RIB table
 
 Example test (you should recieve your device's whole configuration):
 
-'''
+```
 curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" -H "Authorization: <INSERT YOUR AUTH CODE>" http://<YOUR IP>/restconf/data/?content=config
-'''
+```
 
 
 Step 2: Clone this project onto your device
@@ -44,7 +44,7 @@ Step 3: Change your exaBGP configuration file to run the edit_rib.py script.
 
 Example:
 
-'''
+```
 group test {
         router-id x.x.x.x;
 
@@ -66,6 +66,6 @@ group test {
 
 }
 
-'''
+```
 
 Step 4: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 

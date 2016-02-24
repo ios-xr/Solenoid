@@ -58,7 +58,7 @@ def create_rest_object():
         :returns: restCalls object
         :rtype: restCalls class object
     """
-    with open('edit_rib.config', 'r') as f:
+    with open('/vagrant/BGP-filter/rest_calls/edit_rib.config', 'r') as f:
         lines = f.readlines()
     return restCalls(lines[0].replace("\r\n", ""),
                      lines[1].replace("\r\n", ""),
@@ -74,9 +74,10 @@ def rib_announce(rendered_config):
         """
         rest_object = create_rest_object()
         response = rest_object.patch(rendered_config)
-        print response.status_code
         status = response.status_code
-        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        #syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        # for testing
+        return status
 
 
 def rib_withdraw(new_config):
@@ -90,14 +91,16 @@ def rib_withdraw(new_config):
     # The put will rewrite the previous config
     response = rest_object.put(new_config)
     status = response.status_code
-    syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+    #syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+    # for testing
+    return status
 
 
 def get_config():
     """Grab the current RIB config off of the box
 
         :return: return the json HTTP response object
-        :rtype: unicode string --check this?
+        :rtype: dict
     """
     rest_object = create_rest_object()
     url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/'
@@ -110,18 +113,20 @@ def get_config():
         error = response.raise_for_status()
         syslog.syslog(syslog.LOG_ALERT, _prefixed('ERROR', error))
 
-'''
+
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
     while True:
+        # these two lines are just for testing purposes
+        with open('json.dataw', 'r') as f:
+            sys.stdin = f
         raw_update = sys.stdin.readline().strip()
         update_json = json.loads(raw_update)
         if update_json['type'] == 'update':
             render_config(update_json)
-            #update = sys.stdin.readline().strip()
+
+
 '''
-
-
 def tester():
     with open('/vagrant/BGP-filter/rest_calls/json.dataw', 'r') as f:
         fr = f.read()
@@ -129,6 +134,7 @@ def tester():
         # A seperate RIB table change will be made for each update
         if update_json['type'] == 'update':
             render_config(update_json)
+'''
 
 if __name__ == "__main__":
     tester()
