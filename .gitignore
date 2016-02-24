@@ -64,4 +64,4 @@ target/
 
 # pyenv
 .python-version
-./rest_calls/edit_rib.config
+./rib-change/edit_rib.config
