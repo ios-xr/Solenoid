@@ -1,47 +1,71 @@
-# RESTconf Calls
+# BGP-filter
 ##### Author: Lisa Roach
 ##### Email: lisroach@cisco.com
 
 ## Description:
 
-This repository contains a module for making RESTconf calls with python. 
+The end goal of this BGP-filter app is to be able to take any given logic and 
+make changes to the prefixes on a RIB table.
 
-You must add your ip address and port, username, and password for the 
-constructor.
+The changes to the RIB are accomplished by using RESTconf calls to send JSON modeled by YANG. The YANG model I am currently using is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). This model will likely change in the future, see Limitations.
+
+For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exabgp). Exabgp allows me to monitor BGP network announcements, withdrawals, etc. and trigger the RESTconf changes based on these updates. 
+
+### Work in Progress:
+
+Be able to update RIB only with networks from preferred neighbors (based on some blackbox of logic)
+
+Create tar of project including exaBGP and GUI interface for exaBGP (gui be based on the [ERCO](https://erco.xyz/) project).
+
+
+#### Current Limitations:
+
+As of now, the IOS-XR 6.0 device I am using does not have completed YANG models
+for BGP RIB changes. As a temporary workaround, I can only add static routes
+to the RIB.
+
 
 ### Usage:
 
+Step 1: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
 
-For PUT, POST, and PATCH, you must have a configuration of JSON or XML
-formatted using a valid YANG model. If your device does not have the YANG
-model available, you will not be able to use it. Examples of YANG models can be
-found here:
+Step 2: Make sure RESTconf calls are working from your device to the RIB table
 
-OpenConfig: [https://github.com/openconfig/public]
+Example test (you should recieve your device's whole configuration):
+
+'''
+curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" -H "Authorization: <INSERT YOUR AUTH CODE>" http://<YOUR IP>/restconf/data/?content=config
+'''
 
 
-YangModels: [https://github.com/YangModels/yang]
+Step 2: Clone this project onto your device
 
-For GET and DELETE you must know the name of the YANG module and container that
-you wish the make changes too. 
+Step 3: Change your exaBGP configuration file to run the edit_rib.py script. 
 
-### Examples:
+Example:
 
-```
-#PUT (works same for POST and PATCH)
+'''
+group test {
+        router-id x.x.x.x;
 
-rest_object = restCalls(username, password, ip_address_port)
-response = rest_object.put(data)
+        process monitor-neighbors {
+            encoder json;
+            receive {
+                parsed;
+                updates;
+                neighbor-changes;
+            }
+            run /your/python/location /path/to/bgp-filter/rest_calls/edit_rib.py;
+        }
 
-```
+        neighbor y.y.y.y {
+            local-address x.x.x.x;
+            local as ####;
+            peer-as ####;
+        }
 
-```
-#GET (same for DELETE)
+}
 
-rest_object = restCalls(username, password, ip_address_port)
-response = rest_object.get('yang_module:container')
-print response.content # prints the GET object as a string
-print response.json() # prints the GET object as a dictionary
-print response.status_code # prints the status code of the response
+'''
 
-```
+Step 4: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
