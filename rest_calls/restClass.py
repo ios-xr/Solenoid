@@ -131,6 +131,7 @@ class restCalls(object):
             :rtype: tuple(string, string)
 
         """
+
         try:
             json.loads(data_source)
             data_type = 'json'
@@ -154,3 +155,5 @@ class restCalls(object):
                     return (data_type, section)
             else:
                 sys.exit("Your data has malformed XML or JSON.")
+        except Exception, e:  # catch all other exceptions
+            sys.exit(e)

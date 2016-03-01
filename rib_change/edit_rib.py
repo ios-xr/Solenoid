@@ -3,6 +3,7 @@ import syslog
 import time
 import os
 import sys
+import subprocess
 from jinja2 import Environment, PackageLoader
 from rest_calls.restClass import restCalls
 
@@ -29,19 +30,18 @@ def render_config(update_json):
     :type update_json: str
 
     """
-    if 'announce' in update_json['neighbor']['message']['update']:
-        prefixes = update_json['neighbor']['message']['update']\
-            ['announce']['ipv4 unicast'].values()
-        next_hop = update_json['neighbor']['message']['update']\
-            ['announce']['ipv4 unicast'].keys()[0]
+    update_type = update_json['neighbor']['message']['update']
+    if 'announce' in update_type:
+        updated_prefixes = update_type['announce']['ipv4 unicast']
+        prefixes = updated_prefixes.values()
+        next_hop = updated_prefixes.keys()[0]
         # set env variable for jinja2
         env = Environment(loader=PackageLoader('edit_rib', 'templates'))
         env.filters['to_json'] = json.dumps
         template = env.get_template('static.json')
         rib_announce(template.render(next_hop=next_hop, data=prefixes))
-    elif 'withdraw' in update_json['neighbor']['message']['update']:
-        exa_prefixes = update_json['neighbor']['message']['update']\
-            ['withdraw']['ipv4 unicast'].keys()
+    elif 'withdraw' in update_type:
+        exa_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
         for withdrawn_prefix in exa_prefixes:
             rib_withdraw(withdrawn_prefix)
 
@@ -71,9 +71,9 @@ def rib_announce(rendered_config):
         rest_object = create_rest_object()
         response = rest_object.patch(rendered_config)
         status = response.status_code
-        #syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
         # for testing
-        return status
+        #return status
 
 
 def rib_withdraw(withdrawn_prefix):
@@ -93,21 +93,25 @@ def rib_withdraw(withdrawn_prefix):
     # for testing
     return status
 
-'''
+
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
+    subprocess.call('logger -f /vagrant/BGP-filter/examples/exa-raw.json',
+                    shell=True)
+    import pdb
+    pdb.set_trace()
     while True:
         # these two lines are just for testing purposes
-        with open('json.dataw', 'r') as f:
+        with open('/vagrant/BGP-filter/examples/exa-raw.json', 'rb') as f:
             sys.stdin = f
-        raw_update = sys.stdin.readline().strip()
-        update_json = json.loads(raw_update)
-        if update_json['type'] == 'update':
-            render_config(update_json)
+            raw_update = sys.stdin.readline().strip()
+            print raw_update
+            #update_json = json.loads(raw_update)
+            #if update_json['type'] == 'update':
+            #    render_config(update_json)
+
 
 '''
-
-
 def tester():
     with open('/vagrant/BGP-filter/examples/exa-withdraw.json', 'r') as f:
         fr = f.read()
@@ -115,7 +119,7 @@ def tester():
         # A seperate RIB table change will be made for each update
         if update_json['type'] == 'update':
             render_config(update_json)
-
+'''
 
 if __name__ == "__main__":
-    tester()
+    update_watcher()
