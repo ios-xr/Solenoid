@@ -36,7 +36,7 @@ def render_config(update_json):
         prefixes = updated_prefixes.values()
         next_hop = updated_prefixes.keys()[0]
         # set env variable for jinja2
-        env = Environment(loader=PackageLoader('edit_rib', 'templates'))
+        env = Environment(loader=PackageLoader('rib_change', 'templates'))
         env.filters['to_json'] = json.dumps
         template = env.get_template('static.json')
         rib_announce(template.render(next_hop=next_hop, data=prefixes))
@@ -71,9 +71,10 @@ def rib_announce(rendered_config):
         rest_object = create_rest_object()
         response = rest_object.patch(rendered_config)
         status = response.status_code
-        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
-        # for testing
-        #return status
+        if status >= 200 and status < 300:  # Status code is good
+            syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        else:
+            syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
 
 
 def rib_withdraw(withdrawn_prefix):
@@ -89,37 +90,32 @@ def rib_withdraw(withdrawn_prefix):
           '{},{}'.format(exa_prefix, prefix_length)
     response = rest_object.delete(url)
     status = response.status_code
-    # syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
-    # for testing
-    return status
+    if status >= 200 and status < 300:  # Status code is good
+        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+    else:
+        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
 
 
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
-    subprocess.call('logger -f /vagrant/BGP-filter/examples/exa-raw.json',
-                    shell=True)
-    import pdb
-    pdb.set_trace()
     while True:
-        # these two lines are just for testing purposes
-        with open('/vagrant/BGP-filter/examples/exa-raw.json', 'rb') as f:
-            sys.stdin = f
-            raw_update = sys.stdin.readline().strip()
-            print raw_update
-            #update_json = json.loads(raw_update)
-            #if update_json['type'] == 'update':
-            #    render_config(update_json)
+        raw_update = sys.stdin.readline().strip()
+        try:
+            update_json = json.loads(raw_update)
+        except ValueError, e:
+            syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', e))
+        else:
+            if update_json['type'] == 'update':
+                render_config(update_json)
 
 
-'''
 def tester():
-    with open('/vagrant/BGP-filter/examples/exa-withdraw.json', 'r') as f:
+    with open('/vagrant/BGP-filter/examples/exa-announce.json', 'r') as f:
         fr = f.read()
         update_json = json.loads(fr)  # make json object python
-        # A seperate RIB table change will be made for each update
         if update_json['type'] == 'update':
             render_config(update_json)
-'''
+
 
 if __name__ == "__main__":
-    update_watcher()
+    tester()
