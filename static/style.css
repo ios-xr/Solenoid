@@ -1,0 +1,140 @@
+
+body {
+  margin:0;
+  padding:0;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  line-height: 1.5em;
+  background: url({{url_for('static', filename='background.jpg')}});
+}
+
+label{
+  padding-left: 10px;
+}
+#wrap {
+  width: 1500px;
+  margin: 0 auto;
+  margin-top:20px;
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+
+#header {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  background: #ccc;
+  height: 75px;
+  padding-top:15px;
+}
+
+.box{
+  padding: 1em;
+  border:1px solid #ccc;
+  border-radius: 3px;
+  width: 1335px;
+}
+
+.box * {
+  box-sizing: border-box;
+}
+
+#header h1 {
+  margin: 0;
+  padding-top: 15px;
+}
+
+main {
+  padding-bottom: 10010px;
+  margin-bottom: -10000px;
+  float: left;
+  width: 100%;
+}
+
+#nav {
+  padding-bottom: 10010px;
+  margin-bottom: -10000px;
+  float: left;
+  width: 230px;
+  margin-left: -100%;
+  background: #eee;
+}
+
+#footer {
+  clear: left;
+  width: 100%;
+  background: #ccc;
+  text-align: center;
+  padding: 4px 0;
+}
+
+#wrapper {
+  overflow: hidden;
+}
+
+#content {
+  margin-left: 50px; /* Same as 'nav' width */
+  margin-right: 50px;
+}
+
+.innertube {
+  margin: 15px; /* Padding for content */
+  margin-top: 0;
+}
+
+p {
+  color: #555;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul a {
+  color: darkgreen;
+  text-decoration: none;
+}
+.myForm {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: 0.8em;
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: 400px;
+}
+
+.myForm * {
+  box-sizing: border-box;
+}
+
+.myForm button {
+  padding: 0.7em;
+  border-radius: 0.5em;
+  background: #eee;
+  border: none;
+  font-weight: bold;
+}
+
+.myForm button:hover {
+  background: #ccc;
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+  width: auto;
+  border: 1px solid black;
+}
+
+th {
+  border: 1px solid black;
+  text-align: center;
+  padding: 15px;
+}
+
+td {
+  border: 1px solid black;
+  vertical-align: center;
+  text-align:center;
+  padding: 15px;
+}
