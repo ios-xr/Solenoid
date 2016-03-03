@@ -3,7 +3,6 @@ import syslog
 import time
 import os
 import sys
-import subprocess
 from jinja2 import Environment, PackageLoader
 from rest_calls.restClass import restCalls
 
@@ -51,6 +50,10 @@ def create_rest_object():
         Reads in a file containing username, password, and
         ip address:port, in that order.
 
+        This method could be eliminated and the restCalls(username, password,
+        ip_address:port) replace all calls to create_rest_object().
+        This method exists in order to seperate passwords from github.
+
         :returns: restCalls object
         :rtype: restCalls class object
     """
@@ -62,7 +65,7 @@ def create_rest_object():
 
 
 def rib_announce(rendered_config):
-        """Add networks to the RIB table.
+        """Add networks to the RIB table using HTTP PATCH over RESTconf.
 
         :param rendered_config: Jinja2 rendered configuration file
         :type rendered_config: unicode
@@ -98,24 +101,24 @@ def rib_withdraw(withdrawn_prefix):
 
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
-    while True:
-        raw_update = sys.stdin.readline().strip()
-        try:
-            update_json = json.loads(raw_update)
-        except ValueError, e:
-            syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', e))
-        else:
-            if update_json['type'] == 'update':
-                render_config(update_json)
+    #while True:
+    raw_update = sys.stdin.readline().strip()
+    try:
+        update_json = json.loads(raw_update)
+    except ValueError, e:
+        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', e))
+    else:
+        if update_json['type'] == 'update':
+            render_config(update_json)
 
 
 def tester():
-    with open('/vagrant/BGP-filter/examples/exa-announce.json', 'r') as f:
+    """Just for testing purposes. Will be removed in official release"""
+    with open('/vagrant/BGP-filter/examples/exa-withdraw.json', 'r') as f:
         fr = f.read()
         update_json = json.loads(fr)  # make json object python
         if update_json['type'] == 'update':
             render_config(update_json)
-
 
 if __name__ == "__main__":
     tester()
