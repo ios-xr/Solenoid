@@ -16,8 +16,12 @@ class RibTestCase(unittest.TestCase):
                 return lines[2].strip()
             elif test == 'invalid_json':
                 return lines[3].strip()
-            elif test == 'invalid_model':
+            elif test == 'invalid_n_model':
                 return lines[4].strip()
+            elif test == 'invalid_i_model':
+                return lines[5].strip()
+            elif test == 'announce_eor':
+                return lines[6].strip()
 
     def test_announce_good(self):
         with patch('sys.stdin', StringIO(self._exa_raw('announce_g'))):
@@ -27,6 +31,11 @@ class RibTestCase(unittest.TestCase):
             syslog_f.seek(-1024, 2)
             last = syslog_f.readlines()[-1]
         self.assertTrue(' 204\n' in last)
+
+    def test_announce_eor(self):
+        with patch('sys.stdin', StringIO(self._exa_raw('announce_eor'))):
+            self.assertRaises(KeyError,
+                              rib_change.edit_rib.update_watcher())
 
     def test_withdraw_good(self):
         with patch('sys.stdin', StringIO(self._exa_raw('withdraw_g'))):
@@ -45,7 +54,8 @@ class RibTestCase(unittest.TestCase):
         self.assertTrue(' 409\n' in last)
 
     def test_invalid_json(self):
-        with patch('sys.stdin', StringIO(self._exa_raw('invalid_json'))):
+        with patch('sys.stdin', StringIO(
+                   self._exa_raw('invalid_json'))):
             self.assertRaises(ValueError,
                               rib_change.edit_rib.update_watcher())
         with open('/var/log/syslog', 'r') as syslog_f:
@@ -53,8 +63,19 @@ class RibTestCase(unittest.TestCase):
             last = syslog_f.readlines()[-1]
         self.assertTrue('No JSON object could be decoded\n' in last)
 
-    def test_invalid_model(self):
-        with patch('sys.stdin', StringIO(self._exa_raw('invalid_model'))):
+    def test_invalid_normal_model(self):
+        with patch('sys.stdin', StringIO(
+                   self._exa_raw('invalid_n_model'))):
+            self.assertRaises(ValueError,
+                              rib_change.edit_rib.update_watcher())
+        with open('/var/log/syslog', 'r') as syslog_f:
+            syslog_f.seek(-1060, 2)
+            last = syslog_f.readlines()[-1]
+        self.assertTrue('Extra data: ' in last)
+
+    def test_invalid_incorect_model(self):
+        with patch('sys.stdin', StringIO(
+                   self._exa_raw('invalid_i_model'))):
             self.assertRaises(ValueError,
                               rib_change.edit_rib.update_watcher())
         with open('/var/log/syslog', 'r') as syslog_f:
