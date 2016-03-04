@@ -4,6 +4,7 @@ import time
 import os
 import sys
 from jinja2 import Environment, PackageLoader
+sys.path.append('/home/cisco/exabgp/bgp-filter/')
 from rest_calls.restClass import restCalls
 
 
@@ -29,27 +30,35 @@ def render_config(update_json):
     :type update_json: str
 
     """
-    if 'announce' in update_json['neighbor']['message']['update']:
-        prefixes = update_json['neighbor']['message']['update']\
-            ['announce']['ipv4 unicast'].values()
-        next_hop = update_json['neighbor']['message']['update']\
-            ['announce']['ipv4 unicast'].keys()[0]
-        # set env variable for jinja2
-        env = Environment(loader=PackageLoader('edit_rib', 'templates'))
-        env.filters['to_json'] = json.dumps
-        template = env.get_template('static.json')
-        rib_announce(template.render(next_hop=next_hop, data=prefixes))
-    elif 'withdraw' in update_json['neighbor']['message']['update']:
-        exa_prefixes = update_json['neighbor']['message']['update']\
-            ['withdraw']['ipv4 unicast'].keys()
-        for withdrawn_prefix in exa_prefixes:
-            rib_withdraw(withdrawn_prefix)
+    try:
+        update_type = update_json['neighbor']['message']['update']
+        if 'announce' in update_type:
+            updated_prefixes = update_type['announce']['ipv4 unicast']
+            prefixes = updated_prefixes.values()
+            next_hop = updated_prefixes.keys()[0]
+            # set env variable for jinja2
+            env = Environment(loader=PackageLoader('rib_change',
+                              'templates'))
+            env.filters['to_json'] = json.dumps
+            template = env.get_template('static.json')
+            rib_announce(template.render(next_hop=next_hop,
+                                         data=prefixes))
+        elif 'withdraw' in update_type:
+            exa_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
+            for withdrawn_prefix in exa_prefixes:
+                rib_withdraw(withdrawn_prefix)
+    except ValueError:  # If we hit an eor or other type of update
+        pass
 
 
 def create_rest_object():
     """Create a restCalls object.
         Reads in a file containing username, password, and
         ip address:port, in that order.
+
+        This method could be eliminated and the restCalls(username, password,
+        ip_address:port) replace all calls to create_rest_object().
+        This method exists in order to seperate passwords from github.
 
         :returns: restCalls object
         :rtype: restCalls class object
@@ -62,7 +71,7 @@ def create_rest_object():
 
 
 def rib_announce(rendered_config):
-        """Add networks to the RIB table.
+        """Add networks to the RIB table using HTTP PATCH over RESTconf.
 
         :param rendered_config: Jinja2 rendered configuration file
         :type rendered_config: unicode
@@ -71,9 +80,10 @@ def rib_announce(rendered_config):
         rest_object = create_rest_object()
         response = rest_object.patch(rendered_config)
         status = response.status_code
-        #syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
-        # for testing
-        return status
+        if status >= 200 and status < 300:  # Status code is good
+            syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        else:
+            syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
 
 
 def rib_withdraw(withdrawn_prefix):
@@ -89,33 +99,26 @@ def rib_withdraw(withdrawn_prefix):
           '{},{}'.format(exa_prefix, prefix_length)
     response = rest_object.delete(url)
     status = response.status_code
-    # syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
-    # for testing
-    return status
+    if status >= 200 and status < 300:  # Status code is good
+        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+    else:
+        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
 
-'''
+
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
-    while True:
-        # these two lines are just for testing purposes
-        with open('json.dataw', 'r') as f:
-            sys.stdin = f
-        raw_update = sys.stdin.readline().strip()
+    #while True:
+    open('~/bgp-filter/rib_change/updates.txt', 'w').close()
+    raw_update = sys.stdin.readline().strip()
+    try:
         update_json = json.loads(raw_update)
-        if update_json['type'] == 'update':
-            render_config(update_json)
-
-'''
-
-
-def tester():
-    with open('/vagrant/BGP-filter/examples/exa-withdraw.json', 'r') as f:
-        fr = f.read()
-        update_json = json.loads(fr)  # make json object python
-        # A seperate RIB table change will be made for each update
-        if update_json['type'] == 'update':
-            render_config(update_json)
-
-
-if __name__ == "__main__":
-    tester()
+        with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
+                f.write(raw_update + '\n')
+    except ValueError, e:
+        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', e))
+    else:
+        try:
+            if update_json['type'] == 'update':
+                render_config(update_json)
+        except KeyError:
+            pass
