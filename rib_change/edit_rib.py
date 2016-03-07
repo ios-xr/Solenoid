@@ -3,6 +3,8 @@ import syslog
 import time
 import os
 import sys
+import logging
+import logging.config
 from jinja2 import Environment, PackageLoader
 sys.path.append('/home/cisco/exabgp/bgp-filter/')
 from rest_calls.restClass import restCalls
@@ -48,6 +50,9 @@ def render_config(update_json):
             for withdrawn_prefix in exa_prefixes:
                 rib_withdraw(withdrawn_prefix)
     except ValueError:  # If we hit an eor or other type of update
+        logging.error('Failed JSON conversion for:\n %s \n',
+                      update_json,
+                      exc_info=True)
         pass
 
 
@@ -81,9 +86,15 @@ def rib_announce(rendered_config):
         response = rest_object.patch(rendered_config)
         status = response.status_code
         if status >= 200 and status < 300:  # Status code is good
-            syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+            logging.info('ANNOUNCE: %s %s',
+                         status,
+                         rest_object.lookup_code(status),
+                         )
         else:
-            syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
+            logging.warning('ANNOUNCE: %s %s',
+                            status,
+                            rest_object.lookup_code(status),
+                            )
 
 
 def rib_withdraw(withdrawn_prefix):
@@ -100,25 +111,87 @@ def rib_withdraw(withdrawn_prefix):
     response = rest_object.delete(url)
     status = response.status_code
     if status >= 200 and status < 300:  # Status code is good
-        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        logging.info('WITHDRAW: %s %s',
+                     status,
+                     rest_object.lookup_code(status),
+                     )
     else:
-        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
+        logging.warning('WITHDRAW: %s %s',
+                        status,
+                        rest_object.lookup_code(status),
+                        )
+
+
+def setup_logging(default_path='logging.json',
+                  default_level=logging.INFO,
+                  env_key='LOG_CFG'):
+    """Setup logging configuration"""
+    path = default_path
+    value = os.getenv(env_key, None)
+    if value:
+        path = value
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+                config = json.load(f)
+        logging.config.dictConfig(config)
+    else:
+        logging.basicConfig(level=default_level)
 
 
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
-    #while True:
-    open('~/bgp-filter/rib_change/updates.txt', 'w').close()
-    raw_update = sys.stdin.readline().strip()
-    try:
-        update_json = json.loads(raw_update)
-        with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
-                f.write(raw_update + '\n')
-    except ValueError, e:
-        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', e))
-    else:
+    while True:
+        # empty the updates file for Flask application
+        open('~/bgp-filter/rib_change/updates.txt', 'w').close()
+        setup_logging()
+        # listen for BGP updates
+        raw_update = sys.stdin.readline().strip()
         try:
-            if update_json['type'] == 'update':
-                render_config(update_json)
-        except KeyError:
+            update_json = json.loads(raw_update)
+            with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
+                    f.write(raw_update + '\n')
+        except ValueError:
+            #syslog.syslog(syslog.LOG_ERR, _prefixed('WARNING', e))
+            logging.error('Failed JSON conversion for %s',
+                          raw_update,
+                          exc_info=True)
+        else:
+            try:
+                if update_json['type'] == 'update':
+                    render_config(update_json)
+            except KeyError:
+                logging.error('Failed to find key in %s',
+                              raw_update,
+                              exc_info=True)
+                pass
+
+
+def tester():
+    """Just for testing purposes. Will be removed in official release"""
+    with open('/vagrant/BGP-filter/examples/exa-ero.json', 'r') as f:
+        setup_logging()
+        raw_update = f.read().strip()
+        #raw_update = sys.stdin.readline().strip()
+        try:
+            update_json = json.loads(raw_update)
+            #with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
+            #        f.write(raw_update + '\n')
+        except ValueError:
+            #syslog.syslog(syslog.LOG_ERR, _prefixed('WARNING', e))
+            logging.error('Failed JSON conversion for %s',
+                          raw_update,
+                          exc_info=True)
             pass
+        else:
+            try:
+                if update_json['type'] == 'update':
+                    render_config(update_json)
+            except KeyError:
+                logging.error('Failed to find key in %s',
+                              raw_update,
+                              exc_info=True)
+                pass
+
+
+if __name__ == "__main__":
+    tester()

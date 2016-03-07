@@ -82,6 +82,10 @@ class restCalls(object):
                                    auth=self._auth)
         return response
 
+    def lookup_code(code):
+        """Look up the status code returned by a response object. """
+        return requests.status_codes._codes.get(code)
+
     def _create_headers_data(self, data_source):
         """Generate the headers
             :param data_source: The JSON or XML config
