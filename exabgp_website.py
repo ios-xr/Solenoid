@@ -6,24 +6,26 @@ Contact: kkumara3@cisco.com
 
 from flask import Flask, render_template, request, jsonify
 import requests
-from restClass import restCalls
+from rest_calls.restClass import restCalls
 import json
 import sys
-from time import sleep, gmtime, strftime
 
 app = Flask(__name__)
 
-@app.route("/", methods=['GET'])
+@app.route("/", methods=['GET', 'POST'])
 def template_test():
     ip_address = request.form.get('ip_address', ' ')
     network = request.form.get('network', ' ')
-    push_exabgp(ip_address, network)
-    exabgp = get_exa()
+    message = network + ' route ' + ip_address + ' next-hop self'
+    push_exabgp(message)
+#    pdb.set_trace()
+#    exabgp = get_exa()
+#    pp = pprint.PrettyPrinter(indent=4)
+#    pp.pprint(exabgp)
     rib = get_rib()
-    return render_template('index.html',
+    return render_template('template.html',
         Title = 'ExaBGP Demo on eXR Container',
-        content1=exabgp,
-        content2=rib
+        content2 = rib,
         )
 
 @app.route("/get_rib_json", methods=['GET'])

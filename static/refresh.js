@@ -8,8 +8,8 @@
       if (xhttp.readyState == 4 && xhttp.status == 200) {
         var json = JSON.parse(xhttp.responseText);
         var keys = Object.keys(json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix']).length
-        for (var i = 0; i <keys; i++){
-          if (i < rows) {
+        for (var i = 0; i < keys; i++){
+          if (i < rows - 1) {
             var table = document.getElementById("rib");
             var row = table.rows[i+1];
             var cell1 = row.cells[0];
@@ -25,11 +25,9 @@
             cell2.innerHTML = json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['vrf-route']['segment-route-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'];
           }
         }
-        if (keys<rows) {
-          do {
+        if (rows - 1 > keys) {
             var table = document.getElementById("rib");
             table.deleteRow(keys + 1);
-          } while (keys < rows);
         }
       }
     };
@@ -44,21 +42,28 @@
       if (xhttp.readyState == 4 && xhttp.status == 200) {
         var exa = JSON.parse(xhttp.responseText);
         var time = timeConverter(exa['time']);
-        var old_time = Table.rows[rows_l+1].cells[4].innerHTML;
+        var old_time = Table.rows[1].cells[4].innerHTML;
         if (time != old_time){
-          var row = Table.insertRow(rows_l)
+          var  row = Table.insertRow(1)
           row.insertCell(0).innerHTML = exa['neighbor']['ip'];
           var counter = Object.keys(exa['neighbor']['message']['update']).length - 1
           var update = Object.keys(exa['neighbor']['message']['update'])[counter];
           row.insertCell(1).innerHTML = update;
           var nexthop = Object.keys(exa['neighbor']['message']['update'][update]['ipv4 unicast']);
-          row.insertCell(2).innerHTML = nexthop;
-          var network = Object.keys(exa['neighbor']['message']['update'][update]['ipv4 unicast'][nexthop]);
-          row.insertCell(3).innerHTML = network;
-          row.insertCell(4).innerHTML = time;
+          if (counter == 0){
+            row.insertCell(2).innerHTML = " ";
+            var network = Object.keys(exa['neighbor']['message']['update'][update]['ipv4 unicast'][nexthop]);
+            row.insertCell(3).innerHTML = nexthop;
+            row.insertCell(4).innerHTML = time;
+         } else {
+            row.insertCell(2).innerHTML = nexthop;
+            var network = Object.keys(exa['neighbor']['message']['update'][update]['ipv4 unicast'][nexthop]);
+            row.insertCell(3).innerHTML = network;
+            row.insertCell(4).innerHTML = time;
+         }
         }
         if (rows_l > 6){
-          Table.deleteRow(1)
+          Table.deleteRow(6)
         }
       }
     };
@@ -77,7 +82,7 @@
     var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
     return time;
   }
-  setInterval(getInfo1, 5000);
-  setInterval(getInfo, 10000);
+  setInterval(getInfo1, 1000);
+  setInterval(getInfo, 2000);
 }());
 

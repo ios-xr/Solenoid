@@ -20,8 +20,9 @@
       <main>
         <div id="content">
           <div class="innertube">
-            <h1>ExaBGP #1</h1>
-            </p>
+            <h1>Router 1</h1>
+            <p>Add or remove a network that Router 1 knows about. The calls to add the network is sent by a simple post command to the router.</p>
+            <p>This will force changes in ExaBGP RIB table through BGP. </p>
             <p>
               <form class='myForm' name="ip_address_form" method='post'>
                 <fieldset>
@@ -37,7 +38,8 @@
               </form>
             </p>
             <hr>
-            <h1>Last Update on ExaBGP</h1>
+            <h1>Lastest Update on ExaBGP</h1>
+            <p> Updates are shown here when ExaBGP learns about a network. </p>
             <p>
               <table  id="exa">
                   <thead>
@@ -50,18 +52,19 @@
                       </tr>
                   </thead>
                   <tbody>
-                          <tr>
-                              <td id="Peer_IP"> </td>
-                              <td id="Update_Type"> </td>
-                              <td id="Next_Hop"> </td>
-                              <td id="Update_Network"> </td>
-                              <td id="Update_Time"> </td>
-                          </tr>
+                      <tr>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                      </tr>
                   </tbody>
               </table>
             </p>
             <hr>
             <h1>RIB table on Router</h1>
+            <p>The RIB table is shown here through restconf. The RIB table is updated by ExaBGP learning about networks. </p>
             <p>
               <table  id="rib">
                   <thead>
@@ -70,7 +73,7 @@
                           <th>Next Hop</th>
                       </tr>
                   </thead>
-	                  <tbody>
+                    <tbody>
                       {% for prefix in content2['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'] %}
                           <tr>
                               <td id="prefix">{{prefix['prefix']}}
@@ -84,6 +87,14 @@
         </div>
       </main>
 
+      <nav id="nav">
+        <div class="innertube">
+          <h3>Topology</h3>
+          <img src={{url_for('static', filename='Topology.jpg')}} alt="Topology" style='width:261px; height:199px;'>
+          <p> A BGP network is shown above. Networks are automatically announced and withdrawn on RouteM at a fixed interval. </p>
+          <p> ExaBGP is sitting on an Cisco Sunstone, IOS-XR image, within a container.</p>
+        </div>
+      </nav>
 
 
     </div>
@@ -95,6 +106,7 @@
       </div>
     </footer>
   </div>
-    <script src={{url_for('static', filename='refresh.js')}} type="text/javascript"></script>
+    <script src={{url_for('static', filename='recall.js')}} type="text/javascript"></script>
   </body>
 </html>
+
