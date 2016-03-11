@@ -7,7 +7,7 @@ import logging
 import logging.config
 from jinja2 import Environment, PackageLoader
 sys.path.append('/home/cisco/exabgp/bgp-filter/')
-from rest_calls.restClass import restCalls
+from rest.restClass import restCalls
 
 
 def _prefixed(level, message):
