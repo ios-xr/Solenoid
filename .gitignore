@@ -64,3 +64,6 @@ target/
 
 # pyenv
 .python-version
+
+#Custom
+restcalls.config
