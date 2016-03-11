@@ -7,7 +7,7 @@ import logging
 import logging.config
 from jinja2 import Environment, PackageLoader
 sys.path.append('/home/cisco/exabgp/bgp-filter/')
-from rest.restClass import restCalls
+from rest.jsonRestClass import JSONRestCalls
 
 
 def _prefixed(level, message):
@@ -70,7 +70,7 @@ def create_rest_object():
     """
     with open('/vagrant/BGP-filter/rib_change/edit_rib.config', 'r') as f:
         lines = f.readlines()
-    return restCalls(lines[0].replace("\r\n", ""),
+    return JSONRestCalls(lines[0].replace("\r\n", ""),
                      lines[1].replace("\r\n", ""),
                      lines[2].replace("\r\n", ""))
 
