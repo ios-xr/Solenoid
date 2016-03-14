@@ -12,6 +12,7 @@ class Logger(object):
     def __init__(self):
 
         self._logger = logging.getLogger()
+        self._logger.setLevel(logging.DEBUG)
         # initialize messages to stream
         self._where = 'stderr'
         self._streamhandler = logging.StreamHandler(sys.stderr)
