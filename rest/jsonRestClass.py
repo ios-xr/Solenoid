@@ -2,7 +2,7 @@ import json
 import re
 
 from exceptions.exceptions import YangFileException
-from rest_calls.restClass import RestCalls
+from rest.restClass import RestCalls
 
 
 class JSONRestCalls(RestCalls):
