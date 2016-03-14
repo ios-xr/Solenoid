@@ -14,7 +14,6 @@ class Logger(object):
         self._logger = logging.getLogger()
         self._logger.setLevel(logging.DEBUG)
         # initialize messages to stream
-        self._where = 'stderr'
         self._streamhandler = logging.StreamHandler(sys.stderr)
         self._streamhandler.setLevel(logging.INFO)
         self._logger.addHandler(self._streamhandler)
