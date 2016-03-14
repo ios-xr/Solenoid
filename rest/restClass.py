@@ -2,6 +2,7 @@
 
 import requests
 import abc
+import logging
 
 
 class RestCalls(object):
@@ -14,6 +15,8 @@ class RestCalls(object):
         :type username: str
         :type ip_address_port: str
     """
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
     __metaclass__ = abc.ABCMeta
     BasePath = '/restconf/data'
     Accept = [

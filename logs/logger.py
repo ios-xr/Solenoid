@@ -10,27 +10,22 @@ class Logger(object):
     _pid = os.getpid()
 
     def __init__(self):
+
+        self._logger = logging.getLogger()
         # initialize messages to stream
         self._where = 'stderr'
         self._streamhandler = logging.StreamHandler(sys.stderr)
-        self._syslog = logging.getLogger()
-        self._syslog.setLevel(logging.INFO)
-        self._syslog.addHandler(self._streamhandler)
-        self._syslog.destination = 'stderr'
-
+        self._streamhandler.setLevel(logging.INFO)
+        self._logger.addHandler(self._streamhandler)
         # initialize errors to file
         self._errorhandler = logging.handlers.RotatingFileHandler('/vagrant/bgp-filter/logs/errors.log')
-        self._errors = logging.getLogger()
-        self._errors.setLevel(logging.ERROR)
-        self._errors.addHandler(self._errorhandler)
-        self._errors.destination = 'file'
+        self._errorhandler.setLevel(logging.ERROR)
+        self._logger.addHandler(self._errorhandler)
 
         # initialize debug messages to file
         self._debughandler = logging.handlers.RotatingFileHandler('/vagrant/bgp-filter/logs/debug.log')
-        self._debug = logging.getLogger()
-        self._debug.setLevel(logging.DEBUG)
-        self._debug.addHandler(self._debughandler)
-        self._debug.destination = 'file'
+        self._debughandler.setLevel(logging.DEBUG)
+        self._logger.addHandler(self._debughandler)
 
     def _format(self, timestamp, level, source, message):
         now = time.strftime('%a, %d %b %Y %H:%M:%S', timestamp)
@@ -38,50 +33,50 @@ class Logger(object):
 
     def report(self, message, source='', level=''):
         timestamp = time.localtime()
-        if level == 'debug':
-            self._debug.debug(self._format(timestamp,
+        if level == 'DEBUG':
+            self._logger.debug(self._format(timestamp,
+                                            level,
+                                            source,
+                                            message)
+                               )
+        elif level == 'INFO':
+            self._logger.info(self._format(timestamp,
                                            level,
                                            source,
                                            message)
                               )
-        elif level == 'info':
-            self._syslog.info(self._format(timestamp,
+        elif level == 'WARNING':
+            self._logger.warn(self._format(timestamp,
                                            level,
                                            source,
                                            message)
                               )
-        elif level == 'warning':
-            self._syslog.warn(self._format(timestamp,
-                                           level,
-                                           source,
-                                           message)
-                              )
-        elif level == "error":
-            self._errors.error(self._format(timestamp,
+        elif level == "ERROR":
+            self._logger.error(self._format(timestamp,
                                             level,
                                             source,
                                             message),
                                exc_info=True
                                )
-        elif level == "critical":
-            self._errors.critical(self._format(timestamp,
+        elif level == "CRITICAL":
+            self._logger.critical(self._format(timestamp,
                                                level,
                                                source,
                                                message),
                                   exc_info=True
                                   )
 
-    def debug(self, message, source='', level='debug'):
+    def debug(self, message, source='', level='DEBUG'):
         self.report(message, source, level)
 
-    def info(self, message, source='', level='info'):
+    def info(self, message, source='', level='INFO'):
         self.report(message, source, level)
 
-    def warning(self, message, source='', level='warning'):
+    def warning(self, message, source='', level='WARNING'):
         self.report(message, source, level)
 
-    def error(self, message, source='', level='error'):
+    def error(self, message, source='', level='ERROR'):
         self.report(message, source, level)
 
-    def critical(self, message, source='', level='critical'):
+    def critical(self, message, source='', level='CRITICAL'):
         self.report(message, source, level)

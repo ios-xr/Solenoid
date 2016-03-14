@@ -70,14 +70,14 @@ def rib_announce(rendered_config):
         response = rest_object.patch(rendered_config)
         status = response.status_code
         if status >= 200 and status < 300:  # Status code is good
-            logger.info('ANNOUNCE: {code} {type}'.format(
+            logger.info('ANNOUNCE | {code} | {type}'.format(
                 code=status,
                 type=rest_object.lookup_code(status)
                 ),
                 _source
             )
         else:
-            logger.warning('ANNOUNCE: {code} {type}'.format(
+            logger.warning('ANNOUNCE | {code} | {type}'.format(
                 code=status,
                 type=rest_object.lookup_code(status)
                 ),
@@ -99,14 +99,14 @@ def rib_withdraw(withdrawn_prefix):
     response = rest_object.delete(url)
     status = response.status_code
     if status >= 200 and status < 300:  # Status code is good
-        logger.info('WITHDRAW: {code} {type}'.format(
+        logger.info('WITHDRAW | {code} | {type}'.format(
             code=status,
             type=rest_object.lookup_code(status)
             ),
             _source
         )
     else:
-        logger.warning('WITHDRAW: {code} {type}'.format(
+        logger.warning('WITHDRAW | {code} | {type}'.format(
             code=status,
             type=rest_object.lookup_code(status)
             ),
@@ -145,7 +145,7 @@ def tester():
     """Just for testing purposes. Will be removed in official release"""
     #open('~/bgp-filter/rib_change/updates.txt', 'w').close()
     logger = Logger()
-    with open('/vagrant/bgp-filter/examples/json/invalid_data.json', 'r') as f:
+    with open('/vagrant/bgp-filter/examples/exa-announce.json', 'r') as f:
         raw_update = f.read().strip()
         #raw_update = sys.stdin.readline().strip()
         try:
