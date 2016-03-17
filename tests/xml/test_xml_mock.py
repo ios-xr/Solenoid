@@ -3,13 +3,13 @@ import unittest
 import mock
 from requests import Response
 
-from rest_calls.exceptions.exceptions import YangFileException
-from rest_calls.xmlRestClass import XMLRestCalls
+from rest.exceptions import YangFileException
+from rest.xmlRestClass import XMLRestCalls
 
 
 class XMLRestCallsCase(unittest.TestCase):
     def setUp(self):
-        with open('/vagrant/rest_calls/tests/restcalls.config',
+        with open('/vagrant/bgp-filter/tests/restCalls.config',
                   'r') as f:
             lines = f.readlines()
         self.username = lines[0].strip()
@@ -28,7 +28,7 @@ class XMLRestCallsCase(unittest.TestCase):
                 ]),
             'Content-Type': 'application/yang.data+xml',
             'Accept-Encoding': 'gzip, deflate, compress',
-            'User-Agent': 'python-requests/2.2.1 CPython/2.7.6 Linux/3.13.0-68-generic'
+            'User-Agent': 'python-requests/2.2.1 CPython/2.7.6 Linux/3.13.0-70-generic'
         }
         url = '{scheme}://{ip}:{port}{basePath}/'.format(
             scheme='http',
@@ -41,20 +41,20 @@ class XMLRestCallsCase(unittest.TestCase):
         self.assertEqual(self.classObject._host, url)
 
     def test_get_endpoint(self):
-        with open('/vagrant/rest_calls/examples/xml/put_data.xml',
+        with open('/vagrant/bgp-filter/examples/xml/data.xml',
                   'rb') as f:
             contents = f.read()
         yang_selection = self.classObject._get_endpoint(contents)
         self.assertEqual(yang_selection,
                          'Cisco-IOS-XR-ipv4-ospf-cfg:ospf')
 
-        with open('/vagrant/rest_calls/examples/xml/missing_name_data.xml',
+        with open('/vagrant/bgp-filter/examples/xml/missing_name_data.xml',
                   'rb') as f:
                 bad_contents = f.read()
         with self.assertRaises(YangFileException):
                 self.classObject._get_endpoint(bad_contents)
 
-    @mock.patch('rest_calls.xmlRestClass.XMLRestCalls.get')
+    @mock.patch('rest.xmlRestClass.XMLRestCalls.get')
     def test_get(self, mock_get):
         mock_get.return_value = mock.MagicMock(spec=Response,
                                                status_code=200)
@@ -64,9 +64,9 @@ class XMLRestCallsCase(unittest.TestCase):
         self.assertEqual(get_res.status_code,
                          mock_get.return_value.status_code)
 
-    @mock.patch('rest_calls.xmlRestClass.XMLRestCalls.put')
+    @mock.patch('rest.xmlRestClass.XMLRestCalls.put')
     def test_put(self, mock_put):
-        with open('/vagrant/rest_calls/examples/xml/put_data.xml',
+        with open('/vagrant/bgp-filter/examples/xml/put_data.xml',
                   'rb') as f:
             contents = f.read()
         mock_put.return_value = mock.MagicMock(spec=Response,
@@ -76,9 +76,9 @@ class XMLRestCallsCase(unittest.TestCase):
         self.assertEqual(put_res.status_code,
                          mock_put.return_value.status_code)
 
-    @mock.patch('rest_calls.xmlRestClass.XMLRestCalls.patch')
+    @mock.patch('rest.xmlRestClass.XMLRestCalls.patch')
     def test_patch(self, mock_patch):
-        with open('/vagrant/rest_calls/examples/xml/patch_data.xml',
+        with open('/vagrant/bgp-filter/examples/xml/patch_data.xml',
                   'rb') as f:
             contents = f.read()
         mock_patch.return_value = mock.MagicMock(spec=Response,
@@ -88,9 +88,9 @@ class XMLRestCallsCase(unittest.TestCase):
         self.assertEqual(patch_res.status_code,
                          mock_patch.return_value.status_code)
 
-    @mock.patch('rest_calls.xmlRestClass.XMLRestCalls.post')
+    @mock.patch('rest.xmlRestClass.XMLRestCalls.post')
     def test_post(self, mock_post):
-        with open('/vagrant/rest_calls/examples/xml/put_data.xml',
+        with open('/vagrant/bgp-filter/examples/xml/put_data.xml',
                   'rb') as f:
             contents = f.read()
         mock_post.return_value = mock.MagicMock(spec=Response,

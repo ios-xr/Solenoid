@@ -1,7 +1,7 @@
 import re
 
 from lxml import etree as ET
-from rest.exceptions import YangFileException
+from exceptions import YangFileException
 from rest.restClass import RestCalls
 
 

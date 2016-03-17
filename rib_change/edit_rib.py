@@ -35,9 +35,9 @@ def render_config(update_json):
             for withdrawn_prefix in exa_prefixes:
                 rib_withdraw(withdrawn_prefix)
     except ValueError:  # If we hit an eor or other type of update
-        logger.error('Failed JSON conversion for exa update',
-                     _source
-                     )
+        logger.warning('Failed JSON conversion for exa update',
+                       _source
+                       )
 
 
 def create_rest_object():
@@ -135,9 +135,9 @@ def update_watcher():
                 if update_json['type'] == 'update':
                     render_config(update_json)
             except KeyError:
-                logger.error('Failed to find "update" keyword in exa update',
-                             'bgp-filter'
-                             )
+                logger.warning('Failed to find "update" keyword in exa update',
+                               'bgp-filter'
+                               )
                 pass
 
 

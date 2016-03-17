@@ -1,7 +1,7 @@
 import json
 import re
 
-from exceptions.exceptions import YangFileException
+from exceptions import YangFileException
 from rest.restClass import RestCalls
 
 
