@@ -47,15 +47,11 @@ class RestCalls(object):
     def _get_endpoint(data):
         pass
 
-<<<<<<< HEAD
-    def put(self, data, endpoint):
-=======
     def lookup_code(self, code):
         """Look up the status code returned by a response object. """
         return requests.status_codes._codes.get(code)
 
-    def put(self, data):
->>>>>>> master
+    def put(self, data, endpoint):
         """PUT RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
