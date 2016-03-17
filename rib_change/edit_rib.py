@@ -1,26 +1,13 @@
 import json
-import syslog
-import time
-import os
 import sys
 from jinja2 import Environment, PackageLoader
-sys.path.append('/home/cisco/exabgp/bgp-filter/')
-from rest_calls.restClass import restCalls
+#sys.path.append('/home/cisco/exabgp/bgp-filter/')
+from rest.jsonRestClass import JSONRestCalls
+from logs.logger import Logger
 
 
-def _prefixed(level, message):
-    """Set the time, os pid, and the message in syslog format
-
-        :param level: Level of syslog message
-        :param message: Message to be printed to syslog
-        :type level: str
-        :type message: str
-
-        return: string syslog output
-        rtype: str
-    """
-    now = time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime())
-    return "%s %-8s %-6d %s" % (now, level, os.getpid(), message)
+_source = 'bgp-filter'
+logger = Logger()
 
 
 def render_config(update_json):
@@ -48,7 +35,9 @@ def render_config(update_json):
             for withdrawn_prefix in exa_prefixes:
                 rib_withdraw(withdrawn_prefix)
     except ValueError:  # If we hit an eor or other type of update
-        pass
+        logger.warning('Failed JSON conversion for exa update',
+                       _source
+                       )
 
 
 def create_rest_object():
@@ -86,9 +75,19 @@ def rib_announce(rendered_config):
             )
         status = response.status_code
         if status >= 200 and status < 300:  # Status code is good
-            syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+            logger.info('ANNOUNCE | {code} | {type}'.format(
+                code=status,
+                type=rest_object.lookup_code(status)
+                ),
+                _source
+            )
         else:
-            syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
+            logger.warning('ANNOUNCE | {code} | {type}'.format(
+                code=status,
+                type=rest_object.lookup_code(status)
+                ),
+                _source
+            )
 
 
 def rib_withdraw(withdrawn_prefix):
@@ -105,25 +104,72 @@ def rib_withdraw(withdrawn_prefix):
     response = rest_object.delete(url)
     status = response.status_code
     if status >= 200 and status < 300:  # Status code is good
-        syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))
+        logger.info('WITHDRAW | {code} | {type}'.format(
+            code=status,
+            type=rest_object.lookup_code(status)
+            ),
+            _source
+        )
     else:
-        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', status))
+        logger.warning('WITHDRAW | {code} | {type}'.format(
+            code=status,
+            type=rest_object.lookup_code(status)
+            ),
+            _source
+        )
 
 
 def update_watcher():
     """Watches for BGP updates from neighbors and triggers RIB change."""
-    #while True:
     open('~/bgp-filter/rib_change/updates.txt', 'w').close()
-    raw_update = sys.stdin.readline().strip()
-    try:
-        update_json = json.loads(raw_update)
-        with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
-                f.write(raw_update + '\n')
-    except ValueError, e:
-        syslog.syslog(syslog.LOG_ERR, _prefixed('ERROR', e))
-    else:
+    logger = Logger()
+    while True:
+        # listen for BGP updates
+        raw_update = sys.stdin.readline().strip()
         try:
-            if update_json['type'] == 'update':
-                render_config(update_json)
-        except KeyError:
-            pass
+            update_json = json.loads(raw_update)
+            with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
+                    f.write(raw_update + '\n')
+        except ValueError:
+            #syslog.syslog(syslog.LOG_ERR, _prefixed('WARNING', e))
+            logger.error('Failed JSON conversion for exa update',
+                         _source
+                         )
+        else:
+            try:
+                if update_json['type'] == 'update':
+                    render_config(update_json)
+            except KeyError:
+                logger.warning('Failed to find "update" keyword in exa update',
+                               'bgp-filter'
+                               )
+                pass
+
+
+def tester():
+    """Just for testing purposes. Will be removed in official release"""
+    #open('~/bgp-filter/rib_change/updates.txt', 'w').close()
+    logger = Logger()
+    with open('/vagrant/bgp-filter/examples/exa-announce.json', 'r') as f:
+        raw_update = f.read().strip()
+        #raw_update = sys.stdin.readline().strip()
+        try:
+            update_json = json.loads(raw_update)
+            #with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
+            #        f.write(raw_update + '\n')
+        except ValueError:
+            logger.error('Failed JSON conversion for exa update',
+                         _source
+                         )
+        else:
+            try:
+                if update_json['type'] == 'update':
+                    render_config(update_json)
+            except KeyError:
+                logger.error('Failed to find "update" keyword in exa update',
+                             'bgp-filter'
+                             )
+
+
+if __name__ == "__main__":
+    tester()

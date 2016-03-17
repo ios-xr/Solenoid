@@ -2,6 +2,7 @@
 
 import requests
 import abc
+import logging
 
 
 class RestCalls(object):
@@ -14,6 +15,8 @@ class RestCalls(object):
         :type username: str
         :type ip_address_port: str
     """
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
     __metaclass__ = abc.ABCMeta
     BasePath = '/restconf/data'
     Accept = [
@@ -44,7 +47,15 @@ class RestCalls(object):
     def _get_endpoint(data):
         pass
 
+<<<<<<< HEAD
     def put(self, data, endpoint):
+=======
+    def lookup_code(self, code):
+        """Look up the status code returned by a response object. """
+        return requests.status_codes._codes.get(code)
+
+    def put(self, data):
+>>>>>>> master
         """PUT RESTconf call
             :param data: JSON or XML with config changes
             :type data: str

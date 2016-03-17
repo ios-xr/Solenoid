@@ -15,8 +15,13 @@ For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exa
 
 Be able to update RIB only with networks from preferred neighbors (based on some blackbox of logic)
 
-Create tar of project including exaBGP and GUI interface for exaBGP (gui be based on the [ERCO](https://erco.xyz/) project).
+Be able to filter the routes based on prefixes ranges.
 
+Test at scale.
+
+Change from RESTconf backend to [gRPC](http://www.grpc.io/docs/tutorials/basic/python.html)
+
+Create tar of project container, as well as create a vagrant environment including IOS-XRv image, the app, and simulated network environment.
 
 #### Current Limitations:
 
