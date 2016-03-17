@@ -43,10 +43,6 @@ class RestCalls(object):
             basePath=self.BasePath
         )
 
-    @abc.abstractmethod
-    def _get_endpoint(data):
-        pass
-
     def lookup_code(self, code):
         """Look up the status code returned by a response object. """
         return requests.status_codes._codes.get(code)
