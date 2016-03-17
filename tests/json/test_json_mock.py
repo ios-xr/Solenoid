@@ -40,20 +40,6 @@ class JSONRestCallsCase(unittest.TestCase):
                          headers)
         self.assertEqual(self.classObject._host, url)
 
-    def test_get_endpoint(self):
-        with open('/vagrant/bgp-filter/examples/json/put_data.json',
-                  'rb') as f:
-            contents = f.read()
-        yang_selection = self.classObject._get_endpoint(contents)
-        self.assertEqual(yang_selection,
-                         'Cisco-IOS-XR-ipv4-ospf-cfg:ospf')
-
-        with open('/vagrant/bgp-filter/examples/json/missing_name_data.json',
-                  'rb') as f:
-                bad_contents = f.read()
-        with self.assertRaises(YangFileException):
-                self.classObject._get_endpoint(bad_contents)
-
     @mock.patch('rest.jsonRestClass.JSONRestCalls.get')
     def test_get(self, mock_get):
         mock_get.return_value = mock.MagicMock(spec=Response,
@@ -71,8 +57,14 @@ class JSONRestCallsCase(unittest.TestCase):
             contents = f.read()
         mock_put.return_value = mock.MagicMock(spec=Response,
                                                status_code=204)
-        put_res = self.classObject.put(contents)
-        mock_put.assert_called_once_with(contents)
+        put_res = self.classObject.put(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+        )
+        mock_put.assert_called_once_with(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
         self.assertEqual(put_res.status_code,
                          mock_put.return_value.status_code)
 
@@ -83,8 +75,14 @@ class JSONRestCallsCase(unittest.TestCase):
             contents = f.read()
         mock_patch.return_value = mock.MagicMock(spec=Response,
                                                  status_code=204)
-        patch_res = self.classObject.patch(contents)
-        mock_patch.assert_called_once_with(contents)
+        patch_res = self.classObject.patch(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
+        mock_patch.assert_called_once_with(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
         self.assertEqual(patch_res.status_code,
                          mock_patch.return_value.status_code)
 
@@ -95,8 +93,14 @@ class JSONRestCallsCase(unittest.TestCase):
             contents = f.read()
         mock_post.return_value = mock.MagicMock(spec=Response,
                                                 status_code=204)
-        post_res = self.classObject.post(contents)
-        mock_post.assert_called_once_with(contents)
+        post_res = self.classObject.post(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
+        mock_post.assert_called_once_with(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
         self.assertEqual(post_res.status_code,
                          mock_post.return_value.status_code)
 
