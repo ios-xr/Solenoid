@@ -63,11 +63,13 @@ def create_rest_object():
         :returns: restCalls object
         :rtype: restCalls class object
     """
-    with open('/vagrant/BGP-filter/rib_change/edit_rib.config', 'r') as f:
+    with open('/vagrant/bgp-filter/rib_change/edit_rib.config', 'r') as f:
         lines = f.readlines()
     return restCalls(lines[0].replace("\r\n", ""),
                      lines[1].replace("\r\n", ""),
-                     lines[2].replace("\r\n", ""))
+                     lines[2].replace("\r\n", ""),
+                     lines[3].replace("\r\n", "")
+                     )
 
 
 def rib_announce(rendered_config):
@@ -78,7 +80,10 @@ def rib_announce(rendered_config):
 
         """
         rest_object = create_rest_object()
-        response = rest_object.patch(rendered_config)
+        response = rest_object.patch(
+            rendered_config,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
         status = response.status_code
         if status >= 200 and status < 300:  # Status code is good
             syslog.syslog(syslog.LOG_ALERT, _prefixed('INFO', status))

@@ -44,38 +44,35 @@ class RestCalls(object):
     def _get_endpoint(data):
         pass
 
-    def put(self, data):
+    def put(self, data, endpoint):
         """PUT RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        endpoint = self._get_endpoint(data)
         url = self._host + endpoint
         res = self._session.put(url, data=data)
         return res
 
-    def post(self, data):
+    def post(self, data, endpoint):
         """POST RESTconf call
             :param data: JSON or XML file with config changes
             :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        endpoint = self._get_endpoint(data)
         url = self._host + endpoint
         res = self._session.post(url, data=data)
         return res
 
-    def patch(self, data):
+    def patch(self, data, endpoint):
         """PATCH RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        endpoint = self._get_endpoint(data)
         url = self._host + endpoint
         res = self._session.patch(url, data=data)
         return res
