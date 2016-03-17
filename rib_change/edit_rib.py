@@ -54,11 +54,11 @@ def create_rest_object():
     """
     with open('/vagrant/bgp-filter/rib_change/edit_rib.config', 'r') as f:
         lines = f.readlines()
-    return restCalls(lines[0].replace("\r\n", ""),
-                     lines[1].replace("\r\n", ""),
-                     lines[2].replace("\r\n", ""),
-                     lines[3].replace("\r\n", "")
-                     )
+    return JSONRestCalls(lines[0].replace("\r\n", ""),
+                         lines[1].replace("\r\n", ""),
+                         lines[2].replace("\r\n", ""),
+                         lines[3].replace("\r\n", "")
+                         )
 
 
 def rib_announce(rendered_config):
