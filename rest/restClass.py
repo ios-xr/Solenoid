@@ -15,8 +15,10 @@ class RestCalls(object):
         :type username: str
         :type ip_address_port: str
     """
+    #Prevent logging messages for anything below warning showing up
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+
     __metaclass__ = abc.ABCMeta
     BasePath = '/restconf/data'
     Accept = [
