@@ -1,34 +1,22 @@
 (function(){
   'use strict';
   function getInfo(){
-    var Table = document.getElementById("rib");
-    var rows = Table.rows.length
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (xhttp.readyState == 4 && xhttp.status == 200) {
+    var newData = ""
         var json = JSON.parse(xhttp.responseText);
         var keys = Object.keys(json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix']).length
         for (var i = 0; i < keys; i++){
-          if (i < rows - 1) {
-            var table = document.getElementById("rib");
-            var row = table.rows[i+1];
-            var cell1 = row.cells[0];
-            var cell2 = row.cells[1];
-            cell1.innerHTML = json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['prefix'];
-            cell2.innerHTML = json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['vrf-route']['segment-route-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'];
-          } else {
-            var table = document.getElementById("rib");
-            var row = table.insertRow(i+1);
-            var cell1 = row.insertCell(0);
-            var cell2 = row.insertCell(1);
-            cell1.innerHTML = json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['prefix'];
-            cell2.innerHTML = json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['vrf-route']['segment-route-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'];
-          }
-        }
-        if (rows - 1 > keys) {
-            var table = document.getElementById("rib");
-            table.deleteRow(keys + 1);
-        }
+      newData += "<tr><td>" + json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['prefix'] + "</td>";
+      console.log(json);
+
+      newData += "<td>" + json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['vrf-route']['vrf-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'];
+      newData += "</td></tr>\n"
+    }
+
+  $('#rib tbody').html(newData);
+
       }
     };
     xhttp.open('GET', '/get_rib_json', true);
@@ -62,9 +50,6 @@
             row.insertCell(4).innerHTML = time;
          }
         }
-        if (rows_l > 6){
-          Table.deleteRow(6)
-        }
       }
     };
     xhttp.open('GET', '/get_exa_json', true);
@@ -85,4 +70,3 @@
   setInterval(getInfo1, 1000);
   setInterval(getInfo, 2000);
 }());
-

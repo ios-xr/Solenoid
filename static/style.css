@@ -1,4 +1,3 @@
-
 body {
   margin:0;
   padding:0;
@@ -137,4 +136,10 @@ td {
   vertical-align: center;
   text-align:center;
   padding: 15px;
+}
+
+#table-scroll{
+  height: 475px;
+  overflow:auto;
+  margin-top:20px;
 }

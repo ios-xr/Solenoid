@@ -6,9 +6,10 @@ Contact: kkumara3@cisco.com
 
 from flask import Flask, render_template, request, jsonify
 import requests
-from rest_calls.restClass import restCalls
 import json
 import sys
+sys.path.append('/home/cisco/exabgp/bgp-filter/')
+from rest.jsonRestClass import JSONRestCalls
 
 app = Flask(__name__)
 
@@ -18,10 +19,6 @@ def template_test():
     network = request.form.get('network', ' ')
     message = network + ' route ' + ip_address + ' next-hop self'
     push_exabgp(message)
-#    pdb.set_trace()
-#    exabgp = get_exa()
-#    pp = pprint.PrettyPrinter(indent=4)
-#    pp.pprint(exabgp)
     rib = get_rib()
     return render_template('template.html',
         Title = 'ExaBGP Demo on eXR Container',
@@ -65,13 +62,14 @@ def get_rib():
 
 def create_rest_object():
     """Create a restCalls object.
-        Replace Username, Password and IP_Address of box, in that order.
+        Replace IP_Address, Port, Username, and Password  in that order.
         :returns: restCalls object
         :rtype: restCalls class object
     """
-    return restCalls('Username',
-                     'Password',
-                     'IP_address')
+    return restCalls('10.1.1.5',
+                     '80',
+                     'vagrant'
+                     'vagrant')
 def get_exa():
     #Opens file that announcements are stored and returns the last line
     with open('/home/cisco/exabgp/routes.txt', 'rb') as f:
@@ -80,10 +78,6 @@ def get_exa():
             f.seek(-2, 1)         # ...jump back the read byte plus one more.
         last = f.readline()       # Read last line.
     return last
-
-
-
-
 
 
 
