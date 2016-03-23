@@ -18,9 +18,9 @@ def template_test():
     ip_address = request.form.get('ip_address', ' ')
     network = request.form.get('network', ' ')
     message = network + ' route ' + ip_address + ' next-hop self'
-    push_exabgp(message)
+#    push_exabgp(message)
     rib = get_rib()
-    return render_template('template.html',
+    return render_template('index.html',
         Title = 'ExaBGP Demo on eXR Container',
         content2 = rib,
         )
@@ -66,13 +66,13 @@ def create_rest_object():
         :returns: restCalls object
         :rtype: restCalls class object
     """
-    return restCalls('10.1.1.5',
+    return JSONRestCalls('10.1.1.5',
                      '80',
-                     'vagrant'
+                     'vagrant',
                      'vagrant')
 def get_exa():
     #Opens file that announcements are stored and returns the last line
-    with open('/home/cisco/exabgp/routes.txt', 'rb') as f:
+    with open('/home/cisco/exabgp/history.txt', 'rb') as f:
         f.seek(-2,2)
         while f.read(1) != b"\n": # Until EOL is found...
             f.seek(-2, 1)         # ...jump back the read byte plus one more.
