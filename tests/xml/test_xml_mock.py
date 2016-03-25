@@ -3,7 +3,6 @@ import unittest
 import mock
 from requests import Response
 
-from rest.exceptions import YangFileException
 from rest.xmlRestClass import XMLRestCalls
 
 
