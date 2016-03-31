@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+from netaddr import IPNetwork
 from jinja2 import Environment, PackageLoader
 #sys.path.append('/home/cisco/exabgp/bgp-filter/')
 from rest.jsonRestClass import JSONRestCalls
@@ -20,7 +21,7 @@ def render_config(update_json):
     """
     # check if any filtering has been applied to the prefixes
     try:
-        if os.path.getsize('/vagr3ant/bgp-filter/rib_change/filter.txt') > 0:
+        if os.path.getsize('/vagrant/bgp-filter/rib_change/filter.txt') > 0:
             filt = True
     except OSError:
         filt = False
@@ -31,7 +32,7 @@ def render_config(update_json):
         update_type = update_json['neighbor']['message']['update']
         if 'announce' in update_type:
             updated_prefixes = update_type['announce']['ipv4 unicast']
-            prefixes = updated_prefixes.values()[0]
+            prefixes = updated_prefixes.values()[0].keys()
             next_hop = updated_prefixes.keys()[0]
             # Filter the prefixes
             if filt:
@@ -136,8 +137,18 @@ def rib_withdraw(withdrawn_prefix):
 
 
 def filter_prefixes(prefixes):
-    for values in prefixes:
-        print values
+    with open('/vagrant/bgp-filter/rib_change/filter.txt', 'r') as filterf:
+        final = []
+        for line in filterf:
+            # is it in the prefix range?
+            ip1, ip2 = line.split('-')
+            ip1 = IPNetwork(ip1)
+            ip2 = IPNetwork(ip2)
+            for prefix in prefixes:
+                prefix = IPNetwork(prefix)
+                if ip1 <= prefix <= ip2:
+                    final.append(str(prefix))
+        return final
 
 
 def update_watcher():
