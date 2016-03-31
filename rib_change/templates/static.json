@@ -6,8 +6,7 @@
           "vrf-unicast": {
             "vrf-prefixes": {
               "vrf-prefix": [
-              {% for values in data -%}
-                {% for prefix in values -%}
+                {% for prefix in prefixes -%}
                 {% set prefix, length = prefix.split('/') %}
                 {
                   "prefix": {{ prefix | to_json }},
@@ -25,7 +24,6 @@
                 {% if not loop.last %}
                 ,
                 {%endif %}
-              {%- endfor %}
               {%- endfor %}
               ]
             }
