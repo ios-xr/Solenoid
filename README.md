@@ -1,4 +1,5 @@
-# BGP-filter
+# Solenium
+### Route Filtering Agent
 ##### Author: Lisa Roach
 ##### Email: lisroach@cisco.com
 
@@ -32,9 +33,23 @@ to the RIB.
 
 ### Usage:
 
-Step 1: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
+Step 1: Clone this repo
 
-Step 2: Make sure RESTconf calls are working from your device to the RIB table
+Step 2 : Create an edit_rib.config file in the /bgp-filter/rib_change/ directory and fill in the following data (in the same order):
+
+```
+ip_address
+port number
+username
+password
+
+```
+
+Step 3 (optional): Edit the filter.txt file in /solenium/edit_rib/filter.txt to include the ranges of prefixes to be filtered with.
+
+Step 4: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
+
+Step 5: Make sure RESTconf calls are working from your device to the RIB table
 
 Example test (you should recieve your device's whole configuration):
 
@@ -43,9 +58,7 @@ curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" 
 ```
 
 
-Step 2: Clone this project onto your device
-
-Step 3: Change your exaBGP configuration file to run the edit_rib.py script. 
+Step 6: Change your exaBGP configuration file to run the edit_rib.py script. 
 
 Example:
 
@@ -73,4 +86,4 @@ group test {
 
 ```
 
-Step 4: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
+Step 7: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
