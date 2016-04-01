@@ -15,8 +15,10 @@ class RestCalls(object):
         :type username: str
         :type ip_address_port: str
     """
+    #Prevent logging messages for anything below warning showing up
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+
     __metaclass__ = abc.ABCMeta
     BasePath = '/restconf/data'
     Accept = [
@@ -43,46 +45,39 @@ class RestCalls(object):
             basePath=self.BasePath
         )
 
-    @abc.abstractmethod
-    def _get_endpoint(data):
-        pass
-
     def lookup_code(self, code):
         """Look up the status code returned by a response object. """
         return requests.status_codes._codes.get(code)
 
-    def put(self, data):
+    def put(self, data, endpoint):
         """PUT RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        endpoint = self._get_endpoint(data)
         url = self._host + endpoint
         res = self._session.put(url, data=data)
         return res
 
-    def post(self, data):
+    def post(self, data, endpoint):
         """POST RESTconf call
             :param data: JSON or XML file with config changes
             :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        endpoint = self._get_endpoint(data)
         url = self._host + endpoint
         res = self._session.post(url, data=data)
         return res
 
-    def patch(self, data):
+    def patch(self, data, endpoint):
         """PATCH RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
             :return: Return the response object
             :rtype: Response object
         """
-        endpoint = self._get_endpoint(data)
         url = self._host + endpoint
         res = self._session.patch(url, data=data)
         return res

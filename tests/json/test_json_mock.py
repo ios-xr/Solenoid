@@ -3,7 +3,6 @@ import unittest
 import mock
 from requests import Response
 
-from rest.exceptions import YangFileException
 from rest.jsonRestClass import JSONRestCalls
 
 
@@ -12,10 +11,10 @@ class JSONRestCallsCase(unittest.TestCase):
         with open('/vagrant/bgp-filter/tests/restCalls.config',
                   'r') as f:
             lines = f.readlines()
-        self.username = lines[0].strip()
-        self.password = lines[1].strip()
-        self.ip_address = lines[2].strip()
-        self.port = lines[3].strip()
+        self.username = lines[2].strip()
+        self.password = lines[3].strip()
+        self.ip_address = lines[0].strip()
+        self.port = lines[1].strip()
         self.classObject = JSONRestCalls(self.ip_address, self.port,
                                          self.username, self.password)
 
@@ -40,20 +39,6 @@ class JSONRestCallsCase(unittest.TestCase):
                          headers)
         self.assertEqual(self.classObject._host, url)
 
-    def test_get_endpoint(self):
-        with open('/vagrant/bgp-filter/examples/json/put_data.json',
-                  'rb') as f:
-            contents = f.read()
-        yang_selection = self.classObject._get_endpoint(contents)
-        self.assertEqual(yang_selection,
-                         'Cisco-IOS-XR-ipv4-ospf-cfg:ospf')
-
-        with open('/vagrant/bgp-filter/examples/json/missing_name_data.json',
-                  'rb') as f:
-                bad_contents = f.read()
-        with self.assertRaises(YangFileException):
-                self.classObject._get_endpoint(bad_contents)
-
     @mock.patch('rest.jsonRestClass.JSONRestCalls.get')
     def test_get(self, mock_get):
         mock_get.return_value = mock.MagicMock(spec=Response,
@@ -66,25 +51,59 @@ class JSONRestCallsCase(unittest.TestCase):
 
     @mock.patch('rest.jsonRestClass.JSONRestCalls.put')
     def test_put(self, mock_put):
+        # Tests it with good data
         with open('/vagrant/bgp-filter/examples/json/put_data.json',
                   'rb') as f:
             contents = f.read()
         mock_put.return_value = mock.MagicMock(spec=Response,
                                                status_code=204)
-        put_res = self.classObject.put(contents)
-        mock_put.assert_called_once_with(contents)
+        put_res = self.classObject.put(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+        )
+        mock_put.assert_called_once_with(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
+        self.assertEqual(put_res.status_code,
+                         mock_put.return_value.status_code)
+
+        # Test it with bad data
+        with open('/vagrant/bgp-filter/examples/json/invalid_data.json',
+                  'rb') as f:
+            contents = f.read()
+        mock_put.return_value = mock.MagicMock(spec=Response,
+                                               status_code=400)
+        put_res = self.classObject.put(contents, 'bgp:bgp')
         self.assertEqual(put_res.status_code,
                          mock_put.return_value.status_code)
 
     @mock.patch('rest.jsonRestClass.JSONRestCalls.patch')
-    def test_patch(self, mock_patch):
+    def test_patch_good_data(self, mock_patch):
         with open('/vagrant/bgp-filter/examples/json/patch_data.json',
                   'rb') as f:
             contents = f.read()
         mock_patch.return_value = mock.MagicMock(spec=Response,
                                                  status_code=204)
-        patch_res = self.classObject.patch(contents)
-        mock_patch.assert_called_once_with(contents)
+        patch_res = self.classObject.patch(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
+        mock_patch.assert_called_once_with(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
+        self.assertEqual(patch_res.status_code,
+                         mock_patch.return_value.status_code)
+
+    @mock.patch('rest.jsonRestClass.JSONRestCalls.patch')
+    def test_patch_bad_data(self, mock_patch):
+        with open('/vagrant/bgp-filter/examples/json/invalid_data.json',
+                  'rb') as f:
+            contents = f.read()
+        mock_patch.return_value = mock.MagicMock(spec=Response,
+                                                 status_code=400)
+        patch_res = self.classObject.put(contents, 'bgp:bgp')
         self.assertEqual(patch_res.status_code,
                          mock_patch.return_value.status_code)
 
@@ -95,10 +114,27 @@ class JSONRestCallsCase(unittest.TestCase):
             contents = f.read()
         mock_post.return_value = mock.MagicMock(spec=Response,
                                                 status_code=204)
-        post_res = self.classObject.post(contents)
-        mock_post.assert_called_once_with(contents)
+        post_res = self.classObject.post(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
+        mock_post.assert_called_once_with(
+            contents,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
         self.assertEqual(post_res.status_code,
                          mock_post.return_value.status_code)
+
+        # Test it with bad data
+        with open('/vagrant/bgp-filter/examples/json/invalid_data.json',
+                  'rb') as f:
+            contents = f.read()
+        mock_post.return_value = mock.MagicMock(spec=Response,
+                                                status_code=400)
+        put_res = self.classObject.put(contents, 'bgp:bgp')
+        self.assertEqual(put_res.status_code,
+                         mock_post.return_value.status_code)
+
 
 if __name__ == "__main__":
     unittest.main()

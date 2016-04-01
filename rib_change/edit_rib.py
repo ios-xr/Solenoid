@@ -1,5 +1,7 @@
 import json
 import sys
+import os
+from netaddr import IPNetwork
 from jinja2 import Environment, PackageLoader
 #sys.path.append('/home/cisco/exabgp/bgp-filter/')
 from rest.jsonRestClass import JSONRestCalls
@@ -17,21 +19,36 @@ def render_config(update_json):
     :type update_json: str
 
     """
+    # check if any filtering has been applied to the prefixes
+    try:
+        if os.path.getsize('/vagrant/bgp-filter/rib_change/filter.txt') > 0:
+            filt = True
+    except OSError:
+        filt = False
+        pass
+
+    # render the config
     try:
         update_type = update_json['neighbor']['message']['update']
         if 'announce' in update_type:
             updated_prefixes = update_type['announce']['ipv4 unicast']
-            prefixes = updated_prefixes.values()
+            prefixes = updated_prefixes.values()[0].keys()
             next_hop = updated_prefixes.keys()[0]
+            # Filter the prefixes
+            if filt:
+                prefixes = filter_prefixes(prefixes)
             # set env variable for jinja2
             env = Environment(loader=PackageLoader('rib_change',
                               'templates'))
             env.filters['to_json'] = json.dumps
             template = env.get_template('static.json')
             rib_announce(template.render(next_hop=next_hop,
-                                         data=prefixes))
+                                         prefixes=prefixes))
         elif 'withdraw' in update_type:
             exa_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
+            # Filter the prefixes
+            if filt:
+                exa_prefixes = filter_prefixes(prefixes)
             for withdrawn_prefix in exa_prefixes:
                 rib_withdraw(withdrawn_prefix)
     except ValueError:  # If we hit an eor or other type of update
@@ -57,7 +74,8 @@ def create_rest_object():
     return JSONRestCalls(lines[0].replace("\r\n", ""),
                          lines[1].replace("\r\n", ""),
                          lines[2].replace("\r\n", ""),
-                         lines[3].replace("\r\n", ""))
+                         lines[3].replace("\r\n", "")
+                         )
 
 
 def rib_announce(rendered_config):
@@ -68,19 +86,20 @@ def rib_announce(rendered_config):
 
         """
         rest_object = create_rest_object()
-        response = rest_object.patch(rendered_config)
+        response = rest_object.patch(
+            rendered_config,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
+            )
         status = response.status_code
         if status >= 200 and status < 300:  # Status code is good
-            logger.info('ANNOUNCE | {code} | {type}'.format(
-                code=status,
-                type=rest_object.lookup_code(status)
+            logger.info('ANNOUNCE | {code}'.format(
+                code=status
                 ),
                 _source
             )
         else:
-            logger.warning('ANNOUNCE | {code} | {type}'.format(
-                code=status,
-                type=rest_object.lookup_code(status)
+            logger.warning('ANNOUNCE | {code}'.format(
+                code=status
                 ),
                 _source
             )
@@ -100,19 +119,51 @@ def rib_withdraw(withdrawn_prefix):
     response = rest_object.delete(url)
     status = response.status_code
     if status >= 200 and status < 300:  # Status code is good
-        logger.info('WITHDRAW | {code} | {type}'.format(
-            code=status,
-            type=rest_object.lookup_code(status)
+        logger.info('WITHDRAW | {code}'.format(
+            code=status
             ),
             _source
         )
     else:
-        logger.warning('WITHDRAW | {code} | {type}'.format(
-            code=status,
-            type=rest_object.lookup_code(status)
+        logger.warning('WITHDRAW | {code}'.format(
+            code=status
             ),
             _source
         )
+
+
+def filter_prefixes(prefixes):
+    """Filters out prefixes that do not fall in ranges indicated in filter.txt
+
+    :param prefixes: List of prefixes exaBGP announced or withdrew
+    :type prefixes: list or strings
+
+    """
+
+    with open('/vagrant/bgp-filter/rib_change/filter.txt', 'r') as filterf:
+        final = []
+        for line in filterf:
+            temp_list = []
+            try:
+                # convert it all to IPNetwork for comparison
+                ip1, ip2 = line.split('-')
+                ip1 = IPNetwork(ip1)
+                ip2 = IPNetwork(ip2)
+                for prefix in prefixes:
+                    prefix = IPNetwork(prefix)
+                    # is the exaBGP prefix in the filtering range
+                    if ip1 <= prefix <= ip2:
+                        temp_list.append(str(prefix))
+                # remove all items that were added from prefixes to avoid
+                # checking the same values twice
+                for prefix in temp_list:
+                    prefixes.remove(prefix)
+                # create the final list
+                final += temp_list
+            # make this more specific
+            except Exception, e:
+                print e
+        return final
 
 
 def update_watcher():
@@ -127,7 +178,6 @@ def update_watcher():
             with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
                     f.write(raw_update + '\n')
         except ValueError:
-            #syslog.syslog(syslog.LOG_ERR, _prefixed('WARNING', e))
             logger.error('Failed JSON conversion for exa update',
                          _source
                          )
@@ -160,6 +210,7 @@ def tester():
         else:
             try:
                 if update_json['type'] == 'update':
+                    # if everything is right, render the config
                     render_config(update_json)
             except KeyError:
                 logger.error('Failed to find "update" keyword in exa update',
