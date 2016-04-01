@@ -92,16 +92,14 @@ def rib_announce(rendered_config):
             )
         status = response.status_code
         if status >= 200 and status < 300:  # Status code is good
-            logger.info('ANNOUNCE | {code} | {type}'.format(
-                code=status,
-                type=rest_object.lookup_code(status)
+            logger.info('ANNOUNCE | {code}'.format(
+                code=status
                 ),
                 _source
             )
         else:
-            logger.warning('ANNOUNCE | {code} | {type}'.format(
-                code=status,
-                type=rest_object.lookup_code(status)
+            logger.warning('ANNOUNCE | {code}'.format(
+                code=status
                 ),
                 _source
             )
@@ -121,33 +119,50 @@ def rib_withdraw(withdrawn_prefix):
     response = rest_object.delete(url)
     status = response.status_code
     if status >= 200 and status < 300:  # Status code is good
-        logger.info('WITHDRAW | {code} | {type}'.format(
-            code=status,
-            type=rest_object.lookup_code(status)
+        logger.info('WITHDRAW | {code}'.format(
+            code=status
             ),
             _source
         )
     else:
-        logger.warning('WITHDRAW | {code} | {type}'.format(
-            code=status,
-            type=rest_object.lookup_code(status)
+        logger.warning('WITHDRAW | {code}'.format(
+            code=status
             ),
             _source
         )
 
 
 def filter_prefixes(prefixes):
+    """Filters out prefixes that do not fall in ranges indicated in filter.txt
+
+    :param prefixes: List of prefixes exaBGP announced or withdrew
+    :type prefixes: list or strings
+
+    """
+
     with open('/vagrant/bgp-filter/rib_change/filter.txt', 'r') as filterf:
         final = []
         for line in filterf:
-            # is it in the prefix range?
-            ip1, ip2 = line.split('-')
-            ip1 = IPNetwork(ip1)
-            ip2 = IPNetwork(ip2)
-            for prefix in prefixes:
-                prefix = IPNetwork(prefix)
-                if ip1 <= prefix <= ip2:
-                    final.append(str(prefix))
+            temp_list = []
+            try:
+                # convert it all to IPNetwork for comparison
+                ip1, ip2 = line.split('-')
+                ip1 = IPNetwork(ip1)
+                ip2 = IPNetwork(ip2)
+                for prefix in prefixes:
+                    prefix = IPNetwork(prefix)
+                    # is the exaBGP prefix in the filtering range
+                    if ip1 <= prefix <= ip2:
+                        temp_list.append(str(prefix))
+                # remove all items that were added from prefixes to avoid
+                # checking the same values twice
+                for prefix in temp_list:
+                    prefixes.remove(prefix)
+                # create the final list
+                final += temp_list
+            # make this more specific
+            except Exception, e:
+                print e
         return final
 
 
