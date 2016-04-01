@@ -45,7 +45,13 @@ password
 
 ```
 
-Step 3 (optional): Edit the filter.txt file in /solenium/edit_rib/filter.txt to include the ranges of prefixes to be filtered with.
+Step 3 (optional): Edit the filter.txt file in /solenium/edit_rib/filter.txt to include the ranges of prefixes to be filtered with. Example:
+
+```
+1.1.1.0/32-1.1.2.0/32
+10.1.1.0/32-10.1.5.0/32
+192.168.1.0/28-192.168.2.0/28
+```
 
 Step 4: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
 
