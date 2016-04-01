@@ -51,6 +51,7 @@ Step 4: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighbo
 
 Step 5: Make sure RESTconf calls are working from your device to the RIB table
 
+
 Example test (you should recieve your device's whole configuration):
 
 ```
@@ -59,6 +60,7 @@ curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" 
 
 
 Step 6: Change your exaBGP configuration file to run the edit_rib.py script. 
+
 
 Example:
 
@@ -86,4 +88,4 @@ group test {
 
 ```
 
-Step 7: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
+Step 7: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful.
