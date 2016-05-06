@@ -1,4 +1,5 @@
-# BGP-filter
+# Solenoid
+### Route Filtering Agent
 ##### Author: Lisa Roach
 ##### Email: lisroach@cisco.com
 
@@ -34,19 +35,26 @@ to the RIB.
 
 Step 1: Clone this repo
 
-Step 2 : Create an edit_rib.config file in the /bgp-filter/rib_change/ directory and fill in the following data (in the same order):
+Step 2 : Create an bgp_filter.config file in your home directory and fill in the values in the key:value pair:
 
 ```
-ip_address
-port number
-username
-password
+[default] # Or whatever you want to name this section, it maybe helpful to name it the router you are working on
+ip: ip_address
+port: port number
+username: username
+password: password
 
 ```
 
-Step 3: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
+Step 3: Set a BGP_FILTER_CONFIG environment variable pointing to the filepath of your config file. 
 
-Step 4: Make sure RESTconf calls are working from your device to the RIB table
+```
+$ export BGP_FILTER_CONFIG=/home/user/bgp_filter.config
+```
+
+Step 4: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
+
+Step 5: Make sure RESTconf calls are working from your device to the RIB table
 
 Example test (you should recieve your device's whole configuration):
 
@@ -55,7 +63,7 @@ curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" 
 ```
 
 
-Step 5: Change your exaBGP configuration file to run the edit_rib.py script. 
+Step 6: Change your exaBGP configuration file to run the edit_rib.py script. 
 
 Example:
 
@@ -83,4 +91,4 @@ group test {
 
 ```
 
-Step 6: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
+Step 7: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
