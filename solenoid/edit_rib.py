@@ -196,37 +196,10 @@ def update_watcher():
                 _source
             )
 
-
-def tester():
-    """Just for testing purposes. Will be removed in official release"""
-    # open('~/bgp-filter/rib_change/updates.txt', 'w').close()
-    logger = Logger()
-    with open('/vagrant/trusty_backup/solenoid/solenoid/examples/exa-announce.json', 'r') as f:
-        raw_update = f.read().strip()
-        # raw_update = sys.stdin.readline().strip()
-        try:
-            update_json = json.loads(raw_update)
-            # with open('~/bgp-filter/rib_change/updates.txt', 'a') as f:
-            #        f.write(raw_update + '\n')
-        except ValueError:
-            logger.error('Failed JSON conversion for exa update',
-                         _source
-                         )
-        else:
-            try:
-                if update_json['type'] == 'update':
-                    # if everything is right, render the config
-                    render_config(update_json)
-            except KeyError:
-                logger.error('Failed to find "update" keyword in exa update',
-                             'bgp-filter'
-                             )
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', type=str)
     args = parser.parse_args()
     global filepath
     filepath = args.f
-    tester()
+    update_watcher()
