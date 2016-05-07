@@ -54,8 +54,8 @@ def render_config(update_json):
                 exa_prefixes = filter_prefixes(prefixes)
             for withdrawn_prefix in exa_prefixes:
                 rib_withdraw(withdrawn_prefix)
-    except ValueError:  # If we hit an eor or other type of update
-        logger.warning('Failed JSON conversion for exa update',
+    except ValueError, e:  # If we hit an eor or other type of update
+        logger.warning(e,
                        _source
                        )
 
@@ -149,6 +149,7 @@ def filter_prefixes(prefixes):
             try:
                 # convert it all to IPNetwork for comparison
                 ip1, ip2 = line.split('-')
+                ip2 = ip2.strip()
                 ip1 = IPNetwork(ip1)
                 ip2 = IPNetwork(ip2)
                 for prefix in prefixes:
@@ -160,16 +161,14 @@ def filter_prefixes(prefixes):
                             continue
                         else:
                             temp_list.append(str(prefix))
-                # remove all items that were added from prefixes to avoid
-                # checking the same values twice
-                # for prefix in temp_list:
-                #    prefixes.remove(prefix)
                 # create the final list
-                final.append(temp_list)
+                final += temp_list
             # make this more specific
             except AddrFormatError, e:
-                logger.error('FILTER | {e}'.format(e=e), _source)
+                logger.error('FILTER | {}'.format(e), _source)
                 print e
+            except ValueError, e:
+                logger.error('FILTER | {}'.format(e.message), _source)
         return final
 
 
@@ -178,7 +177,7 @@ def update_watcher():
     location = os.path.dirname(os.path.realpath(__file__))
     open(os.path.join(location, 'updates.txt')).close()
     while True:
-        # listen for BGP updates
+        # Listen for BGP updates.
         raw_update = sys.stdin.readline().strip()
         with open(os.path.join(location, 'updates.txt'), 'a') as f:
             f.write(raw_update + '\n')
@@ -188,6 +187,7 @@ def update_watcher():
             logger.error('Failed JSON conversion for exa update', _source)
             sys.exit(1)
         try:
+            # If it is an update, make the RIB changes.
             if update_json['type'] == 'update':
                 render_config(update_json)
         except KeyError:
@@ -196,10 +196,33 @@ def update_watcher():
                 _source
             )
 
+
+def tester():
+    """Just for testing purposes. Will be removed in official release"""
+    logger = Logger()
+    with open('/vagrant/trusty_backup/solenoid/solenoid/examples/exa-announce.json', 'r') as f:
+        raw_update = f.read().strip()
+        try:
+            update_json = json.loads(raw_update)
+        except ValueError:
+            logger.error('Failed JSON conversion for exa update',
+                         _source
+                         )
+        else:
+            try:
+                if update_json['type'] == 'update':
+                    # if everything is right, render the config
+                    render_config(update_json)
+            except KeyError:
+                logger.error('Failed to find "update" keyword in exa update',
+                             'bgp-filter'
+                             )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', type=str)
     args = parser.parse_args()
     global filepath
     filepath = args.f
-    update_watcher()
+    tester()
