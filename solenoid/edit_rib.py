@@ -6,7 +6,10 @@ import argparse
 from netaddr import IPNetwork
 from netaddr import AddrFormatError
 from jinja2 import Environment, PackageLoader
-#sys.path.append('/home/cisco/exabgp/bgp-filter/')
+#This needs to be fixed with a setup.sh script.
+#For now, users should uncomment this when running script as a daemon.
+#Make sure to change the path to your location.
+#sys.path.append('/home/cisco/exabgp/solenoid/')
 from solenoid import JSONRestCalls
 from logs.logger import Logger
 
@@ -22,7 +25,7 @@ def render_config(update_json):
     :type update_json: str
 
     """
-    # check if any filtering has been applied to the prefixes
+    # Check if any filtering has been applied to the prefixes.
     try:
         if os.path.getsize(filepath) > 0:
             filt = True
@@ -30,7 +33,7 @@ def render_config(update_json):
             filt = False
     except OSError:
         filt = False
-    # render the config
+    # Render the config.
     try:
         update_type = update_json['neighbor']['message']['update']
         if 'announce' in update_type:
@@ -73,7 +76,7 @@ def create_rest_object():
         :rtype: restCalls class object
     """
     try:
-        # can be absolute or relative
+        # Can be absolute or relative.
         obj = os.environ['BGP_FILTER_CONFIG']
     except KeyError:
         logger.critical(
@@ -118,7 +121,7 @@ def rib_announce(rendered_config):
 
 
 def rib_withdraw(withdrawn_prefix):
-    """Remove the withdrawn prefix from the RIB table
+    """Remove the withdrawn prefix from the RIB table.
 
         :param new_config: The prefix and prefix-length to be removed
         :type new_config: str
@@ -142,28 +145,29 @@ def filter_prefixes(prefixes):
     :type prefixes: list or strings
 
     """
+    # TODO: Add the capability of only have 1 IP, not a range.
     with open(filepath) as filterf:
         final = []
         for line in filterf:
             temp_list = []
             try:
-                # convert it all to IPNetwork for comparison
+                # Convert it all to IPNetwork for comparison.
                 ip1, ip2 = line.split('-')
                 ip2 = ip2.strip()
                 ip1 = IPNetwork(ip1)
                 ip2 = IPNetwork(ip2)
                 for prefix in prefixes:
                     prefix = IPNetwork(prefix)
-                    # is the exaBGP prefix in the filtering range
+                    # Is the exaBGP prefix in the filtering range?
                     if ip1 <= prefix <= ip2:
-                        # if the item is already in the list, don't re-add it
+                        # If the item is already in the list, don't re-add it.
                         if str(prefix) in temp_list:
                             continue
                         else:
                             temp_list.append(str(prefix))
-                # create the final list
+                # Create the final list.
                 final += temp_list
-            # make this more specific
+            # Make this more specific.
             except AddrFormatError, e:
                 logger.error('FILTER | {}'.format(e), _source)
                 print e
@@ -179,45 +183,24 @@ def update_watcher():
     while True:
         # Listen for BGP updates.
         raw_update = sys.stdin.readline().strip()
-        with open(os.path.join(location, 'updates.txt'), 'a') as f:
-            f.write(raw_update + '\n')
         try:
             update_json = json.loads(raw_update)
         except ValueError:
             logger.error('Failed JSON conversion for exa update', _source)
-            sys.exit(1)
-        try:
-            # If it is an update, make the RIB changes.
-            if update_json['type'] == 'update':
-                render_config(update_json)
-        except KeyError:
-            logger.warning(
-                'Failed to find "update" keyword in exa update',
-                _source
-            )
-
-
-def tester():
-    """Just for testing purposes. Will be removed in official release"""
-    logger = Logger()
-    with open('/vagrant/trusty_backup/solenoid/solenoid/examples/exa-announce.json', 'r') as f:
-        raw_update = f.read().strip()
-        try:
-            update_json = json.loads(raw_update)
-        except ValueError:
-            logger.error('Failed JSON conversion for exa update',
-                         _source
-                         )
         else:
             try:
+                # If it is an update, make the RIB changes.
                 if update_json['type'] == 'update':
-                    # if everything is right, render the config
                     render_config(update_json)
-            except KeyError:
-                logger.error('Failed to find "update" keyword in exa update',
-                             'bgp-filter'
-                             )
 
+                    # Add the change to the update file.
+                    with open(os.path.join(location, 'updates.txt'), 'a') as f:
+                        f.write(raw_update + '\n')
+            except KeyError:
+                logger.warning(
+                    'Failed to find "update" keyword in exa update',
+                    _source
+                )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -225,4 +208,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     global filepath
     filepath = args.f
-    tester()
+    update_watcher()

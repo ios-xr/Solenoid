@@ -15,7 +15,7 @@ class RestCalls(object):
         :type username: str
         :type ip_address_port: str
     """
-    #Prevent logging messages for anything below warning showing up
+    #Prevent logging messages for anything below warning showing up.
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
 
@@ -44,10 +44,6 @@ class RestCalls(object):
             port=port,
             basePath=self.BasePath
         )
-
-    def lookup_code(self, code):
-        """Look up the status code returned by a response object. """
-        return requests.status_codes._codes.get(code)
 
     def put(self, endpoint, data):
         """PUT RESTconf call
