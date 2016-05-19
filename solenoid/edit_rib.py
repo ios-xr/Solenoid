@@ -14,7 +14,7 @@ from solenoid import JSONRestCalls
 from logs.logger import Logger
 
 
-_source = 'bgp-filter'
+_source = 'route-injector'
 logger = Logger()
 
 
@@ -36,13 +36,18 @@ def render_config(update_json):
     # Render the config.
     try:
         update_type = update_json['neighbor']['message']['update']
+        #Check if it is an announcement or withdrawal.
         if 'announce' in update_type:
             updated_prefixes = update_type['announce']['ipv4 unicast']
+            #Grab the next hop value.
             next_hop = updated_prefixes.keys()[0]
+            #Grab the list of prefixes.
             prefixes = updated_prefixes.values()[0].keys()
+
             # Filter the prefixes
             if filt:
                 prefixes = filter_prefixes(prefixes)
+
             # set env variable for jinja2
             env = Environment(loader=PackageLoader('solenoid',
                                                    'templates'))
@@ -58,9 +63,7 @@ def render_config(update_json):
             for withdrawn_prefix in exa_prefixes:
                 rib_withdraw(withdrawn_prefix)
     except ValueError, e:  # If we hit an eor or other type of update
-        logger.warning(e,
-                       _source
-                       )
+        logger.warning(e, _source)
 
 
 def create_rest_object():
@@ -77,10 +80,10 @@ def create_rest_object():
     """
     try:
         # Can be absolute or relative.
-        obj = os.environ['BGP_FILTER_CONFIG']
+        obj = os.environ['ROUTE_INJECT_CONFIG']
     except KeyError:
         logger.critical(
-            'You must set the environment variable BGP_FILTER_CONFIG'
+            'You must set the environment variable ROUTE_INJECT_CONFIG'
         )
         sys.exit(1)
     config = ConfigParser.ConfigParser()
