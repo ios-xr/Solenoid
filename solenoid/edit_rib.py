@@ -3,6 +3,7 @@ import sys
 import os
 import ConfigParser
 import argparse
+import time
 from netaddr import IPNetwork
 from netaddr import AddrFormatError
 from jinja2 import Environment, PackageLoader
@@ -18,11 +19,11 @@ _source = 'route-injector'
 logger = Logger()
 
 
-def render_config(update_json):
-    """Take a exa command and translate it into yang formatted JSON
+def render_config(json_update):
+    """Take a BGP command and translate it into yang formatted JSON
 
-    :param update_json: The exa bgp string that is sent to stdout
-    :type update_json: str
+    :param json_update: The BGP string that is sent to stdout
+    :type json_update: str
 
     """
     # Check if any filtering has been applied to the prefixes.
@@ -33,36 +34,42 @@ def render_config(update_json):
             filt = False
     except OSError:
         filt = False
+
     # Render the config.
     try:
-        update_type = update_json['neighbor']['message']['update']
-        #Check if it is an announcement or withdrawal.
+        update_type = json_update['neighbor']['message']['update']
+        # Check if it is an announcement or withdrawal.
         if 'announce' in update_type:
             updated_prefixes = update_type['announce']['ipv4 unicast']
-            #Grab the next hop value.
+            # Grab the next hop value.
             next_hop = updated_prefixes.keys()[0]
-            #Grab the list of prefixes.
+            # Grab the list of prefixes.
             prefixes = updated_prefixes.values()[0].keys()
 
-            # Filter the prefixes
+            # Filter the prefixes if needed.
             if filt:
                 prefixes = filter_prefixes(prefixes)
 
-            # set env variable for jinja2
+            # Set env variable for Jinja2.
             env = Environment(loader=PackageLoader('solenoid',
-                                                   'templates'))
+                                                   'templates'
+                                                   )
+                              )
             env.filters['to_json'] = json.dumps
             template = env.get_template('static.json')
+            # Render the template and make the announcement.
             rib_announce(template.render(next_hop=next_hop,
                                          prefixes=prefixes))
+
         elif 'withdraw' in update_type:
-            exa_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
-            # Filter the prefixes
+            bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
+            # Filter the prefixes if needed.
             if filt:
-                exa_prefixes = filter_prefixes(prefixes)
-            for withdrawn_prefix in exa_prefixes:
+                bgp_prefixes = filter_prefixes(prefixes)
+            # Withdraw each prefix one at a time.
+            for withdrawn_prefix in bgp_prefixes:
                 rib_withdraw(withdrawn_prefix)
-    except ValueError, e:  # If we hit an eor or other type of update
+    except ValueError, e:  # If we hit an eor or other type of update.
         logger.warning(e, _source)
 
 
@@ -130,9 +137,9 @@ def rib_withdraw(withdrawn_prefix):
         :type new_config: str
     """
     rest_object = create_rest_object()
-    exa_prefix, prefix_length = withdrawn_prefix.split('/')
+    bgp_prefix, prefix_length = withdrawn_prefix.split('/')
     url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={},{}'
-    url = url.format(exa_prefix, prefix_length)
+    url = url.format(bgp_prefix, prefix_length)
     response = rest_object.delete(url)
     status = response.status_code
     if status in xrange(200, 300):
@@ -144,7 +151,7 @@ def rib_withdraw(withdrawn_prefix):
 def filter_prefixes(prefixes):
     """Filters out prefixes that do not fall in ranges indicated in filter.txt
 
-    :param prefixes: List of prefixes exaBGP announced or withdrew
+    :param prefixes: List of prefixes bgpBGP announced or withdrew
     :type prefixes: list or strings
 
     """
@@ -175,35 +182,44 @@ def filter_prefixes(prefixes):
                 logger.error('FILTER | {}'.format(e), _source)
                 print e
             except ValueError, e:
-                logger.error('FILTER | {}'.format(e.message), _source)
+                logger.error('FILTER | {}'.format(e), _source)
         return final
 
 
-def update_watcher():
-    """Watches for BGP updates from neighbors and triggers RIB change."""
+def update_file(raw_update):
+    # Add the change to the update file.
     location = os.path.dirname(os.path.realpath(__file__))
-    open(os.path.join(location, 'updates.txt')).close()
-    while True:
-        # Listen for BGP updates.
-        raw_update = sys.stdin.readline().strip()
-        try:
-            update_json = json.loads(raw_update)
-        except ValueError:
-            logger.error('Failed JSON conversion for exa update', _source)
-        else:
-            try:
-                # If it is an update, make the RIB changes.
-                if update_json['type'] == 'update':
-                    render_config(update_json)
+    with open(os.path.join(location, 'updates.txt'), 'a') as f:
+        f.write(str(raw_update) + '\n')
 
-                    # Add the change to the update file.
-                    with open(os.path.join(location, 'updates.txt'), 'a') as f:
-                        f.write(raw_update + '\n')
-            except KeyError:
-                logger.warning(
-                    'Failed to find "update" keyword in exa update',
-                    _source
-                )
+
+def update_validator(raw_update):
+    """Translate update to JSON and send it to be rendered.
+
+        :param raw_update: Raw exaBGP message.
+        :type raw_update: JSON
+
+    """
+    try:
+        json_update = json.loads(raw_update)
+        # If it is an update, make the RIB changes.
+        if json_update['type'] == 'update':
+            render_config(json_update)
+    except ValueError:
+        logger.error('Failed JSON conversion for BGP update', _source)
+    except KeyError:
+        logger.debug('Not an update message type', _source)
+
+
+def update_watcher():
+    """Watches for BGP updates and triggers a RIB change when update is heard."""
+    # Add a message to the updates file informing restart time.
+    update_file({"Restart": time.ctime()})
+    # Continuously listen for updates.
+    while True:
+        raw_update = sys.stdin.readline().strip()
+        update_validator(raw_update)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
