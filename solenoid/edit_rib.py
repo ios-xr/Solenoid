@@ -39,17 +39,16 @@ def render_config(json_update):
     try:
         update_type = json_update['neighbor']['message']['update']
         # Check if it is an announcement or withdrawal.
-        if 'announce' in update_type:
+        if ('announce' in update_type 
+            and 'null' not in update_type['announce']['ipv4 unicast']):
             updated_prefixes = update_type['announce']['ipv4 unicast']
             # Grab the next hop value.
             next_hop = updated_prefixes.keys()[0]
             # Grab the list of prefixes.
             prefixes = updated_prefixes.values()[0].keys()
-
             # Filter the prefixes if needed.
             if filt:
                 prefixes = filter_prefixes(prefixes)
-
             # Set env variable for Jinja2.
             env = Environment(loader=PackageLoader('solenoid',
                                                    'templates'
@@ -69,8 +68,12 @@ def render_config(json_update):
             # Withdraw each prefix one at a time.
             for withdrawn_prefix in bgp_prefixes:
                 rib_withdraw(withdrawn_prefix)
+        else:
+            logger.info('EOR message', _source)
     except ValueError, e:  # If we hit an eor or other type of update.
         logger.warning(e, _source)
+    except KeyError:
+        logger.warning('Not a valid update message type', _source)
 
 
 def create_rest_object():
@@ -208,7 +211,7 @@ def update_validator(raw_update):
     except ValueError:
         logger.error('Failed JSON conversion for BGP update', _source)
     except KeyError:
-        logger.debug('Not an update message type', _source)
+        logger.debug('Not a valid update message type', _source)
 
 
 def update_watcher():

@@ -73,20 +73,8 @@ class RibTestCase(unittest.TestCase, object):
         edit_rib.update_validator(raw_b_json)
         with open(os.path.join(location, '../logs/debug.log')) as log_f:
             line = log_f.readline()
-        self.assertTrue('Not an update message type\n' in line)
+        self.assertTrue('Not a valid update message type\n' in line)
         self.assertFalse(mock_render.called)
-
-    @patch('sys.stdin', StringIO(_exa_raw('announce_g')))
-    @patch('solenoid.edit_rib.update_validator')
-    def test_update_watcher_call(self, mock_validator):
-        # Monkey patching to avoid infinite loop.
-        def mock_watcher():
-            raw_update = sys.stdin.readline().strip()
-            edit_rib.update_validator(raw_update)
-        args = _exa_raw('announce_g')
-        edit_rib.update_watcher = mock_watcher
-        mock_watcher()
-        mock_validator.assert_called_with(args)
 
     def test_update_file(self):
         edit_rib.update_file(
@@ -97,46 +85,43 @@ class RibTestCase(unittest.TestCase, object):
         with open(os.path.join(location, '../updates.txt')) as f:
             self.assertTrue(len(f.readlines()) == 1)
 
-    # @patch('sys.stdin', StringIO(_exa_raw('announce_g')))
-    # def test_announce_good(self):
-    #     edit_rib.update_watcher()
-    #     syslog = self._check_syslog()
-    #     self.assertTrue(' 204\n' in syslog)
+    @patch('solenoid.edit_rib.rib_announce')
+    def test_render_config_normal_model_missing_value(self, mock_announce):
+        raw_json = _exa_raw('invalid_n_model')
+        loaded_json = json.loads(raw_json)
+        edit_rib.rib_announce = mock_announce
+        #self.assertRaises(KeyError, edit_rib.render_config(loaded_json))
+        edit_rib.render_config(loaded_json)
+        with open(os.path.join(location, '../logs/debug.log')) as log_f:
+            line = log_f.readline()
+        self.assertTrue('Not a valid update message type\n' in line)
+        self.assertFalse(mock_announce.called)
 
-    # @patch('sys.stdin', StringIO(_exa_raw  ('announce_eor')))
-    # def test_announce_eor(self):
-    #     edit_rib.update_watcher()
-    #     self.assertRaises(KeyError, edit_rib.update_watcher())
+    @patch('solenoid.edit_rib.rib_announce')
+    def test_render_config_normal_model_missing_value(self, mock_announce):
+        raw_json = _exa_raw('invalid_n_model')
+        loaded_json = json.loads(raw_json)
+        edit_rib.rib_announce = mock_announce
+        self.assertRaises(KeyError, edit_rib.render_config(loaded_json))
+        edit_rib.render_config(loaded_json)
+        with open(os.path.join(location, '../logs/debug.log')) as log_f:
+            line = log_f.readline()
+        self.assertTrue('Not a valid update message type\n' in line)
+        self.assertFalse(mock_announce.called)
 
-    # @patch('sys.stdin', StringIO(_exa_raw('withdraw_g')))
-    # def test_withdraw_good(self):
-    #     edit_rib.update_watcher()
-    #     syslog = self._check_syslog()
-    #     self.assertTrue(' 204\n' in syslog)
+    @patch('solenoid.edit_rib.rib_announce')
+    def test_render_config_normal_model_eor(self, mock_announce):
+        raw_json = _exa_raw('announce_eor')
+        loaded_json = json.loads(raw_json)
+        edit_rib.rib_announce = mock_announce
+        edit_rib.render_config(loaded_json)
+        with open(os.path.join(location, '../logs/debug.log')) as log_f:
+            line = log_f.readline()
+        self.assertTrue('EOR message\n' in line)
+        self.assertFalse(mock_announce.called)
 
-    # @patch('sys.stdin', StringIO(_exa_raw('withdraw_b')))
-    # def test_withdraw_bad(self):
-    #     edit_rib.update_watcher()
-    #     syslog = self._check_syslog()
-    #     self.assertTrue(' 409\n' in syslog)
 
-    # @patch('sys.stdin', StringIO(_exa_raw('invalid_json')))
-    # def test_invalid_json(self):
-    #     self.assertRaises(ValueError, edit_rib.update_watcher())
-    #     syslog = self._check_syslog()
-    #     self.assertTrue('Failed JSON conversion for exa update\n' in syslog)
 
-    # @patch('sys.stdin', StringIO(_exa_raw('invalid_n_model')))
-    # def test_invalid_normal_model(self):
-    #     self.assertRaises(ValueError, edit_rib.update_watcher())
-    #     syslog = self._check_syslog()
-    #     self.assertTrue('Extra data: ' in syslog)
-
-    # @patch('sys.stdin', StringIO(_exa_raw('invalid_i_model')))
-    # def test_invalid_incorect_model(self):
-    #     self.assertRaises(ValueError, edit_rib.update_watcher())
-    #     syslog = self._check_syslog()
-    #     self.assertTrue('Expecting property ' in syslog)
 
 if __name__ == '__main__':
     unittest.main()
