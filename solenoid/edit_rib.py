@@ -4,8 +4,7 @@ import os
 import ConfigParser
 import argparse
 import time
-from netaddr import IPNetwork
-from netaddr import AddrFormatError
+from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
 #This needs to be fixed with a setup.sh script.
 #For now, users should uncomment this when running script as a daemon.
@@ -44,9 +43,9 @@ def render_config(json_update):
             updated_prefixes = update_type['announce']['ipv4 unicast']
             # Grab the next hop value.
             next_hop = updated_prefixes.keys()[0]
+            # Grab the list of prefixes.
             prefixes = updated_prefixes.values()[0].keys()
             # Filter the prefixes if needed.
-
             if filt:
                 prefixes = filter_prefixes(prefixes)
             # Set env variable for Jinja2.
@@ -169,9 +168,6 @@ def filter_prefixes(prefixes):
                 temp = [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
                 final += temp
             except AddrFormatError, e:
-                logger.error('FILTER | {}'.format(e), _source)
-                print e
-            except ValueError, e:
                 logger.error('FILTER | {}'.format(e), _source)
         return final
 
