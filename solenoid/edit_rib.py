@@ -47,6 +47,7 @@ def render_config(json_update):
             # Grab the list of prefixes.
             prefixes = updated_prefixes.values()[0].keys()
             # Filter the prefixes if needed.
+
             if filt:
                 prefixes = filter_prefixes(prefixes)
             # Set env variable for Jinja2.
@@ -64,10 +65,8 @@ def render_config(json_update):
             bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
             # Filter the prefixes if needed.
             if filt:
-                bgp_prefixes = filter_prefixes(prefixes)
-            # Withdraw each prefix one at a time.
-            for withdrawn_prefix in bgp_prefixes:
-                rib_withdraw(withdrawn_prefix)
+                bgp_prefixes = filter_prefixes(bgp_prefixes)
+            rib_withdraw(bgp_prefixes)
         else:
             logger.info('EOR message', _source)
     except ValueError, e:  # If we hit an eor or other type of update.
@@ -133,54 +132,43 @@ def rib_announce(rendered_config):
         logger.warning('ANNOUNCE | {code}'.format(code=status), _source)
 
 
-def rib_withdraw(withdrawn_prefix):
+def rib_withdraw(withdrawn_prefixes):
     """Remove the withdrawn prefix from the RIB table.
 
         :param new_config: The prefix and prefix-length to be removed
         :type new_config: str
     """
     rest_object = create_rest_object()
-    bgp_prefix, prefix_length = withdrawn_prefix.split('/')
-    url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={},{}'
-    url = url.format(bgp_prefix, prefix_length)
-    response = rest_object.delete(url)
-    status = response.status_code
-    if status in xrange(200, 300):
-        logger.info('ANNOUNCE | {code}'.format(code=status), _source)
-    else:
-        logger.warning('ANNOUNCE | {code}'.format(code=status), _source)
+    # Delete each prefix one at a time.
+    for withdraw_prefix in withdrawn_prefixes:
+        bgp_prefix, prefix_length = withdrawn_prefix.split('/')
+        url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={},{}'
+        url = url.format(bgp_prefix, prefix_length)
+        response = rest_object.delete(url)
+        status = response.status_code
+        if status in xrange(200, 300):
+            logger.info('ANNOUNCE | {code}'.format(code=status), _source)
+        else:
+            logger.warning('ANNOUNCE | {code}'.format(code=status), _source)
 
 
 def filter_prefixes(prefixes):
     """Filters out prefixes that do not fall in ranges indicated in filter.txt
 
     :param prefixes: List of prefixes bgpBGP announced or withdrew
-    :type prefixes: list or strings
+    :type prefixes: list of strings
 
     """
     # TODO: Add the capability of only have 1 IP, not a range.
     with open(filepath) as filterf:
         final = []
         for line in filterf:
-            temp_list = []
             try:
                 # Convert it all to IPNetwork for comparison.
-                ip1, ip2 = line.split('-')
-                ip2 = ip2.strip()
-                ip1 = IPNetwork(ip1)
-                ip2 = IPNetwork(ip2)
-                for prefix in prefixes:
-                    prefix = IPNetwork(prefix)
-                    # Is the exaBGP prefix in the filtering range?
-                    if ip1 <= prefix <= ip2:
-                        # If the item is already in the list, don't re-add it.
-                        if str(prefix) in temp_list:
-                            continue
-                        else:
-                            temp_list.append(str(prefix))
-                # Create the final list.
-                final += temp_list
-            # Make this more specific.
+                ip1, ip2 = map(IPNetwork, line.split('-'))
+                prefixes = map(IPNetwork, prefixes)
+                temp = [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
+                final += temp
             except AddrFormatError, e:
                 logger.error('FILTER | {}'.format(e), _source)
                 print e
