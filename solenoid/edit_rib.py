@@ -44,9 +44,6 @@ def render_config(json_update):
             updated_prefixes = update_type['announce']['ipv4 unicast']
             # Grab the next hop value.
             next_hop = updated_prefixes.keys()[0]
-            # Grab the list of prefixes.
-            import pdb
-            pdb.set_trace()
             prefixes = updated_prefixes.values()[0].keys()
             # Filter the prefixes if needed.
 
