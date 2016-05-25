@@ -38,7 +38,7 @@ def render_config(json_update):
     try:
         update_type = json_update['neighbor']['message']['update']
         # Check if it is an announcement or withdrawal.
-        if ('announce' in update_type 
+        if ('announce' in update_type
             and 'null' not in update_type['announce']['ipv4 unicast']):
             updated_prefixes = update_type['announce']['ipv4 unicast']
             # Grab the next hop value.
@@ -49,15 +49,11 @@ def render_config(json_update):
             if filt:
                 prefixes = filter_prefixes(prefixes)
             # Set env variable for Jinja2.
-            env = Environment(loader=PackageLoader('solenoid',
-                                                   'templates'
-                                                   )
-                              )
+            env = Environment(loader=PackageLoader('solenoid', 'templates'))
             env.filters['to_json'] = json.dumps
             template = env.get_template('static.json')
             # Render the template and make the announcement.
-            rib_announce(template.render(next_hop=next_hop,
-                                         prefixes=prefixes))
+            rib_announce(template.render(next_hop=next_hop, prefixes=prefixes))
 
         elif 'withdraw' in update_type:
             bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
@@ -67,10 +63,8 @@ def render_config(json_update):
             rib_withdraw(bgp_prefixes)
         else:
             logger.info('EOR message', _source)
-    except ValueError, e:  # If we hit an eor or other type of update.
-        logger.warning(e, _source)
     except KeyError:
-        logger.warning('Not a valid update message type', _source)
+        logger.error('Not a valid update message type', _source)
 
 
 def create_rest_object():
@@ -98,7 +92,7 @@ def create_rest_object():
         config.readfp(open(os.path.expanduser(obj)))
         return JSONRestCalls(
             config.get('default', 'ip'),
-            config.get('default', 'port'),
+            int(config.get('default', 'port')),
             config.get('default', 'username'),
             config.get('default', 'password')
         )
@@ -138,9 +132,9 @@ def rib_withdraw(withdrawn_prefixes):
     """
     rest_object = create_rest_object()
     # Delete each prefix one at a time.
-    for withdraw_prefix in withdrawn_prefixes:
-        bgp_prefix, prefix_length = withdrawn_prefix.split('/')
+    for withdrawn_prefix in withdrawn_prefixes:
         url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={},{}'
+        bgp_prefix, prefix_length = withdrawn_prefix.split('/')
         url = url.format(bgp_prefix, prefix_length)
         response = rest_object.delete(url)
         status = response.status_code
@@ -160,16 +154,15 @@ def filter_prefixes(prefixes):
     # TODO: Add the capability of only have 1 IP, not a range.
     with open(filepath) as filterf:
         final = []
-        for line in filterf:
-            try:
-                # Convert it all to IPNetwork for comparison.
-                ip1, ip2 = map(IPNetwork, line.split('-'))
-                prefixes = map(IPNetwork, prefixes)
-                temp = [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
-                final += temp
-            except AddrFormatError, e:
-                logger.error('FILTER | {}'.format(e), _source)
-        return final
+        try:
+            for line in filterf:
+                    # Convert it all to IPNetwork for comparison.
+                    ip1, ip2 = map(IPNetwork, line.split('-'))
+                    prefixes = map(IPNetwork, prefixes)
+                    final += [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
+            return final
+        except AddrFormatError, e:
+            logger.error('FILTER | {}'.format(e), _source)
 
 
 def update_file(raw_update):
@@ -202,7 +195,7 @@ def update_watcher():
     # Add a message to the updates file informing restart time.
     update_file({"Restart": time.ctime()})
     # Continuously listen for updates.
-    while True:
+    while 1:
         raw_update = sys.stdin.readline().strip()
         update_validator(raw_update)
 
