@@ -5,7 +5,7 @@
 
 ## Description:
 
-The end goal of this BGP-filter app is to be able to take any given logic and 
+The end goal of this Route injector app is to be able to take any given logic and 
 make changes to the prefixes on a RIB table.
 
 The changes to the RIB are accomplished by using RESTconf calls to send JSON modeled by YANG. The YANG model I am currently using is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). This model will likely change in the future, see Limitations.
@@ -33,9 +33,9 @@ to the RIB.
 
 ### Usage:
 
-Step 1: Clone this repo
+Step 1: Clone this repo and run ```python setup.py install``` to install the Solenoid application.
 
-Step 2 : Create an bgp_filter.config file in your home directory and fill in the values in the key:value pair:
+Step 2 : Create an solenoid.config file in your home directory and fill in the values in the key:value pair. The application will fail:
 
 ```
 [default] # Or whatever you want to name this section, it maybe helpful to name it the router you are working on
@@ -46,10 +46,10 @@ password: password
 
 ```
 
-Step 3: Set a BGP_FILTER_CONFIG environment variable pointing to the filepath of your config file. 
+Step 3: Set a ROUTE_INJECT_CONFIG environment variable pointing to the filepath of your config file. 
 
 ```
-$ export BGP_FILTER_CONFIG=/home/user/bgp_filter.config
+$ export ROUTE_INJECT_CONFIG=/home/user/solenoid/solenoid.config
 ```
 
 Step 4: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
