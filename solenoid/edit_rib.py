@@ -6,15 +6,11 @@ import argparse
 import time
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
-#This needs to be fixed with a setup.sh script.
-#For now, users should uncomment this when running script as a daemon.
-#Make sure to change the path to your location.
-#sys.path.append('/home/cisco/exabgp/solenoid/')
 from solenoid import JSONRestCalls
 from logs.logger import Logger
 
 
-_source = 'route-injector'
+_source = 'solenoid'
 logger = Logger()
 
 
@@ -36,31 +32,36 @@ def render_config(json_update):
 
     # Render the config.
     try:
-        update_type = json_update['neighbor']['message']['update']
-        # Check if it is an announcement or withdrawal.
-        if ('announce' in update_type
-            and 'null' not in update_type['announce']['ipv4 unicast']):
-            updated_prefixes = update_type['announce']['ipv4 unicast']
-            # Grab the next hop value.
-            next_hop = updated_prefixes.keys()[0]
-            # Grab the list of prefixes.
-            prefixes = updated_prefixes.values()[0].keys()
-            # Filter the prefixes if needed.
-            if filt:
-                prefixes = filter_prefixes(prefixes)
-            # Set env variable for Jinja2.
-            env = Environment(loader=PackageLoader('solenoid', 'templates'))
-            env.filters['to_json'] = json.dumps
-            template = env.get_template('static.json')
-            # Render the template and make the announcement.
-            rib_announce(template.render(next_hop=next_hop, prefixes=prefixes))
-
-        elif 'withdraw' in update_type:
-            bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
-            # Filter the prefixes if needed.
-            if filt:
-                bgp_prefixes = filter_prefixes(bgp_prefixes)
-            rib_withdraw(bgp_prefixes)
+        update_type = json_update['neighbor']['message']
+        if 'eor' not in update_type:
+            update_type = json_update['neighbor']['message']['update']
+            # Check if it is an announcement or withdrawal.
+            if ('announce' in update_type
+                and 'null' not in update_type['announce']['ipv4 unicast']):
+                updated_prefixes = update_type['announce']['ipv4 unicast']
+                # Grab the next hop value.
+                next_hop = updated_prefixes.keys()[0]
+                # Grab the list of prefixes.
+                prefixes = updated_prefixes.values()[0].keys()
+                # Filter the prefixes if needed.
+                if filt:
+                    prefixes = filter_prefixes(prefixes)
+                # Set env variable for Jinja2.
+                env = Environment(loader=PackageLoader('edit_rib',
+                                                       'templates')
+                                  )
+                env.filters['to_json'] = json.dumps
+                template = env.get_template('static.json')
+                # Render the template and make the announcement.
+                rib_announce(template.render(next_hop=next_hop,
+                                             prefixes=prefixes)
+                             )
+            elif 'withdraw' in update_type:
+                bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
+                # Filter the prefixes if needed.
+                if filt:
+                    bgp_prefixes = filter_prefixes(bgp_prefixes)
+                rib_withdraw(bgp_prefixes)
         else:
             logger.info('EOR message', _source)
     except KeyError:
@@ -79,30 +80,27 @@ def create_rest_object():
         :returns: restCalls object
         :rtype: restCalls class object
     """
+    location = os.path.dirname(os.path.realpath(__file__))
     try:
-        # Can be absolute or relative.
-        obj = os.environ['ROUTE_INJECT_CONFIG']
-    except KeyError:
-        logger.critical(
-            'You must set the environment variable ROUTE_INJECT_CONFIG'
-        )
-        sys.exit(1)
-    config = ConfigParser.ConfigParser()
-    try:
-        config.readfp(open(os.path.expanduser(obj)))
-        return JSONRestCalls(
-            config.get('default', 'ip'),
-            int(config.get('default', 'port')),
-            config.get('default', 'username'),
-            config.get('default', 'password')
-        )
-    except (ConfigParser.Error, ValueError), e:
-        logger.critical(
-            'Something is wrong with your config file: {}'.format(
-                e.message
-            )
-        )
-        sys.exit(1)
+        with open(os.path.join(location, '../solenoid.config')) as f:
+            config = ConfigParser.ConfigParser()
+            try:
+                config.readfp(f)
+                return JSONRestCalls(
+                    config.get('default', 'ip'),
+                    int(config.get('default', 'port')),
+                    config.get('default', 'username'),
+                    config.get('default', 'password')
+                )
+            except (ConfigParser.Error, ValueError), e:
+                logger.critical(
+                    'Something is wrong with your config file: {}'.format(
+                        e.message
+                    )
+                )
+                sys.exit(1)
+    except IOError:
+        logger.error('You must have a solenoid.config file.', _source)
 
 
 def rib_announce(rendered_config):
@@ -119,9 +117,19 @@ def rib_announce(rendered_config):
     )
     status = response.status_code
     if status in xrange(200, 300):
-        logger.info('ANNOUNCE | {code}'.format(code=status), _source)
+        logger.info('ANNOUNCE | {code} | {reason}'.format(
+            code=status,
+            reason=response.reason
+            ),
+            _source
+        )
     else:
-        logger.warning('ANNOUNCE | {code}'.format(code=status), _source)
+        logger.warning('ANNOUNCE | {code} | {reason}'.format(
+            code=status,
+            reason=response.reason
+            ),
+            _source
+        )
 
 
 def rib_withdraw(withdrawn_prefixes):
@@ -139,9 +147,19 @@ def rib_withdraw(withdrawn_prefixes):
         response = rest_object.delete(url)
         status = response.status_code
         if status in xrange(200, 300):
-            logger.info('ANNOUNCE | {code}'.format(code=status), _source)
+            logger.info('WITHDRAW | {code} | {reason}'.format(
+                code=status,
+                reason=response.reason
+                ),
+                _source
+            )
         else:
-            logger.warning('ANNOUNCE | {code}'.format(code=status), _source)
+            logger.warning('WITHDRAW | {code} | {reason}'.format(
+                code=status,
+                reason=response.reason
+                ),
+                _source
+            )
 
 
 def filter_prefixes(prefixes):
@@ -184,6 +202,7 @@ def update_validator(raw_update):
         # If it is an update, make the RIB changes.
         if json_update['type'] == 'update':
             render_config(json_update)
+            update_file(raw_update)
     except ValueError:
         logger.error('Failed JSON conversion for BGP update', _source)
     except KeyError:
