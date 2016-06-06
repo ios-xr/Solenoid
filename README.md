@@ -10,19 +10,13 @@ make changes to the prefixes on a RIB table.
 
 The changes to the RIB are accomplished by using RESTconf calls to send JSON modeled by YANG. The YANG model I am currently using is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). This model will likely change in the future, see Limitations.
 
-For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exabgp). Exabgp allows me to monitor BGP network announcements, withdrawals, etc. and trigger the RESTconf changes based on these updates. 
+For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exabgp). Exabgp allows me to monitor BGP network announcements, withdrawals, etc. and trigger the RESTconf changes based on these updates. exaBGP acts completely as a listener, if you with to send BGP updates directly to Solenoid that should work as well (examples and documentation coming soon)
 
 ### Work in Progress:
 
-Be able to update RIB only with networks from preferred neighbors (based on some blackbox of logic)
-
-Be able to filter the routes based on prefixes ranges.
-
 Test at scale.
 
-Change from RESTconf backend to [gRPC](http://www.grpc.io/docs/tutorials/basic/python.html)
-
-Create tar of project container, as well as create a vagrant environment including IOS-XRv image, the app, and simulated network environment.
+Change from RESTconf backend to [gRPC](http://www.grpc.io/docs/tutorials/basic/python.html) for enhanced performance.
 
 #### Current Limitations:
 
