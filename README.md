@@ -29,7 +29,7 @@ to the RIB.
 
 Step 1: Clone this repo and run ```python setup.py install``` to install the Solenoid application. You may have to use sudo. 
 
-Step 2 : Create an solenoid.config file in your home directory and fill in the values in the key:value pair:
+Step 2 : Create a solenoid.config file in your home directory and fill in the values in the key:value pair:
 
 ```
 [default] # Or whatever you want to name this section, it maybe helpful to name it the router you are working on
@@ -42,7 +42,7 @@ password: password
 Step 3: Set a ROUTE_INJECT_CONFIG environment variable pointing to the filepath of your config file. 
 
 ```
-$ export ROUTE_INJECT_CONFIG=/home/user/solenoid/solenoid.config
+$ export ROUTE_INJECT_CONFIG=/home/user/solenoid.config
 ```
 
 Step 4 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Example:
