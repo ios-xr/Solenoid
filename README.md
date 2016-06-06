@@ -37,14 +37,12 @@ ip: ip_address
 port: port number
 username: username
 password: password
-
 ```
 
 Step 3: Set a ROUTE_INJECT_CONFIG environment variable pointing to the filepath of your config file. 
 
 ```
 $ export ROUTE_INJECT_CONFIG=/home/user/solenoid/solenoid.config
-
 ```
 
 Step 4 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Example:
@@ -97,7 +95,7 @@ group test {
 If you chose to add a filter file, you must add the path to the file in the run call with the file flag -f (be sure to include the quotes):
 
 ```
-run /your/python/location /path/to/bgp-filter/rest_calls/edit_rib.py -f '/path/to/filter/file'
+run /your/python/location /path/to/bgp-filter/rest_calls/edit_rib.py -f '/path/to/filter/file';
 ```
 
 Step 7: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
