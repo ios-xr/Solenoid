@@ -3,7 +3,6 @@ import sys
 import os
 import ConfigParser
 import argparse
-import time
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
 from solenoid import JSONRestCalls
@@ -23,7 +22,7 @@ def render_config(json_update):
     """
     # Check if any filtering has been applied to the prefixes.
     try:
-        if os.path.getsize(filepath) > 0:
+        if filepath is not None and os.path.getsize(filepath) > 0:
             filt = True
         else:
             filt = False
@@ -39,11 +38,8 @@ def render_config(json_update):
             if ('announce' in update_type
                 and 'null' not in update_type['announce']['ipv4 unicast']):
                 updated_prefixes = update_type['announce']['ipv4 unicast']
-                # Grab the next hop value.
                 next_hop = updated_prefixes.keys()[0]
-                # Grab the list of prefixes.
                 prefixes = updated_prefixes.values()[0].keys()
-                # Filter the prefixes if needed.
                 if filt:
                     prefixes = filter_prefixes(prefixes)
                 # Set env variable for Jinja2.
@@ -75,7 +71,7 @@ def create_rest_object():
 
         This method could be eliminated and the restCalls(username, password,
         ip_address:port) replace all calls to create_rest_object().
-        This method exists in order to seperate passwords from github.
+        This method exists in order to separate passwords from github.
 
         :returns: restCalls object
         :rtype: restCalls class object
@@ -202,6 +198,7 @@ def update_validator(raw_update):
         # If it is an update, make the RIB changes.
         if json_update['type'] == 'update':
             render_config(json_update)
+            # Add the update to a file to keep track.
             update_file(raw_update)
     except ValueError:
         logger.error('Failed JSON conversion for BGP update', _source)
@@ -211,8 +208,6 @@ def update_validator(raw_update):
 
 def update_watcher():
     """Watches for BGP updates and triggers a RIB change when update is heard."""
-    # Add a message to the updates file informing restart time.
-    update_file({"Restart": time.ctime()})
     # Continuously listen for updates.
     while 1:
         raw_update = sys.stdin.readline().strip()
