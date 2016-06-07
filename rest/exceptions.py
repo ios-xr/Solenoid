@@ -1,2 +1,0 @@
-class YangFileException(Exception):
-    pass

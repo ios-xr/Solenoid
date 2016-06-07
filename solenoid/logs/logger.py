@@ -1,6 +1,6 @@
 import os
-import sys
 import time
+import sys
 import logging
 import logging.handlers
 
@@ -8,6 +8,7 @@ import logging.handlers
 class Logger(object):
 
     _pid = os.getpid()
+    _location = os.path.dirname(os.path.realpath(__file__))
 
     def __init__(self):
 
@@ -18,12 +19,15 @@ class Logger(object):
         self._streamhandler.setLevel(logging.INFO)
         self._logger.addHandler(self._streamhandler)
         # initialize errors to file
-        self._errorhandler = logging.handlers.RotatingFileHandler('/vagrant/bgp-filter/logs/errors.log')
+        self._errorhandler = logging.handlers.RotatingFileHandler(
+            os.path.join(self._location, 'errors.log')
+        )
         self._errorhandler.setLevel(logging.ERROR)
         self._logger.addHandler(self._errorhandler)
-
         # initialize debug messages to file
-        self._debughandler = logging.handlers.RotatingFileHandler('/vagrant/bgp-filter/logs/debug.log')
+        self._debughandler = logging.handlers.RotatingFileHandler(
+            os.path.join(self._location, 'debug.log')
+        )
         self._debughandler.setLevel(logging.DEBUG)
         self._logger.addHandler(self._debughandler)
 
