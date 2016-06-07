@@ -3,7 +3,6 @@ import os
 import json
 import time
 
-from netaddr import AddrFormatError
 from mock import patch, call
 
 from solenoid import edit_rib
@@ -159,8 +158,9 @@ class RibTestCase(unittest.TestCase, object):
     #                       '10.1.1.1/32',
     #                       '1.1.1.10/32',
     #                       '10.1.6.1/24']
-    #     with self.assertRaises(AddrFormatError):
-    #         edit_rib.filter_prefixes(start_prefixes)
+    #     self.assertRaises(edit_rib.AddrFormatError,
+    #                       edit_rib.filter_prefixes,
+    #                       start_prefixes)
 
     @patch('solenoid.edit_rib.JSONRestCalls')
     def test_create_rest_object_correct_call_made(self, mock_rest_class):
