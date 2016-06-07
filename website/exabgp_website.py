@@ -8,8 +8,8 @@ from flask import Flask, render_template, request, jsonify
 import requests
 import json
 import sys
-sys.path.append('/home/cisco/exabgp/bgp-filter/')
-from rest.jsonRestClass import JSONRestCalls
+sys.path.append('../solenoid/')
+from rest.jsonRestClient import JSONRestCalls
 
 app = Flask(__name__)
 
@@ -72,7 +72,7 @@ def create_rest_object():
                      'vagrant')
 def get_exa():
     #Opens file that announcements are stored and returns the last line
-    with open('/home/cisco/exabgp/history.txt', 'rb') as f:
+    with open('/home/cisco/exabgp/history.txt', 'rb') as f: # change this to where the history.txt. file will be
         f.seek(-2,2)
         while f.read(1) != b"\n": # Until EOL is found...
             f.seek(-2, 1)         # ...jump back the read byte plus one more.
