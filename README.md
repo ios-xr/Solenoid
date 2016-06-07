@@ -79,7 +79,7 @@ group test {
                 updates;
                 neighbor-changes;
             }
-            run /your/python/location /path/to/bgp-filter/rest_calls/edit_rib.py;
+            run /your/python/location /path/to/solenoid/solenoid/edit_rib.py;
         }
 
         neighbor y.y.y.y {
@@ -95,7 +95,7 @@ group test {
 If you chose to add a filter file, you must add the path to the file in the run call with the file flag -f (be sure to include the quotes):
 
 ```
-run /your/python/location /path/to/bgp-filter/rest_calls/edit_rib.py -f '/path/to/filter/file';
+run /your/python/location /path/to//solenoid/solenoid/edit_rib.py -f '/path/to/filter/file';
 ```
 
 Step 7: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
