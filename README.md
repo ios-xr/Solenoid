@@ -1,5 +1,5 @@
 # Solenoid
-### Route Filtering Agent
+### Route Injection Agent
 ##### Author: Lisa Roach
 ##### Email: lisroach@cisco.com
 

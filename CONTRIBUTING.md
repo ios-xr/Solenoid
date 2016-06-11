@@ -5,6 +5,10 @@ Contributions are welcome!
 
 **Please carefully read this page to make the code review process go as smoothly as possible and to maximize the likelihood of your contribution being merged.**
 
+## License Agreement
+
+Solenoid is licensed under the [BSD license](https://opensource.org/licenses/BSD-3-Clause). In your commit messages, you must specify that you agree to contribute under the BSD license. Pull requests also must agree to submit under the BSD license. 
+
 ## Bug Reports
 
 For bug reports or requests [submit an issue](https://cto-github.cisco.com/lisroach/Solenoid/issues).
