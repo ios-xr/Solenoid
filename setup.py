@@ -1,5 +1,14 @@
+import os
+
+from codecs import open
 from setuptools import setup
 from setuptools import find_packages
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as fp:
+    requirements = fp.read().splitlines()
+
 
 setup(
     name='solenoid',
@@ -11,6 +20,7 @@ setup(
         Injects routes into Cisco's IOS-XR RIB table, based on some
         outside logic.
     ''',
-    license='Apache',
-    packages=find_packages()
+    license='BSD',
+    packages=find_packages(),
+    install_requires=requirements
 )
