@@ -9,8 +9,6 @@
         var keys = Object.keys(json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix']).length
         for (var i = 0; i < keys; i++){
       newData += "<tr><td>" + json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['prefix'] + "</td>";
-      console.log(json);
-
       newData += "<td>" + json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['vrf-route']['vrf-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'];
       newData += "</td></tr>\n"
     }
@@ -29,6 +27,7 @@
     xhttp.onreadystatechange = function() {
       if (xhttp.readyState == 4 && xhttp.status == 200) {
         var exa = JSON.parse(xhttp.responseText);
+	console.log(exa);
         var time = timeConverter(exa['time']);
         var old_time = Table.rows[1].cells[4].innerHTML;
         if (time != old_time){

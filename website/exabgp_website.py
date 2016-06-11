@@ -8,6 +8,8 @@ from flask import Flask, render_template, request, jsonify
 import requests
 import json
 import sys
+import os
+import ConfigParser
 sys.path.append('../solenoid/')
 from rest.jsonRestClient import JSONRestCalls
 
@@ -36,12 +38,12 @@ def get_exa_json():
     return get_exa()
 
 def push_exabgp(network, ip_address):
-    """Push Network to Second ExaBGP instance, change URL to appropriate http api
-    """
+    #Push Network to Second ExaBGP instance, change URL to appropriate http api 
     message = network + ' route ' + ip_address + ' next-hop self' #Formats announcement got api
-    url='http://10.25.0.51:55780' #Change this URL to your second exabgp instances HTTP api URL
+    url='http://192.168.1.3:55780' #Change this URL to your second exabgp instances HTTP api URL
     response = requests.post(url, data = {'command':message}, headers={'Content-Type':'application/x-www-form-urlencoded'})
     return
+
 
 def get_rib():
     """Grab the current RIB config off of the box
@@ -66,13 +68,31 @@ def create_rest_object():
         :returns: restCalls object
         :rtype: restCalls class object
     """
-    return JSONRestCalls('10.1.1.5',
-                     '80',
-                     'vagrant',
-                     'vagrant')
+    location = os.path.dirname(os.path.realpath(__file__))
+    try:
+        with open(os.path.join(location, '../solenoid.config')) as f:
+            config = ConfigParser.ConfigParser()
+            try:
+                config.readfp(f)
+                return JSONRestCalls(
+                    config.get('default', 'ip'),
+                    int(config.get('default', 'port')),
+                    config.get('default', 'username'),
+                    config.get('default', 'password')
+                )
+            except (ConfigParser.Error, ValueError), e:
+                logger.critical(
+                    'Something is wrong with your config file: {}'.format(
+                        e.message
+                    )
+                )
+                sys.exit(1)
+    except IOError:
+        logger.error('You must have a solenoid.config file.', _source)
+
 def get_exa():
     #Opens file that announcements are stored and returns the last line
-    with open('/home/cisco/exabgp/history.txt', 'rb') as f: # change this to where the history.txt. file will be
+    with open('../solenoid/updates.txt', 'rb') as f: # change this to where the history.txt. file will be
         f.seek(-2,2)
         while f.read(1) != b"\n": # Until EOL is found...
             f.seek(-2, 1)         # ...jump back the read byte plus one more.
