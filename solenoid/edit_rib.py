@@ -1,8 +1,10 @@
 import json
 import sys
 import os
+import socket
 import ConfigParser
 import argparse
+
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
 from solenoid import JSONRestCalls
@@ -208,9 +210,23 @@ def update_validator(raw_update):
 def update_watcher():
     """Watches for BGP updates and triggers a RIB change when update is heard."""
     # Continuously listen for updates.
+    try:
+        #with open(os.path.join(location, 'updates.txt'), 'a') as f:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(("127.0.0.1", 179))
+        s.listen(1)
+    except socket.error,msg:
+        if s:
+            s.close()
+            print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
+            sys.exit(1)
     while 1:
-        raw_update = sys.stdin.readline().strip()
-        update_validator(raw_update)
+        #raw_update = sys.stdin.readline().strip()  
+        connection_socket, client_address = s.accept()
+        data = connection_socket.recv(1024)
+        connection_socket.sendall(message)
+        connection_socket.close()
+        update_validator(data.strip())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
