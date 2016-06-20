@@ -14,6 +14,8 @@ For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exa
 
 ### Work in Progress:
 
+Vagrant box demo scenario. 
+
 Test at scale.
 
 Change from RESTconf backend to [gRPC](http://www.grpc.io/docs/tutorials/basic/python.html) for enhanced performance.
