@@ -78,23 +78,22 @@ def create_rest_object():
     """
     location = os.path.dirname(os.path.realpath(__file__))
     try:
-        with open(os.path.join(location, '../solenoid.config')) as f:
-            config = ConfigParser.ConfigParser()
-            try:
-                config.readfp(f)
-                return JSONRestCalls(
-                    config.get('default', 'ip'),
-                    int(config.get('default', 'port')),
-                    config.get('default', 'username'),
-                    config.get('default', 'password')
+        config = ConfigParser.ConfigParser()
+        try:
+            config.read(os.path.join(location, '../solenoid.config'))
+            return JSONRestCalls(
+                config.get('default', 'ip'),
+                int(config.get('default', 'port')),
+                config.get('default', 'username'),
+                config.get('default', 'password')
+            )
+        except (ConfigParser.Error, ValueError), e:
+            logger.critical(
+                'Something is wrong with your config file: {}'.format(
+                    e.message
                 )
-            except (ConfigParser.Error, ValueError), e:
-                logger.critical(
-                    'Something is wrong with your config file: {}'.format(
-                        e.message
-                    )
-                )
-                sys.exit(1)
+            )
+            sys.exit(1)
     except IOError:
         logger.error('You must have a solenoid.config file.', _source)
 
@@ -212,7 +211,6 @@ def update_watcher():
     while 1:
         raw_update = sys.stdin.readline().strip()
         update_validator(raw_update)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

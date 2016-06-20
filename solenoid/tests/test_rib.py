@@ -2,12 +2,11 @@ import unittest
 import os
 import json
 import time
-
-from mock import patch, call
-
+import sys
+from StringIO import StringIO
+from mock import patch, call, mock_open, call
 from solenoid import edit_rib
-from test import test_support
-
+#from test import test_support
 
 location = os.path.dirname(os.path.realpath(__file__))
 withdraw_prefixes = ['1.1.1.8/32',
@@ -50,13 +49,25 @@ class RibTestCase(unittest.TestCase, object):
         open(os.path.join(location, '../updates.txt'), 'w').close()
         open(os.path.join(location, '../logs/debug.log'), 'w').close()
         open(os.path.join(location, '../logs/errors.log'), 'w').close()
-        self.env = test_support.EnvironmentVarGuard()
-        self.env['ROUTE_INJECT_CONFIG'] = os.path.join(location, 'examples/example-good.config')
+        # self.env = test_support.EnvironmentVarGuard()
+        # self.env['ROUTE_INJECT_CONFIG'] = os.path.join(location, 'examples/example-good.config')
 
     def _check_syslog(self):
         with open('/var/log/syslog', 'r') as syslog_f:
             syslog_f.seek(-1060, 2)
             return syslog_f.readlines()[-1]
+
+    @patch('sys.stdin', StringIO(_exa_raw('announce_g')))
+    @patch('solenoid.edit_rib.update_validator')
+    def test_update_watcher_call(self, mock_validator):
+       # Monkey patching to avoid infinite loop.
+        def mock_watcher():
+            raw_update = sys.stdin.readline().strip()
+            edit_rib.update_validator(raw_update)
+        args = _exa_raw('announce_g')
+        edit_rib.update_watcher = mock_watcher
+        mock_watcher()
+        mock_validator.assert_called_with(args)
 
     @patch('solenoid.edit_rib.render_config')
     def test_update_validator_good_json_conversion(self, mock_render):
@@ -171,14 +182,16 @@ class RibTestCase(unittest.TestCase, object):
         restObject = edit_rib.create_rest_object()
         self.assertIsInstance(restObject, edit_rib.JSONRestCalls)
 
-    def test_create_rest_object_no_env_var(self):
-        if 'ROUTE_INJECT_CONFIG' in self.env:
-            del self.env['ROUTE_INJECT_CONFIG']
-        self.assertRaises(SystemExit, edit_rib.create_rest_object)
+    @patch('solenoid.edit_rib.ConfigParser.ConfigParser.read')
+    def test_create_rest_object_no_config_file(self, mock_read):
+        mock_read.side_effect = IOError
+        self.assertRaises(IOError, edit_rib.create_rest_object())
 
-    def test_create_rest_object_error_in_file(self):
-        self.env['ROUTE_INJECT_CONFIG'] = os.path.join(location, 'examples/example-bad.config')
-        self.assertRaises(SystemExit, edit_rib.create_rest_object)
+    @patch('solenoid.edit_rib.ConfigParser.ConfigParser.get')
+    def test_create_rest_object_error_in_file(self, mock_get):
+        mock_get.side_effect = edit_rib.ConfigParser.Error
+        with self.assertRaises(SystemExit):
+            edit_rib.create_rest_object()
 
     @patch('solenoid.edit_rib.JSONRestCalls.patch')
     def test_rib_announce(self, mock_patch):
