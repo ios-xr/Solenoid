@@ -212,26 +212,21 @@ def update_watcher():
     """Watches for BGP updates and triggers a RIB change when update is heard."""
     # Continuously listen for updates.
     try:
+        #with open(os.path.join(location, 'updates.txt'), 'a') as f:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        local_address = ('localhost', 179)
-        print 'hey,there'
-        s.bind(local_address)
+        s.bind(("127.0.0.1", 179))
         s.listen(1)
-    except socket.error:
+    except socket.error,msg:
         if s:
             s.close()
-            print 'Socket Error'
+            print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
             sys.exit(1)
     while 1:
-        #raw_update = sys.stdin.readline().strip()    
-        print 'waiting'
-        connection_var, client_address = s.accept()
-        print 'connection from:', client_address
-        data = connection_var.recv(1024)
-        message = "I am the message"
-        print 'got this message', data
-        connection_var.sendall(message)
-        connection_var.close()
+        #raw_update = sys.stdin.readline().strip()  
+        connection_socket, client_address = s.accept()
+        data = connection_socket.recv(1024)
+        connection_socket.sendall(message)
+        connection_socket.close()
         update_validator(data.strip())
 
 
