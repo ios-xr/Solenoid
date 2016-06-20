@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>ExaBGP Demo on eXR Container</title>
+    <title>Solenoid Demo on IOS-XR</title>
     <link rel="stylesheet" type="text/css" href={{url_for('static', filename='style.css')}}>
   </head>
 
@@ -20,18 +20,18 @@
       <main>
         <div id="content">
           <div class="innertube">
-            <h1>Router 1</h1>
-            <p>Add or remove a network that Router 1 knows about. The calls to add the network is sent by a simple post command to the router.</p>
-            <p>This will force changes in ExaBGP RIB table through BGP. </p>
+            <h1>Prefix Filtering</h1>
+            <p>Here is a place holder for the new filtering component of Solenoid</p>
+            <p>This will cause Solenoid to only pass the designated prefix specified. </p>
             <p>
               <form id="myform" class='myForm' name="ip_address_form">
                 <fieldset>
-                <legend>Announce or Withdraw?</legend>
-                <p><label class="choice"> <input type="radio" id='network' name="network" required value="announce"> Announce </label>
-                <label class="choice"> <input type="radio" id='network' name="network" required value="withdraw"> Withdraw</label></p>
+                <legend>Prefix</legend>
+                <p><label class="choice"> <input type="radio" id='network' name="network" required value="announce"> Option 1 </label>
+                <label class="choice"> <input type="radio" id='network' name="network" required value="withdraw"> Option 2</label></p>
                 </fieldset>
                 </br>
-                <label>Network
+                <label>Prefix: 
                   <input type="text" id='ip_address' name="ip_address" placeholder='1.1.1.1/32' required>
                 </label>
                 <input id="submit_b" name="submit_b" type="submit" value="Submit"/>
@@ -39,7 +39,7 @@
             </p>
             <hr>
             <h1>Lastest Update on ExaBGP</h1>
-            <p> Updates are shown here when ExaBGP learns about a network. </p>
+            <p>Solenoid is currently listening to the updates that Exabgp recieves. It will then inject the announce and withdraw request into the rib table. A controller of any sort can be in place of exabgp.  </p>
             <p>
              <div id='table-scroll'>
               <table  id="exa">
@@ -66,7 +66,7 @@
             </p>
             <hr>
             <h1>RIB table on Router</h1>
-            <p>The RIB table is shown here through restconf. The RIB table is updated by ExaBGP learning about networks. </p>
+            <p>The RIB table is shown here through restconf. The RIB table is continously updated, reflecting what Solenoid has injected. </p>
             <p>
               <table  id="rib">
                   <thead>
@@ -93,8 +93,8 @@
         <div class="innertube">
           <h3>Topology</h3>
           <img src={{url_for('static', filename='Topology.jpg')}} alt="Topology" style='width:261px; height:199px;'>
-          <p> A BGP network is shown above. Networks are automatically announced and withdrawn on RouteM at a fixed interval. </p>
-          <p> ExaBGP is sitting on an Cisco Sunstone, IOS-XR image, within a container.</p>
+          <p> A BGP network is shown above. Networks are automatically announced and withdrawn by another bgp speaker  at a fixed interval. </p>
+          <p> Solenoid is sitting on an Cisco XRv, IOS-XR image, within a ubuntu container.</p>
         </div>
       </nav>
 
