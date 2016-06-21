@@ -1,16 +1,46 @@
 body {
   margin:0;
   padding:0;
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   line-height: 1.5em;
   background: url({{url_for('static', filename='background.jpg')}});
 }
+
+h1 {
+  font-family: Arial;
+  font-size: 26px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  font-color: #444444;
+  line-height: 28.6px;
+}
+
+h3 {
+  font-family: Arial;
+  font-size: 18px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  font-color: #444444;
+  line-height: 28.6px;
+}
+
+p {
+  font-family: Arial;
+  font-size: 12px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  font-color: #525252;
+  line-height: 20px;
+}
+
 
 label{
   padding-left: 10px;
 }
 #wrap {
-  width: 1000px;
+  width: 960px;
   margin: 0 auto;
   margin-top:20px;
   background-color: white;
@@ -19,7 +49,13 @@ label{
 }
 
 #header {
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-family: Arial;
+  font-size: 26px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  font-color: #444444;
+  line-height: 28.6px;
   background: #ccc;
   height: 75px;
   padding-top:15px;
@@ -99,6 +135,7 @@ nav ul a {
   padding: 1em;
   border: 1px solid #ccc;
   border-radius: 3px;
+  box-shadow: -5px -5px 5px #888;
   width: 400px;
 }
 
@@ -122,24 +159,29 @@ nav ul a {
 table {
   border-collapse: collapse;
   width: auto;
-  border: 1px solid black;
+  border: 1px solid #ccc;
+  box-shadow: -5px -5px 5px #888;
+  border-radius: 3px;
 }
 
 th {
-  border: 1px solid black;
+  border: 1px solid #ccc;
   text-align: center;
   padding: 15px;
 }
 
 td {
-  border: 1px solid black;
+  border: 1px solid #ccc;
   vertical-align: center;
   text-align:center;
   padding: 15px;
 }
 
 #table-scroll{
-  height: 475px;
   overflow:auto;
   margin-top:20px;
+  height: 475px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: -5px -5px 5px #888;
 }
