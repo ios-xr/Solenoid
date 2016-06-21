@@ -10,8 +10,7 @@ import json
 import sys
 import os
 import ConfigParser
-sys.path.append('../solenoid/')
-from rest.jsonRestClient import JSONRestCalls
+from solenoid import JSONRestCalls
 
 app = Flask(__name__)
 
