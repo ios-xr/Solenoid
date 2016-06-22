@@ -2,7 +2,8 @@ body {
   margin:0;
   padding:0;
   line-height: 1.5em;
-  background: url({{url_for('static', filename='background.jpg')}});
+  background: background: linear-gradient(to bottom right, blue, green);
+  background: -moz-linear-gradient(bottom right, #46A040, #0096D6); /* For Firefox 3.6 to 15 */
 }
 
 h1 {
@@ -41,9 +42,8 @@ label{
 }
 #wrap {
   width: 960px;
-  margin: 0 auto;
-  margin-top:20px;
-  background-color: white;
+  margin: 5px auto;
+  background: white;
   border: 2px solid #ccc;
   border-radius: 5px;
 }
