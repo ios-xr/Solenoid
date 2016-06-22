@@ -1,7 +1,7 @@
 # Solenoid
 ### Route Injection Agent
 ##### Author: Lisa Roach
-##### Email: lisroach@cisco.com
+##### Contact: Please use the Issues page to ask questions or open bugs and feature requests. 
 
 ## Description:
 
@@ -13,6 +13,8 @@ The changes to the RIB are accomplished by using RESTconf calls to send JSON mod
 For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exabgp). Exabgp allows me to monitor BGP network announcements, withdrawals, etc. and trigger the RESTconf changes based on these updates. exaBGP acts completely as a listener, if you with to send BGP updates directly to Solenoid that should work as well (examples and documentation coming soon)
 
 ### Work in Progress:
+
+Vagrant box demo scenario. 
 
 Test at scale.
 
@@ -29,7 +31,7 @@ to the RIB.
 
 Step 1: Clone this repo and run ```python setup.py install``` to install the Solenoid application. You may have to use sudo. 
 
-Step 2 : Create a solenoid.config file in your home directory and fill in the values in the key:value pair:
+Step 2 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair:
 
 ```
 [default] # Or whatever you want to name this section, it maybe helpful to name it the router you are working on
@@ -39,13 +41,7 @@ username: username
 password: password
 ```
 
-Step 3: Set a ROUTE_INJECT_CONFIG environment variable pointing to the filepath of your config file. 
-
-```
-$ export ROUTE_INJECT_CONFIG=/home/user/solenoid.config
-```
-
-Step 4 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Example:
+Step 3 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Example:
 
 ```
 1.1.1.0/32-1.1.2.0/32
@@ -53,9 +49,9 @@ Step 4 (optional): Create a filter.txt file to include the ranges of prefixes to
 192.168.1.0/28-192.168.2.0/28
 ```
 
-Step 5: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
+Step 4: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
 
-Step 6: Make sure RESTconf calls are working from your device to the RIB table
+Step 5: Make sure RESTconf calls are working from your device to the RIB table
 
 Example test (you should receive your device's whole configuration):
 
@@ -63,7 +59,7 @@ Example test (you should receive your device's whole configuration):
 curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" -H "Authorization: <INSERT YOUR AUTH CODE>" http://<YOUR IP>/restconf/data/?content=config
 ```
 
-Step 7: Change your exaBGP configuration file to run the edit_rib.py script. The important part is the process monitor-neighbors section, the rest is basic exaBGP configuration.
+Step 6: Change your exaBGP configuration file to run the edit_rib.py script. The important part is the process monitor-neighbors section, the rest is basic exaBGP configuration.
 
 
 Example:

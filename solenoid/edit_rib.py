@@ -3,11 +3,11 @@ import sys
 import os
 import ConfigParser
 import argparse
+
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
 from solenoid import JSONRestCalls
 from logs.logger import Logger
-
 
 _source = 'solenoid'
 logger = Logger()
@@ -16,8 +16,8 @@ logger = Logger()
 def render_config(json_update):
     """Take a BGP command and translate it into yang formatted JSON
 
-    :param json_update: The BGP string that is sent to stdout
-    :type json_update: str
+    :param json_update: JSON dictionary
+    :type json_update: dict
 
     """
     # Check if any filtering has been applied to the prefixes.
@@ -43,7 +43,7 @@ def render_config(json_update):
                 if filt:
                     prefixes = filter_prefixes(prefixes)
                 # Set env variable for Jinja2.
-                env = Environment(loader=PackageLoader('edit_rib',
+                env = Environment(loader=PackageLoader('solenoid.edit_rib',
                                                        'templates')
                                   )
                 env.filters['to_json'] = json.dumps
@@ -78,23 +78,22 @@ def create_rest_object():
     """
     location = os.path.dirname(os.path.realpath(__file__))
     try:
-        with open(os.path.join(location, '../solenoid.config')) as f:
-            config = ConfigParser.ConfigParser()
-            try:
-                config.readfp(f)
-                return JSONRestCalls(
-                    config.get('default', 'ip'),
-                    int(config.get('default', 'port')),
-                    config.get('default', 'username'),
-                    config.get('default', 'password')
+        config = ConfigParser.ConfigParser()
+        try:
+            config.read(os.path.join(location, '../solenoid.config'))
+            return JSONRestCalls(
+                config.get('default', 'ip'),
+                int(config.get('default', 'port')),
+                config.get('default', 'username'),
+                config.get('default', 'password')
+            )
+        except (ConfigParser.Error, ValueError), e:
+            logger.critical(
+                'Something is wrong with your config file: {}'.format(
+                    e.message
                 )
-            except (ConfigParser.Error, ValueError), e:
-                logger.critical(
-                    'Something is wrong with your config file: {}'.format(
-                        e.message
-                    )
-                )
-                sys.exit(1)
+            )
+            sys.exit(1)
     except IOError:
         logger.error('You must have a solenoid.config file.', _source)
 
@@ -181,8 +180,9 @@ def filter_prefixes(prefixes):
 
 def update_file(raw_update):
     # Add the change to the update file.
-    location = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(location, 'updates.txt'), 'a') as f:
+    here = os.path.dirname(os.path.realpath(__file__))
+    filepath = os.path.join(here, 'updates.txt')
+    with open(filepath, 'a') as f:
         f.write(str(raw_update) + '\n')
 
 
@@ -212,7 +212,6 @@ def update_watcher():
     while 1:
         raw_update = sys.stdin.readline().strip()
         update_validator(raw_update)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
