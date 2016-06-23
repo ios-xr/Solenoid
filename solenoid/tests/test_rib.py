@@ -173,11 +173,6 @@ class RibTestCase(unittest.TestCase, object):
     #                       edit_rib.filter_prefixes,
     #                       start_prefixes)
 
-    @patch('solenoid.edit_rib.JSONRestCalls')
-    def test_create_rest_object_correct_call_made(self, mock_rest_class):
-        edit_rib.create_rest_object()
-        mock_rest_class.assert_called_with('127.0.0.1', 8080, 'user', 'admin')
-
     def test_create_rest_object_correct_class_created(self):
         restObject = edit_rib.create_rest_object()
         self.assertIsInstance(restObject, edit_rib.JSONRestCalls)
