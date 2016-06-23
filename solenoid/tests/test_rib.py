@@ -3,10 +3,10 @@ import os
 import json
 import time
 import sys
+import logging
 from StringIO import StringIO
-from mock import patch, call, mock_open, call
+from mock import patch, call
 from solenoid import edit_rib
-#from test import test_support
 
 location = os.path.dirname(os.path.realpath(__file__))
 withdraw_prefixes = ['1.1.1.8/32',
@@ -49,8 +49,6 @@ class RibTestCase(unittest.TestCase, object):
         open(os.path.join(location, '../updates.txt'), 'w').close()
         open(os.path.join(location, '../logs/debug.log'), 'w').close()
         open(os.path.join(location, '../logs/errors.log'), 'w').close()
-        # self.env = test_support.EnvironmentVarGuard()
-        # self.env['ROUTE_INJECT_CONFIG'] = os.path.join(location, 'examples/example-good.config')
 
     def _check_syslog(self):
         with open('/var/log/syslog', 'r') as syslog_f:
