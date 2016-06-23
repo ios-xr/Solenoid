@@ -1,7 +1,7 @@
 # Solenoid
 ### Route Injection Agent
 ##### Author: Lisa Roach
-##### Email: lisroach@cisco.com
+##### Contact: Please use the Issues page to ask questions or open bugs and feature requests. 
 
 ## Description:
 
