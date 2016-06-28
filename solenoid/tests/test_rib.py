@@ -192,8 +192,8 @@ class RibTestCase(unittest.TestCase, object):
             rendered_announce = f.read()
         edit_rib.rib_announce(rendered_announce)
         mock_patch.assert_called_with(
-            'Cisco-IOS-XR-ip-static-cfg:router-static',
-            rendered_announce
+            rendered_announce,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
             )
         self.assertIn('| ANNOUNCE | ', self._check_debuglog()[0])
 
