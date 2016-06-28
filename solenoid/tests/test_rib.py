@@ -3,7 +3,6 @@ import os
 import json
 import time
 import sys
-import logging
 from StringIO import StringIO
 from mock import patch, call
 from solenoid import edit_rib
@@ -50,10 +49,13 @@ class RibTestCase(unittest.TestCase, object):
         open(os.path.join(location, '../logs/debug.log'), 'w').close()
         open(os.path.join(location, '../logs/errors.log'), 'w').close()
 
-    def _check_syslog(self):
-        with open('/var/log/syslog', 'r') as syslog_f:
-            syslog_f.seek(-1060, 2)
-            return syslog_f.readlines()[-1]
+    def _check_errorlog(self):
+        with open(os.path.join(location, '../logs/errors.log')) as err_log:
+            return err_log.readlines()
+
+    def _check_debuglog(self):
+        with open(os.path.join(location, '../logs/debug.log')) as debug_log:
+            return debug_log.readlines()
 
     @patch('sys.stdin', StringIO(_exa_raw('announce_g')))
     @patch('solenoid.edit_rib.update_validator')
@@ -79,10 +81,8 @@ class RibTestCase(unittest.TestCase, object):
         raw_b_json = _exa_raw('invalid_json')
         self.assertRaises(ValueError, edit_rib.update_validator(raw_b_json))
         # Check the logs.
-        edit_rib.update_validator(raw_b_json)
-        with open(os.path.join(location, '../logs/errors.log')) as log_f:
-            line = log_f.readline()
-        self.assertTrue('Failed JSON conversion for BGP update\n' in line)
+        self.assertIn('Failed JSON conversion for BGP update\n',
+                      self._check_errorlog()[0])
         self.assertFalse(mock_render.called)
 
     @patch('solenoid.edit_rib.render_config')
@@ -91,9 +91,8 @@ class RibTestCase(unittest.TestCase, object):
         self.assertRaises(KeyError, edit_rib.update_validator(raw_b_json))
         # Check the logs.
         edit_rib.update_validator(raw_b_json)
-        with open(os.path.join(location, '../logs/debug.log')) as log_f:
-            line = log_f.readline()
-        self.assertTrue('Not a valid update message type\n' in line)
+        self.assertTrue('Not a valid update message type\n',
+                        self._check_debuglog()[0])
         self.assertFalse(mock_render.called)
 
     def test_update_file(self):
@@ -111,9 +110,8 @@ class RibTestCase(unittest.TestCase, object):
         edit_rib.rib_announce = mock_announce
         self.assertRaises(KeyError, edit_rib.render_config(formatted_json))
         edit_rib.render_config(formatted_json)
-        with open(os.path.join(location, '../logs/errors.log')) as log_f:
-            line = log_f.readline()
-        self.assertTrue('Not a valid update message type\n' in line)
+        self.assertIn('Not a valid update message type\n',
+                      self._check_errorlog()[0])
         self.assertFalse(mock_announce.called)
 
     @patch('solenoid.edit_rib.rib_announce')
@@ -121,9 +119,7 @@ class RibTestCase(unittest.TestCase, object):
         formatted_json = json.loads(_exa_raw('announce_eor'))
         edit_rib.rib_announce = mock_announce
         edit_rib.render_config(formatted_json)
-        with open(os.path.join(location, '../logs/debug.log')) as log_f:
-            line = log_f.readline()
-        self.assertTrue('EOR message\n' in line)
+        self.assertIn('EOR message\n', self._check_debuglog()[0])
         self.assertFalse(mock_announce.called)
 
     @patch('solenoid.edit_rib.rib_announce')
@@ -179,12 +175,16 @@ class RibTestCase(unittest.TestCase, object):
     def test_create_rest_object_no_config_file(self, mock_read):
         mock_read.side_effect = IOError
         self.assertRaises(IOError, edit_rib.create_rest_object())
+        self.assertIn('You must have a solenoid.config file.',
+                      self._check_errorlog()[0])
 
     @patch('solenoid.edit_rib.ConfigParser.ConfigParser.get')
     def test_create_rest_object_error_in_file(self, mock_get):
         mock_get.side_effect = edit_rib.ConfigParser.Error
         with self.assertRaises(SystemExit):
             edit_rib.create_rest_object()
+        self.assertIn('Something is wrong with your config file:',
+                      self._check_errorlog()[0])
 
     @patch('solenoid.edit_rib.JSONRestCalls.patch')
     def test_rib_announce(self, mock_patch):
@@ -195,6 +195,7 @@ class RibTestCase(unittest.TestCase, object):
             'Cisco-IOS-XR-ip-static-cfg:router-static',
             rendered_announce
             )
+        self.assertIn('| ANNOUNCE | ', self._check_debuglog()[0])
 
     @patch('solenoid.edit_rib.JSONRestCalls.delete')
     def test_rib_withdraw(self, mock_delete):
@@ -203,6 +204,7 @@ class RibTestCase(unittest.TestCase, object):
         comma_list = [prefix.replace('/', ',') for prefix in withdraw_prefixes]
         calls = map(call, map(lambda x: url+x, comma_list))
         mock_delete.assert_has_calls(calls, any_order=True)
+        self.assertIn('| WITHDRAW | ', self._check_debuglog()[0])
 
 
 if __name__ == '__main__':
