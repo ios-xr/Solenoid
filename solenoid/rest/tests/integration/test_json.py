@@ -2,7 +2,7 @@
 import unittest
 import os
 import ConfigParser
-from rest_calls.jsonRestClient import JSONRestCalls
+from solenoid.rest.jsonRestClient import JSONRestCalls
 
 here = os.path.dirname(os.path.realpath(__file__))
 config = ConfigParser.ConfigParser()
