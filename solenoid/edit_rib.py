@@ -182,7 +182,6 @@ def update_file(raw_update):
     # Add the change to the update file.
     here = os.path.dirname(os.path.realpath(__file__))
     filepath = os.path.join(here, 'updates.txt')
-    os.chmod(filepath, 757)
     with open(filepath, 'a') as f:
         f.write(str(raw_update) + '\n')
 
