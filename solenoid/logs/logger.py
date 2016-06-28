@@ -5,10 +5,19 @@ import logging
 import logging.handlers
 
 
+class PermissiveRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    def _open(self):
+        prevumask = os.umask(0o002)
+        rtv = logging.handlers.RotatingFileHandler._open(self)
+        os.umask(prevumask)
+        return rtv
+
+
 class Logger(object):
 
     _pid = os.getpid()
     _location = os.path.dirname(os.path.realpath(__file__))
+    logging.handlers.PermissiveRotatingFileHandler = PermissiveRotatingFileHandler
 
     def __init__(self):
 
@@ -20,16 +29,14 @@ class Logger(object):
         self._logger.addHandler(self._streamhandler)
         # initialize errors to file
         err_filepath = os.path.join(self._location, 'errors.log')
-        os.chmod(err_filepath, 757)
-        self._errorhandler = logging.handlers.RotatingFileHandler(
+        self._errorhandler = logging.handlers.PermissiveRotatingFileHandler(
             err_filepath
         )
         self._errorhandler.setLevel(logging.ERROR)
         self._logger.addHandler(self._errorhandler)
         # initialize debug messages to file
         deb_filepath = os.path.join(self._location, 'debug.log')
-        os.chmod(deb_filepath, 757)
-        self._debughandler = logging.handlers.RotatingFileHandler(
+        self._debughandler = logging.handlers.PermissiveRotatingFileHandler(
             deb_filepath
         )
         self._debughandler.setLevel(logging.DEBUG)
