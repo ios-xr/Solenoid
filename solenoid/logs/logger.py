@@ -19,14 +19,18 @@ class Logger(object):
         self._streamhandler.setLevel(logging.INFO)
         self._logger.addHandler(self._streamhandler)
         # initialize errors to file
+        err_filepath = os.path.join(self._location, 'errors.log')
+        os.chmod(err_filepath, 757)
         self._errorhandler = logging.handlers.RotatingFileHandler(
-            os.path.join(self._location, 'errors.log')
+            err_filepath
         )
         self._errorhandler.setLevel(logging.ERROR)
         self._logger.addHandler(self._errorhandler)
         # initialize debug messages to file
+        deb_filepath = os.path.join(self._location, 'debug.log')
+        os.chmod(deb_filepath, 757)
         self._debughandler = logging.handlers.RotatingFileHandler(
-            os.path.join(self._location, 'debug.log')
+            deb_filepath
         )
         self._debughandler.setLevel(logging.DEBUG)
         self._logger.addHandler(self._debughandler)
