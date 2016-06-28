@@ -5,6 +5,10 @@ import ConfigParser
 from solenoid.rest.jsonRestClient import JSONRestCalls
 
 here = os.path.dirname(os.path.realpath(__file__))
+invalid_data = os.path.join(here, '../examples/invalid_data.json')
+patch_data = os.path.join(here, '../examples/patch_data.json')
+put_data = os.path.join(here, '../examples/put_data.json')
+
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(here, 'restcalls.config'))
 ip = config.get('default', 'ip')
@@ -51,39 +55,39 @@ class JSONRestCallsCase(unittest.TestCase):
 
     def test_put_good_data(self):
         # Tests it with good data
-        with open(os.path.join(here, '../examples/json/put_data.json')) as f:
+        with open(os.path.join(here, '../examples/put_data.json')) as f:
             contents = f.read()
         res = self.classObject.put(contents, endpoint)
         self.assertEqual(res.status_code, 204)
 
     def test_put_bad_data(self):
         # Test it with bad data
-        with open(os.path.join(here, '../examples/json/invalid_data.json')) as f:
+        with open(invalid_data) as f:
             contents = f.read()
         put_res = self.classObject.put(contents, endpoint)
         self.assertEqual(put_res.status_code, 400)
 
     def test_patch_good_data(self):
-        with open(os.path.join(here, '../examples/json/patch_data.json')) as f:
+        with open(patch_data) as f:
             contents = f.read()
         res = self.classObject.patch(contents, endpoint)
         self.assertEqual(res.status_code, 204)
 
     def test_patch_bad_data(self):
-        with open(os.path.join(here, '../examples/json/invalid_data.json')) as f:
+        with open(invalid_data) as f:
             contents = f.read()
         res = self.classObject.patch(contents, endpoint)
         self.assertEqual(res.status_code, 400)
 
     def test_post_good_data(self):
-        with open(os.path.join(here, '../examples/json/put_data.json')) as f:
+        with open(put_data) as f:
             contents = f.read()
         res = self.classObject.post(contents, endpoint)
         self.assertEqual(res.status_code, 204)
 
     def test_post_bad_data(self):
         # Test it with bad data
-        with open(os.path.join(here, '../examples/json/invalid_data.json')) as f:
+        with open(invalid_data) as f:
             contents = f.read()
         res = self.classObject.post(contents, endpoint)
         self.assertEqual(res.status_code, 400)
