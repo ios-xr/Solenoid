@@ -9,7 +9,6 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as fp:
     requirements = fp.read().splitlines()
 
-
 setup(
     name='solenoid',
     version='1.0',
@@ -24,3 +23,5 @@ setup(
     packages=find_packages(),
     install_requires=requirements
 )
+
+os.chmod(os.path.join(here, 'solenoid/logs'), 0o777)
