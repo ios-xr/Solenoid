@@ -45,7 +45,7 @@ class RestCalls(object):
             basePath=self.BasePath
         )
 
-    def put(self, endpoint, data):
+    def put(self, data, endpoint):
         """PUT RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
@@ -56,7 +56,7 @@ class RestCalls(object):
         res = self._session.put(url, data=data)
         return res
 
-    def post(self, endpoint, data):
+    def post(self, data, endpoint):
         """POST RESTconf call
             :param data: JSON or XML file with config changes
             :type data: str
@@ -67,7 +67,7 @@ class RestCalls(object):
         res = self._session.post(url, data=data)
         return res
 
-    def patch(self, endpoint, data):
+    def patch(self, data, endpoint):
         """PATCH RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
@@ -78,14 +78,23 @@ class RestCalls(object):
         res = self._session.patch(url, data=data)
         return res
 
-    def get(self, endpoint, **kwargs):
+    def get(self, endpoint='', **kwargs):
         """GET RESTconf call
             :param endpoint: String selection of YANG model and container
             :type endpoint: str
             :return: Return the response object
             :rtype: Response object
+
+            kwargs would be the type of content. See the ietf's restconf
+            draft section 4.8.1 (expires October 2016). Options:
+
+            config -- Return only configuration descendant data nodes
+            nonconfig -- Return only non-configuration descendant data nodes
+            all -- Return all descendant data nodes
         """
         url = self._host + endpoint
+        if 'content' not in kwargs:
+            kwargs = {'content': 'config'}
         res = self._session.get(url, params=kwargs)
         return res
 

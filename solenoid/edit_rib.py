@@ -6,7 +6,7 @@ import argparse
 
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
-from solenoid import JSONRestCalls
+from rest.jsonRestClient import JSONRestCalls
 from logs.logger import Logger
 
 _source = 'solenoid'
@@ -43,7 +43,7 @@ def render_config(json_update):
                 if filt:
                     prefixes = filter_prefixes(prefixes)
                 # Set env variable for Jinja2.
-                env = Environment(loader=PackageLoader('solenoid.edit_rib',
+                env = Environment(loader=PackageLoader('edit_rib',
                                                        'templates')
                                   )
                 env.filters['to_json'] = json.dumps
@@ -107,8 +107,8 @@ def rib_announce(rendered_config):
     """
     rest_object = create_rest_object()
     response = rest_object.patch(
-        'Cisco-IOS-XR-ip-static-cfg:router-static',
-        rendered_config
+        rendered_config,
+        'Cisco-IOS-XR-ip-static-cfg:router-static'
     )
     status = response.status_code
     if status in xrange(200, 300):
@@ -165,16 +165,24 @@ def filter_prefixes(prefixes):
 
     """
     # TODO: Add the capability of only have 1 IP, not a range.
+    print 'in filter_prefixes'
     with open(filepath) as filterf:
         final = []
         try:
+            prefixes = map(IPNetwork, prefixes)
             for line in filterf:
+                if '-' in line:
                     # Convert it all to IPNetwork for comparison.
                     ip1, ip2 = map(IPNetwork, line.split('-'))
-                    prefixes = map(IPNetwork, prefixes)
                     final += [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
+                    print final
+                else:
+                    ip = IPNetwork(line)
+                    final += [str(ip)]
+                    print final
             return final
         except AddrFormatError, e:
+            print e
             logger.error('FILTER | {}'.format(e), _source)
 
 

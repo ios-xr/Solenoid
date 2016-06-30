@@ -150,7 +150,8 @@ class RibTestCase(unittest.TestCase, object):
                         '1.1.1.2/32',
                         '1.1.1.1/32',
                         '1.1.1.10/32',
-                        '10.1.1.1/32']
+                        '10.1.1.1/32',
+                        '10.1.6.1/24']
         self.assertEqual(filtered_list, end_prefixes)
 
 # This test is wrong - the error is raising but assertRaises is failing
@@ -192,8 +193,8 @@ class RibTestCase(unittest.TestCase, object):
             rendered_announce = f.read()
         edit_rib.rib_announce(rendered_announce)
         mock_patch.assert_called_with(
-            'Cisco-IOS-XR-ip-static-cfg:router-static',
-            rendered_announce
+            rendered_announce,
+            'Cisco-IOS-XR-ip-static-cfg:router-static'
             )
         self.assertIn('| ANNOUNCE | ', self._check_debuglog()[0])
 
