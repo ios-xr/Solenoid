@@ -3,15 +3,19 @@ import sys
 import os
 import ConfigParser
 import argparse
+import logging
+import time
+from logging.handlers import RotatingFileHandler
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
 from solenoid import JSONRestCalls
 from logs.logger import Logger
 
 
+file_logger = logging.getLogger("Rotating Log")
+
 _source = 'solenoid'
 logger = Logger()
-
 
 def render_config(json_update):
     """Take a BGP command and translate it into yang formatted JSON
@@ -166,35 +170,19 @@ def filter_prefixes(prefixes):
 
     """
     # TODO: Add the capability of only have 1 IP, not a range.
-    print 'in filter_prefixes'
     with open(filepath) as filterf:
         final = []
         try:
-            prefixes = map(IPNetwork, prefixes)
             for line in filterf:
-                if '-' in line:
                     # Convert it all to IPNetwork for comparison.
                     ip1, ip2 = map(IPNetwork, line.split('-'))
+                    prefixes = map(IPNetwork, prefixes)
                     final += [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
-                    print final
-                else:
-                    ip = IPNetwork(line)
-                    final += [str(ip)]
-                    print final
             return final
         except AddrFormatError, e:
-            print e
             logger.error('FILTER | {}'.format(e), _source)
 
-
-def update_file(raw_update):
-    # Add the change to the update file.
-    location = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(location, 'updates.txt'), 'a') as f:
-        f.write(str(raw_update) + '\n')
-
-
-def update_validator(raw_update):
+def update_validator(path, raw_update):
     """Translate update to JSON and send it to be rendered.
 
         :param raw_update: Raw exaBGP message.
@@ -206,21 +194,26 @@ def update_validator(raw_update):
         # If it is an update, make the RIB changes.
         if json_update['type'] == 'update':
             render_config(json_update)
-            # Add the update to a file to keep track.
-            update_file(raw_update)
+        # Add the update to a file to keep track.
+        file_logger.info("%s" % raw_update)
+        time.sleep(1.5)
     except ValueError:
         logger.error('Failed JSON conversion for BGP update', _source)
     except KeyError:
         logger.debug('Not a valid update message type', _source)
-
-
+ 
+ 
 def update_watcher():
     """Watches for BGP updates and triggers a RIB change when update is heard."""
     # Continuously listen for updates.
+    log_file = "updates.log"
+    file_logger.setLevel(logging.INFO)
+    # add a rotating handler
+    handler = RotatingFileHandler(log_file, maxBytes=1099511627776, backupCount=429496720)
+    file_logger.addHandler(handler)
     while 1:
         raw_update = sys.stdin.readline().strip()
-        update_validator(raw_update)
-
+        update_validator(log_file, raw_update)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

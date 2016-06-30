@@ -23,7 +23,7 @@ withdraw_prefixes = ['1.1.1.8/32',
 
 
 def _exa_raw(test):
-    with open(os.path.join(location, 'examples/exa-raw.json')) as f:
+    with open(os.path.join(location, '/tests/examples/exa-raw.json')) as f:
         lines = f.readlines()
         if test == 'announce_g':
             return lines[0].strip()
@@ -87,14 +87,16 @@ class RibTestCase(unittest.TestCase, object):
         self.assertTrue('Not a valid update message type\n' in line)
         self.assertFalse(mock_render.called)
 
-    def test_update_file(self):
-        edit_rib.update_file(
+    def test_update_validator_file_check(self):
+        edit_rib.update_validator(
+            os.path.join(location, '../testing.log'),
             {
-                'Restart': time.ctime()
+                'Restart' : time.ctime()
             }
         )
-        with open(os.path.join(location, '../updates.txt')) as f:
-            self.assertTrue(len(f.readlines()) == 1)
+        self.assertTrue(os.path.isfile(os.path.join(location, '../updates.log')))
+        if os.path.getsize(os.path.join(location, '../updates.log.1')) > 1099511627750:
+            self.assertTrue(os.path.isfile(os.path.join(location, '../updates.log.2')))
 
     @patch('solenoid.edit_rib.rib_announce')
     def test_render_config_normal_model_missing_value(self, mock_announce):
