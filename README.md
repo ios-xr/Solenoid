@@ -31,7 +31,9 @@ to the RIB.
 
 Step 1: Clone this repo and cd into Solenoid.
 
-Run ```export PYTHONPATH=$PYTHONPATH:lib/``` then ```python setup.py install``` to install the Solenoid application. 
+Export the following PYTHONPATH: ```export PYTHONPATH=$PYTHONPATH:lib/``` 
+
+Run: ```python setup.py install``` to install the Solenoid application. 
 
 Step 2 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair:
 
