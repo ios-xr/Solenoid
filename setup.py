@@ -21,5 +21,6 @@ setup(
     ''',
     license='BSD',
     packages=find_packages(),
-    install_requires=requirements
+    install_requires=requirements,
+    data_files=[('solenoid/templates', ['solenoid/templates/static.json'])]
 )
