@@ -29,7 +29,9 @@ to the RIB.
 
 ### Usage:
 
-Step 1: Clone this repo and run ```python setup.py install``` to install the Solenoid application. You may have to use sudo. 
+Step 1: Clone this repo and cd into Solenoid.
+
+Run ```export PYTHONPATH=$PYTHONPATH:lib/``` then ```python setup.py install``` to install the Solenoid application. 
 
 Step 2 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair:
 
