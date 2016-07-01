@@ -165,16 +165,24 @@ def filter_prefixes(prefixes):
 
     """
     # TODO: Add the capability of only have 1 IP, not a range.
+    print 'in filter_prefixes'
     with open(filepath) as filterf:
         final = []
         try:
+            prefixes = map(IPNetwork, prefixes)
             for line in filterf:
+                if '-' in line:
                     # Convert it all to IPNetwork for comparison.
                     ip1, ip2 = map(IPNetwork, line.split('-'))
-                    prefixes = map(IPNetwork, prefixes)
                     final += [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
+                    print final
+                else:
+                    ip = IPNetwork(line)
+                    final += [str(ip)]
+                    print final
             return final
         except AddrFormatError, e:
+            print e
             logger.error('FILTER | {}'.format(e), _source)
 
 
