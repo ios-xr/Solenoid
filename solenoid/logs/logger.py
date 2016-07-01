@@ -7,7 +7,7 @@ import logging.handlers
 
 class PermissiveRotatingFileHandler(logging.handlers.RotatingFileHandler):
     def _open(self):
-        prevumask = os.umask(000)
+        prevumask = os.umask(0002)
         rfh_open = logging.handlers.RotatingFileHandler._open(self)
         os.umask(prevumask)
         return rfh_open
