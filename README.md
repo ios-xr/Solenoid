@@ -61,7 +61,7 @@ Step 7: Make sure RESTconf calls are working from your device to the RIB table
 Example test (you should receive your device's whole configuration):
 
 ```
-curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" -H "Authorization: <INSERT YOUR AUTH CODE>" http://<YOUR IP>/restconf/data/?content=config
+curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" --user username:password http://<YOUR IP>/restconf/data/?content=config
 ```
 
 Step 8: Change your exaBGP configuration file to run the edit_rib.py script. The important part is the process monitor-neighbors section, the rest is basic exaBGP configuration.
