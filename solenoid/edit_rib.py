@@ -6,7 +6,7 @@ import argparse
 
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
-from solenoid import JSONRestCalls
+from rest.jsonRestClient import JSONRestCalls
 from logs.logger import Logger
 
 _source = 'solenoid'
@@ -43,7 +43,7 @@ def render_config(json_update):
                 if filt:
                     prefixes = filter_prefixes(prefixes)
                 # Set env variable for Jinja2.
-                env = Environment(loader=PackageLoader('solenoid.edit_rib',
+                env = Environment(loader=PackageLoader('edit_rib',
                                                        'templates')
                                   )
                 env.filters['to_json'] = json.dumps
