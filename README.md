@@ -35,7 +35,7 @@ Step 2: Export the following PYTHONPATH: ```export PYTHONPATH=$PYTHONPATH:lib/``
 
 Step 3: Run ```python setup.py install``` to install the Solenoid application. 
 
-Step 4 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. If you are running this in an IOS-XR container, your IP address should be the loopback address in use for your container):
+Step 4 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. (If you are running this in an IOS-XR container, your IP address should be the loopback address in use for your container):
 
 ```
 [default] # Or whatever you want to name this section, it maybe helpful to name it the router you are working on
