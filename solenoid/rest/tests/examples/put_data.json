@@ -1,0 +1,88 @@
+{
+  "Cisco-IOS-XR-ipv4-ospf-cfg:ospf": {
+    "processes": {
+      "process": [
+        {
+          "process-name": "testOspf123",
+          "snmp": {
+            "trap-rate-limit": {
+              "window-size": 2,
+              "max-window-traps": 2
+            }
+          },
+          "protocol-shutdown": "full",
+          "default-vrf": {
+            "monitor-convergence": {
+              "enable": [
+                null
+              ],
+              "track-ip-frr": [
+                null
+              ],
+              "prefix-list": "ospf_monitor",
+              "track-external-routes": [
+                null
+              ],
+              "track-summary-routes": [
+                null
+              ]
+            },
+            "router-id": "100.1.1.1",
+            "maximum-redistribute-prefix": {
+              "number-of-prefixes": 1,
+              "threshold": 1,
+              "warning-only": true
+            },
+            "nsf": {
+              "ietf-support-role": "never",
+              "ietf-strict-lsa-checking": [
+                null
+              ],
+              "lifetime": 90,
+              "flush-delay-time": 100
+            },
+            "queue": {
+              "dispatch-rate-limited-flush": 100,
+              "dispatch-incoming": 700,
+              "limit-low": 2000,
+              "limit-high": 1000,
+              "dispatch-rate-limited": 500,
+              "limit-medium": 3000,
+              "dispatch-spf-lsa-limit": 300
+            },
+            "microloop": {
+              "avoidance": {
+                "rib-update-delay": 1,
+                "enable": "protected"
+              }
+            },
+            "ignore-mospf": [
+              null
+            ],
+            "default-information": {
+              "always-advertise": true,
+              "metric": 100,
+              "metric-type": "type1"
+            },
+            "type7": [
+              null
+            ],
+            "max-metric": {
+              "max-metric-on-proc-restart": {
+                "startup-max": 10,
+                "include-stub": true,
+                "summary-lsa": true,
+                "summary-lsa-maximum-metric": 10,
+                "external-lsa": true,
+                "external-lsa-maximum-metric": 10
+              }
+            }
+          },
+          "start": [
+            null
+          ]
+        }
+      ]
+    }
+  }
+}

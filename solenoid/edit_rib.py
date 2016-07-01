@@ -107,8 +107,8 @@ def rib_announce(rendered_config):
     """
     rest_object = create_rest_object()
     response = rest_object.patch(
-        'Cisco-IOS-XR-ip-static-cfg:router-static',
-        rendered_config
+        rendered_config,
+        'Cisco-IOS-XR-ip-static-cfg:router-static'
     )
     status = response.status_code
     if status in xrange(200, 300):
