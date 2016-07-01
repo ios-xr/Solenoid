@@ -150,7 +150,8 @@ class RibTestCase(unittest.TestCase, object):
                         '1.1.1.2/32',
                         '1.1.1.1/32',
                         '1.1.1.10/32',
-                        '10.1.1.1/32']
+                        '10.1.1.1/32',
+                        '10.1.6.1/24']
         self.assertEqual(filtered_list, end_prefixes)
 
 # This test is wrong - the error is raising but assertRaises is failing
