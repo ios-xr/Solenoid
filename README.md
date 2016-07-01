@@ -35,7 +35,7 @@ Step 2: Export the following PYTHONPATH: ```export PYTHONPATH=$PYTHONPATH:lib/``
 
 Step 3: Run ```python setup.py install``` to install the Solenoid application. 
 
-Step 4 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair:
+Step 4 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. If you are running this in an IOS-XR container, your IP address should be the loopback address in use for your container):
 
 ```
 [default] # Or whatever you want to name this section, it maybe helpful to name it the router you are working on
@@ -45,11 +45,12 @@ username: username
 password: password
 ```
 
-Step 5 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Example:
+Step 5 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Single prefixes are also acceptable. Example:
 
 ```
 1.1.1.0/32-1.1.2.0/32
 10.1.1.0/32-10.1.5.0/32
+10.1.1.6/32
 192.168.1.0/28-192.168.2.0/28
 ```
 
