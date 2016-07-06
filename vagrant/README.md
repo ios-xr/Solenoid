@@ -86,7 +86,7 @@ password: cisco
 
 ####Ubuntu Container on IOS-XRv
 
-To see the actual Solenoid application running, enter the following from the container (see instructions above) in order to enter the running [screen](https://www.gnu.org/software/screen/manual/screen.html
+To see the actual Solenoid application running, enter the following from the container (see instructions above) in order to enter the running [screen](https://www.gnu.org/software/screen/manual/screen.html):
     
     screen -r exabgp
 
