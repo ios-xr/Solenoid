@@ -41,14 +41,14 @@ From XR Bash
 ```ssh cisco@192.168.1.2``` <br />
 password: cisco
 ####Solenoid
-To see the actual application running, enter the following from the Container running Solenoid<br />
+To see the actual application running, enter the following from the container running Solenoid<br />
 ```screen -r exabgp```<br />
-To see the website running, enter the following from the Container running Solenoid<br />
+To see the website running, enter the following from the container running Solenoid<br />
 ```screen -r website```<br />
 ####ExaBGP is running in a Ubuntu VM
 From the vagrant folder
 ```vagrant ssh ubuntu``` <br />
-######Exabgp is running in a screen
+From this vm, to access exabgp enter the screen<br />
 ```sudo screen -r``` <br />
 note: This will be changed to not use sudo.
 

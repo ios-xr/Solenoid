@@ -1,6 +1,6 @@
 
 <domain type='lxc' xmlns:lxc='http://libvirt.org/schemas/domain/lxc/1.0'>
-  <name>exabgp</name>
+  <name>solenoid</name>
   <memory>327680</memory>
   <os>
     <type>exe</type>
