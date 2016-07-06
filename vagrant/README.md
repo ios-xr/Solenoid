@@ -41,7 +41,7 @@ This is all you need to get Solenoid working!
 
 After completing the initial ```vagrant up```, the application is already up and running. If you navigate to:
 
-      localhost:57780
+     localhost:57780
     
 on your browser, you will see the routes being added and withdrawn from the IOS-XRv's RIB table. To view the application running on the box, reference the instructions below on how to navigate the vagrant environment. 
 
@@ -92,7 +92,7 @@ To see the actual Solenoid application running, enter the following from the con
 
 To see the website running, enter the following from the container (see instructions above) in order to enter the running [screen](https://www.gnu.org/software/screen/manual/screen.html):
 
-  screen -r website
+    screen -r website
 
 
 ####Ubuntu Devbox
