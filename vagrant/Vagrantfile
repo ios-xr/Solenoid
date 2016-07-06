@@ -1,0 +1,30 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure(2) do |config|
+
+  config.vm.define "xrv", primary: true do |xrv|
+    xrv.vm.box = "xrvi5"
+    xrv.vm.network :private_network, virtualbox__intnet: "link1", auto_config: false
+    xrv.vm.network "forwarded_port", guest: 57780, host: 57780
+
+    xrv.vm.provider "virtualbox" do |v|
+            v.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+            v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    end
+
+    xrv.vm.provision "file", source: "xrv/solenoid.tgz", destination: "/home/vagrant/solenoid.tgz"
+    xrv.vm.provision "file", source: "xrv/demo.xml", destination: "/home/vagrant/demo.xml"
+    xrv.vm.provision "file", source: "xrv/router_config", destination: "/home/vagrant/router_config"
+    xrv.vm.provision :shell, path: "xrv/bootstrap.sh"
+  end
+
+  config.vm.define "ubuntu", primary: true do |ubuntu|
+    ubuntu.vm.box = "ubuntu/trusty64"
+    ubuntu.vm.network :private_network, virtualbox__intnet: "link1", ip: "192.168.1.3"
+    ubuntu.vm.provider "virtualbox" do |v|
+            v.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+            v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    end
+    ubuntu.vm.provision :shell, path: "ubuntu/bootstrap_ubuntu.sh"
+  end
+end
