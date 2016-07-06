@@ -17,8 +17,10 @@ https://xrdocs.github.io/getting-started/steps-download-iosxr-vagrant <br />
 Step 3. Download the IOS-XRv vagrant box through the following link, and follow the instructions to add the base box.<br />
 https://xrdocs.github.io/application-hosting/tutorials/iosxr-vagrant-quickstart
 https://xrdocs.github.io/getting-started/steps-download-iosxr-vagrant <br />
-Step 4. Download release tarball and add it the directory /vagrant/xrv/. This is the container image that will sit on the IOS-XRv vm<br />
+Step 4. Download release tarball from https://cto-github.cisco.com/lisroach/Solenoid/releases and add it the directory /vagrant/xrv/. This is the container image that will sit on the IOS-XRv vm<br />
+```mv solenoid.tgz Solenoid/vagrant/xrv/```<br />
 Step 5. In a terminal screen change directory into the vagrant directory of the repository. The vagrant file is located here.<br />
+```cd Solenoid/vagrant```<br />
 Step 6. ```vagrant up``` <br />
 
 This is all you need to get the repo working with all the configs in place for the demo.
