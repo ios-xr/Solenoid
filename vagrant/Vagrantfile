@@ -3,7 +3,7 @@
 Vagrant.configure(2) do |config|
 
   config.vm.define "xrv", primary: true do |xrv|
-    xrv.vm.box = "xrvi5"
+    xrv.vm.box = "IOS-XRv"
     xrv.vm.network :private_network, virtualbox__intnet: "link1", auto_config: false
     xrv.vm.network "forwarded_port", guest: 57780, host: 57780
 

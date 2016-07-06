@@ -1,7 +1,7 @@
 # Solenoid-Vagrant
 #####Vagrant for Solenoid application demo
 #####Author: Karthik Kumaravel
-##### Contact: Please use the Issues page to ask questions or open bugs and feature requests.
+##### Contact: Please use the issues page to ask questions or open bugs and feature requests.
 
 ### Overview
 This is a Vagrant box set up to demo the Solenoid application. This Vagrant uses two virtualbox VMs, a IOS-XRv image and an ubuntu trusty image. The plumbiing and demo functions are brough up through bash scripts to allow you to with the Solenoid application without hassle, and demo it to others.
@@ -32,18 +32,23 @@ This is how to access each of these components.
 From the vagrant folder
 ```vagrant ssh xrv``` <br />
 XR CLI and Solenoid is accessed in from XR bash
-######XR CLI
+####XR CLI
 From XR Bash
 ```ssh 10.1.1.5``` <br />
 password: vagrant
-######Solenoid
+####Container running Solenoid
 From XR Bash
 ```ssh cisco@192.168.1.2``` <br />
 password: cisco
+####Solenoid
+To see the actual application running, enter the following from the container running Solenoid<br />
+```screen -r exabgp```<br />
+To see the website running, enter the following from the container running Solenoid<br />
+```screen -r website```<br />
 ####ExaBGP is running in a Ubuntu VM
 From the vagrant folder
 ```vagrant ssh ubuntu``` <br />
-######Exabgp is running in a screen
+From this vm, to access exabgp enter the screen<br />
 ```sudo screen -r``` <br />
 note: This will be changed to not use sudo.
 
