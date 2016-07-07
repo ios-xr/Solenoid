@@ -100,3 +100,13 @@ run /your/python/location /path/to//solenoid/solenoid/edit_rib.py -f '/path/to/f
 ```
 
 Step 9: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
+
+###Testing
+
+To test the code, run the following command from the Solenoid/ directory:
+
+```
+python -m unittest solenoid.tests.test_rib
+```
+
+If you receive a status of "OK" you are good to go. 
