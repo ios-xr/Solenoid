@@ -128,10 +128,10 @@ def rib_announce(rendered_config):
 
 
 def rib_withdraw(withdrawn_prefixes):
-    """Remove the withdrawn prefix from the RIB table.
+    """Remove the prefixes from the RIB table.
 
-        :param new_config: The prefix and prefix-length to be removed
-        :type new_config: str
+        :param withdrawn_prefixes: The prefix and prefix-length to be removed
+        :type withdrawn_prefixes: list
     """
     rest_object = create_rest_object()
     # Delete each prefix one at a time.
