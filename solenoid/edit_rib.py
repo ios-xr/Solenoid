@@ -43,7 +43,7 @@ def render_config(json_update):
                 if filt:
                     prefixes = filter_prefixes(prefixes)
                 # Set env variable for Jinja2.
-                env = Environment(loader=PackageLoader('edit_rib',
+                env = Environment(loader=PackageLoader('solenoid',
                                                        'templates')
                                   )
                 env.filters['to_json'] = json.dumps
