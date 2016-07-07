@@ -70,3 +70,8 @@ target/
 restCalls.config
 tester.py
 updates.txt
+
+#Vagrantfiles
+vagrant/.vagrant
+vagrant/.DS_STORE
+*.tgz

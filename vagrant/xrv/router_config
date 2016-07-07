@@ -1,0 +1,26 @@
+
+interface GigabitEthernet 0/0/0/0
+ ipv4 address 192.168.1.2 255.255.255.0
+ no shut
+!
+interface Loopback1
+ ipv4 address 10.1.1.5 255.255.255.255
+!
+interface Loopback999
+ description loopback for internal restconf server
+ ipv4 address 128.0.0.1 255.0.0.0
+!
+router static
+ address-family ipv4 unicast
+  no 0.0.0.0/0 MgmtEth0/RP0/CPU0/0 10.0.2.2
+  0.0.0.0/0 10.0.2.2
+ !
+!
+web server
+ service restconf
+  http-enable
+ !
+!
+restconf agent
+!
+end

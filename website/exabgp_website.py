@@ -10,8 +10,7 @@ import json
 import sys
 import os
 import ConfigParser
-sys.path.append('../solenoid/')
-from rest.jsonRestClient import JSONRestCalls
+from solenoid import JSONRestCalls
 
 app = Flask(__name__)
 
@@ -23,7 +22,7 @@ def template_test():
 #    push_exabgp(message)
     rib = get_rib()
     return render_template('index.html',
-        Title = 'ExaBGP Demo on eXR Container',
+        Title = 'Solenoid Demo on IOS-XRv',
         content2 = rib,
         )
 

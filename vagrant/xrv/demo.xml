@@ -1,0 +1,25 @@
+
+<domain type='lxc' xmlns:lxc='http://libvirt.org/schemas/domain/lxc/1.0'>
+  <name>solenoid</name>
+  <memory>327680</memory>
+  <os>
+    <type>exe</type>
+    <init>/sbin/init</init>
+  </os>
+  <lxc:namespace>
+    <sharenet type='netns' value='global-vrf'/>
+  </lxc:namespace>
+  <vcpu>1</vcpu>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/lib64/libvirt/libvirt_lxc</emulator>
+    <filesystem type='mount'>
+      <source dir='/misc/app_host/solenoid/'/>
+      <target dir='/'/>
+    </filesystem>
+    <console type='pty'/>
+  </devices>
+</domain>
