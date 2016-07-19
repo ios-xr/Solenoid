@@ -76,7 +76,7 @@
                       </tr>
                   </thead>
                     <tbody>
-                      {% for prefix in content2['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'] %}
+                      {% for prefix in content2['Cisco-IOS-XR-ip-static-cfg:router-static']['default-vrf']['address-family']['vrfipv4']['vrf-unicast']['vrf-prefixes']['vrf-prefix'] %}
                           <tr>
                               <td id="prefix">{{prefix['prefix']}} </td>
                               <td id="next-hop">{{prefix['vrf-route']['vrf-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'] }} </td>
