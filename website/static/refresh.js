@@ -6,10 +6,10 @@
       if (xhttp.readyState == 4 && xhttp.status == 200) {
     var newData = ""
         var json = JSON.parse(xhttp.responseText);
-        var keys = Object.keys(json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix']).length
+        var keys = Object.keys(json['Cisco-IOS-XR-ip-static-cfg:router-static']['default-vrf']['address-family']['vrfipv4']['vrf-unicast']['vrf-prefixes']['vrf-prefix']).length
         for (var i = 0; i < keys; i++){
-      newData += "<tr><td>" + json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['prefix'] + "</td>";
-      newData += "<td>" + json['Cisco-IOS-XR-ip-static-cfg:vrf-prefixes']['vrf-prefix'][i]['vrf-route']['vrf-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'];
+      newData += "<tr><td>" + json['Cisco-IOS-XR-ip-static-cfg:router-static']['default-vrf']['address-family']['vrfipv4']['vrf-unicast']['vrf-prefixes']['vrf-prefix'][i]['prefix'] + "</td>";
+      newData += "<td>" + json['Cisco-IOS-XR-ip-static-cfg:router-static']['default-vrf']['address-family']['vrfipv4']['vrf-unicast']['vrf-prefixes']['vrf-prefix'][i]['vrf-route']['vrf-next-hop-table']['vrf-next-hop-next-hop-address'][0]['next-hop-address'];
       newData += "</td></tr>\n"
     }
 

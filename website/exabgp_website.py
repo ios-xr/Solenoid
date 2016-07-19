@@ -10,7 +10,7 @@ import json
 import sys
 import os
 import ConfigParser
-from solenoid import JSONRestCalls
+from solenoid import CiscoGRPCClient
 
 app = Flask(__name__)
 
@@ -49,43 +49,37 @@ def get_rib():
         :return: return the json HTTP response object
         :rtype: dict
     """
-    rest_object = create_rest_object()
-    url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/'
-    url += 'address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix'
-    response = rest_object.get(url)
-    if not response.raise_for_status():
-        return response.json()
-    else:
-        # needs to be tested
-        error = response.raise_for_status()
-        syslog.syslog(syslog.LOG_ALERT, _prefixed('ERROR', error))
+    grpc_object = create_grpc_object()
+    response = grpc_object.getconfig('{"Cisco-IOS-XR-ip-static-cfg:router-static": [null]}')
+    return json.loads(response)
 
+def create_grpc_object():
+    """Create a grpc channel object.
+        Reads in a file containing username, password, and
+        ip address:port, in that order.
 
-def create_rest_object():
-    """Create a restCalls object.
-        Replace IP_Address, Port, Username, and Password  in that order.
-        :returns: restCalls object
-        :rtype: restCalls class object
+        :returns: grpc object
+        :rtype: grpc class object
     """
     location = os.path.dirname(os.path.realpath(__file__))
     try:
-        with open(os.path.join(location, '../solenoid.config')) as f:
-            config = ConfigParser.ConfigParser()
-            try:
-                config.readfp(f)
-                return JSONRestCalls(
-                    config.get('default', 'ip'),
-                    int(config.get('default', 'port')),
-                    config.get('default', 'username'),
-                    config.get('default', 'password')
+        config = ConfigParser.ConfigParser()
+        try:
+            config.read(os.path.join(location, '../solenoid.config'))
+            return CiscoGRPCClient(
+                config.get('default', 'ip'),
+                int(config.get('default', 'port')),
+                10,
+                config.get('default', 'username'),
+                config.get('default', 'password')
+            )
+        except (ConfigParser.Error, ValueError), e:
+            logger.critical(
+                'Something is wrong with your config file: {}'.format(
+                    e.message
                 )
-            except (ConfigParser.Error, ValueError), e:
-                logger.critical(
-                    'Something is wrong with your config file: {}'.format(
-                        e.message
-                    )
-                )
-                sys.exit(1)
+            )
+            sys.exit(1)
     except IOError:
         logger.error('You must have a solenoid.config file.', _source)
 
