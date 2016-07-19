@@ -131,10 +131,10 @@ def rib_withdraw(withdrawn_prefixes):
     grpc_object = create_grpc_object()
     # Delete each prefix one at a time.
     for withdrawn_prefix in withdrawn_prefixes:
-        url = '{"Cisco-IOS-XR-ip-static-cfg:router-static": {"default-vrf": {"address-family": {"vrfipv4": {"vrf-unicast": {"vrf-prefixes": {"vrf-prefix": [{"prefix": {},"prefix-length": {}}]}}}}}}}'
+        url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}]}}}}}}}}}}}}}}'
         bgp_prefix, prefix_length = withdrawn_prefix.split('/')
-        url = url.format(bgp_prefix, prefix_length)
-        response = grpc_object.delete(url)
+        url = url.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
+        response = grpc_object.deleteconfig(url)
         status = response.errors
         if status == u'':
             logger.info('WITHDRAW | {code} | {reason}'.format(
