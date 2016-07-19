@@ -172,20 +172,115 @@ class RibTestCase(unittest.TestCase, object):
         restObject = edit_rib.create_rest_object()
         self.assertIsInstance(restObject, edit_rib.JSONRestCalls)
 
-    @patch('solenoid.edit_rib.ConfigParser.ConfigParser.read')
-    def test_create_rest_object_no_config_file(self, mock_read):
-        mock_read.side_effect = IOError
-        self.assertRaises(IOError, edit_rib.create_rest_object())
-        self.assertIn('You must have a solenoid.config file.',
-                      self._check_errorlog()[0])
-
-    @patch('solenoid.edit_rib.ConfigParser.ConfigParser.get')
-    def test_create_rest_object_error_in_file(self, mock_get):
-        mock_get.side_effect = edit_rib.ConfigParser.Error
+    def test_create_rest_object_no_config_file(self):
+        if os.path.isfile(os.path.join(location, '../../solenoid.config')):
+            os.rename(
+                os.path.join(location, '../../solenoid.config'),
+                os.path.join(location, '../../solenoidtest.config')
+            )
         with self.assertRaises(SystemExit):
             edit_rib.create_rest_object()
         self.assertIn('Something is wrong with your config file:',
                       self._check_errorlog()[0])
+        if os.path.isfile(os.path.join(location, '../../solenoidtest.config')):
+            os.rename(
+                os.path.join(location, '../../solenoidtest.config'),
+                os.path.join(location, '../../solenoid.config')
+            )
+
+    def test_create_rest_object_missing_object(self):
+        #check if a solenoid.config already exists and move it
+        if os.path.isfile(os.path.join(location, '../../solenoid.config')):
+            os.rename(
+                os.path.join(location, '../../solenoid.config'),
+                os.path.join(location, '../../solenoidtest.config')
+            )
+        with open(os.path.join(location, '../../solenoid.config'), 'w') as f:
+            f.write('[default]')
+            f.write('ip: 10.1.1.2')
+            #We are missing 'port' here
+            f.write('username: user')
+            f.write('password: admin')
+        with self.assertRaises(SystemExit):
+            edit_rib.create_rest_object()
+        self.assertIn('Something is wrong with your config file:',
+                      self._check_errorlog()[0])
+        os.remove(os.path.join(location, '../../solenoid.config'))
+        #If solenoid.config did already exist move it back
+        if os.path.isfile(os.path.join(location, '../../solenoidtest.config')):
+            os.rename(
+                os.path.join(location, '../../solenoidtest.config'),
+                os.path.join(location, '../../solenoid.config')
+            )
+
+    def test_create_rest_object_missing_section(self):
+        #check if a solenoid.config already exists and move it
+        if os.path.isfile(os.path.join(location, '../../solenoid.config')):
+            os.rename(
+                os.path.join(location, '../../solenoid.config'),
+                os.path.join(location, '../../solenoidtest.config')
+            )
+        with open(os.path.join(location, '../../solenoid.config'), 'w') as f:
+            f.write('ip: 10.1.1.2')
+            f.write('port: 80')
+            f.write('username: user')
+            f.write('password: admin')
+        with self.assertRaises(SystemExit):
+            edit_rib.create_rest_object()
+        self.assertIn('Something is wrong with your config file:',
+                      self._check_errorlog()[0])
+        os.remove(os.path.join(location, '../../solenoid.config'))
+        #If solenoid.config did already exist move it back
+        if os.path.isfile(os.path.join(location, '../../solenoidtest.config')):
+            os.rename(
+                os.path.join(location, '../../solenoidtest.config'),
+                os.path.join(location, '../../solenoid.config')
+            )
+
+    def test_create_rest_object_multiple_sections(self):
+        #check if a solenoid.config already exists and move it
+        if os.path.isfile(os.path.join(location, '../../solenoid.config')):
+            os.rename(
+                os.path.join(location, '../../solenoid.config'),
+                os.path.join(location, '../../solenoidtest.config')
+            )
+        with open(os.path.join(location, '../../solenoid.config'), 'w') as f:
+            f.write('[router2]\n')
+            f.write('ip: 10.1.1.2\n')
+            f.write('port: 80\n')
+            f.write('username: user\n')
+            f.write('password: admin\n')
+            f.write('[router1]\n')
+            f.write('ip: 10.1.1.3\n')
+            f.write('port: 80\n')
+            f.write('username: user\n')
+            f.write('password: admin\n')
+        restObject = edit_rib.create_rest_object()
+        self.assertIsInstance(restObject, edit_rib.JSONRestCalls)
+        self.assertIn('Multiple routers not currently supported in the configuration file',
+                      self._check_debuglog()[0])
+        os.remove(os.path.join(location, '../../solenoid.config'))
+        #If solenoid.config did already exist move it back
+        if os.path.isfile(os.path.join(location, '../../solenoidtest.config')):
+            os.rename(
+                os.path.join(location, '../../solenoidtest.config'),
+                os.path.join(location, '../../solenoid.config')
+            )
+
+    # @patch('solenoid.edit_rib.ConfigParser.ConfigParser.read')
+    # def test_create_rest_object_no_config_file(self, mock_read):
+    #     mock_read.side_effect = IOError
+    #     self.assertRaises(IOError, edit_rib.create_rest_object())
+    #     self.assertIn('You must have a solenoid.config file.',
+    #                   self._check_errorlog()[0])
+
+    # @patch('solenoid.edit_rib.ConfigParser.ConfigParser.get')
+    # def test_create_rest_object_error_in_file(self, mock_get):
+    #     mock_get.side_effect = edit_rib.ConfigParser.Error
+    #     with self.assertRaises(SystemExit):
+    #         edit_rib.create_rest_object()
+    #     self.assertIn('Something is wrong with your config file:',
+    #                   self._check_errorlog()[0])
 
     @patch('solenoid.edit_rib.JSONRestCalls.patch')
     def test_rib_announce(self, mock_patch):

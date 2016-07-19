@@ -77,25 +77,29 @@ def create_rest_object():
         :rtype: restCalls class object
     """
     location = os.path.dirname(os.path.realpath(__file__))
+    config = ConfigParser.ConfigParser()
     try:
-        config = ConfigParser.ConfigParser()
-        try:
-            config.read(os.path.join(location, '../solenoid.config'))
+        config.read(os.path.join(location, '../solenoid.config'))
+        if len(config.sections()) >= 1:
+            if len(config.sections()) > 1:
+                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', _source)
+            section = config.sections()[0]
             return JSONRestCalls(
-                config.get('default', 'ip'),
-                int(config.get('default', 'port')),
-                config.get('default', 'username'),
-                config.get('default', 'password')
+                config.get(section, 'ip'),
+                int(config.get(section, 'port')),
+                config.get(section, 'username'),
+                config.get(section, 'password')
             )
-        except (ConfigParser.Error, ValueError), e:
-            logger.critical(
-                'Something is wrong with your config file: {}'.format(
-                    e.message
-                )
-            )
-            sys.exit(1)
-    except IOError:
-        logger.error('You must have a solenoid.config file.', _source)
+        else:
+            raise ValueError
+    except (ConfigParser.Error, ValueError), e:
+        logger.critical(
+            'Something is wrong with your config file: {}'.format(
+                e.message
+            ),
+            _source
+        )
+        sys.exit(1)
 
 
 def rib_announce(rendered_config):
