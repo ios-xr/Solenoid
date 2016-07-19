@@ -1,6 +1,6 @@
 # Solenoid
 ### Route Injection Agent
-##### Author: Lisa Roach
+##### Author: Lisa Roach & Karthik Kumaravel
 ##### Contact: Please use the Issues page to ask questions or open bugs and feature requests. 
 
 ## Description:
