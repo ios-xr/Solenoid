@@ -30,7 +30,11 @@ to the RIB.
 
 Step 1: Clone this repo and cd into Solenoid.
 
-Step 2: Run ```python setup.py install``` to install the Solenoid application. You may have to use sudo for it. 
+Step 2: Run ```python setup.py install``` to install the Solenoid application. You may have to use sudo for it. If you see this error: 
+
+`SyntaxError: '<' operator not allowed in environment markers`
+
+You need to upgrade your version of setuptools to version 17.1 or above. See: http://docs.openstack.org/developer/pbr/compatibility.html#evaluate-marker
 
 Step 3 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. (If you are running this in an IOS-XR container, your IP address should be the loopback address in use for your container):
 
