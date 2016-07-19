@@ -7,6 +7,7 @@ import argparse
 from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
 from rest.jsonRestClient import JSONRestCalls
+from grpc_cisco.cisco_grpc_client import CiscoGRPCClient
 from logs.logger import Logger
 
 _source = 'solenoid'
@@ -64,26 +65,23 @@ def render_config(json_update):
         logger.error('Not a valid update message type', _source)
 
 
-def create_rest_object():
-    """Create a restCalls object.
+def create_grpc_object():
+    """Create a grpc channel object.
         Reads in a file containing username, password, and
         ip address:port, in that order.
 
-        This method could be eliminated and the restCalls(username, password,
-        ip_address:port) replace all calls to create_rest_object().
-        This method exists in order to separate passwords from github.
-
-        :returns: restCalls object
-        :rtype: restCalls class object
+        :returns: grpc object
+        :rtype: grpc class object
     """
     location = os.path.dirname(os.path.realpath(__file__))
     try:
         config = ConfigParser.ConfigParser()
         try:
             config.read(os.path.join(location, '../solenoid.config'))
-            return JSONRestCalls(
+            return CiscoGRPCClient(
                 config.get('default', 'ip'),
                 int(config.get('default', 'port')),
+                10,
                 config.get('default', 'username'),
                 config.get('default', 'password')
             )
@@ -105,57 +103,53 @@ def rib_announce(rendered_config):
     :type rendered_config: unicode
 
     """
-    rest_object = create_rest_object()
-    response = rest_object.patch(
-        rendered_config,
-        'Cisco-IOS-XR-ip-static-cfg:router-static'
-    )
-    status = response.status_code
-    if status in xrange(200, 300):
+    grpc_object = create_grpc_object()
+    response = grpc_object.mergeconfig(rendered_config)
+    status = response.errors
+    if status == u'':
         logger.info('ANNOUNCE | {code} | {reason}'.format(
-            code=status,
-            reason=response.reason
+            code='ok',
+            reason=response.errors
             ),
             _source
         )
     else:
         logger.warning('ANNOUNCE | {code} | {reason}'.format(
-            code=status,
-            reason=response.reason
+            code='error',
+            reason=response.errors
             ),
             _source
         )
 
 
 def rib_withdraw(withdrawn_prefixes):
-    """Remove the prefixes from the RIB table.
+    """Remove the withdrawn prefix from the RIB table.
 
-        :param withdrawn_prefixes: The prefix and prefix-length to be removed
-        :type withdrawn_prefixes: list
+        :param new_config: The prefix and prefix-length to be removed
+        :type new_config: str
     """
-    rest_object = create_rest_object()
+    grpc_object = create_grpc_object()
     # Delete each prefix one at a time.
     for withdrawn_prefix in withdrawn_prefixes:
-        url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={},{}'
+        url = '{"Cisco-IOS-XR-ip-static-cfg:router-static": {"default-vrf": {"address-family": {"vrfipv4": {"vrf-unicast": {"vrf-prefixes": {"vrf-prefix": [{"prefix": {},"prefix-length": {}}]}}}}}}}'
         bgp_prefix, prefix_length = withdrawn_prefix.split('/')
         url = url.format(bgp_prefix, prefix_length)
-        response = rest_object.delete(url)
-        status = response.status_code
-        if status in xrange(200, 300):
+        response = grpc_object.delete(url)
+        status = response.errors
+        if status == u'':
             logger.info('WITHDRAW | {code} | {reason}'.format(
-                code=status,
-                reason=response.reason
+                code='ok',
+                reason=response.errors
                 ),
                 _source
             )
         else:
             logger.warning('WITHDRAW | {code} | {reason}'.format(
-                code=status,
-                reason=response.reason
+                code='error',
+                reason=response.errors
                 ),
                 _source
             )
-
 
 def filter_prefixes(prefixes):
     """Filters out prefixes that do not fall in ranges indicated in filter.txt
