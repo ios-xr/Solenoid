@@ -7,7 +7,7 @@ import argparse
 from jinja2 import Environment, PackageLoader
 from netaddr import IPNetwork, AddrFormatError
 
-from grpc_cisco.cisco_grpc_client import CiscoGRPCClient
+from grpc_cisco.grpcClient import CiscoGRPCClient
 from grpc_cisco import ems_grpc_pb2
 from rest.jsonRestClient import JSONRestCalls
 from logs.logger import Logger
