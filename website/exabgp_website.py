@@ -49,39 +49,45 @@ def get_rib():
         :return: return the json HTTP response object
         :rtype: dict
     """
-    grpc_object = create_grpc_object()
-    response = grpc_object.getconfig('{"Cisco-IOS-XR-ip-static-cfg:router-static": [null]}')
+    transport_object = create_transport_object()
+    response = transport_object.get('{"Cisco-IOS-XR-ip-static-cfg:router-static": [null]}')
     return json.loads(response)
 
-def create_grpc_object():
+def create_transport_object():
     """Create a grpc channel object.
         Reads in a file containing username, password, and
         ip address:port, in that order.
-
         :returns: grpc object
         :rtype: grpc class object
     """
     location = os.path.dirname(os.path.realpath(__file__))
+    config = ConfigParser.ConfigParser()
     try:
-        config = ConfigParser.ConfigParser()
-        try:
-            config.read(os.path.join(location, '../solenoid.config'))
-            return CiscoGRPCClient(
-                config.get('default', 'ip'),
-                int(config.get('default', 'port')),
-                10,
-                config.get('default', 'username'),
-                config.get('default', 'password')
-            )
-        except (ConfigParser.Error, ValueError), e:
-            logger.critical(
-                'Something is wrong with your config file: {}'.format(
-                    e.message
+        config.read(os.path.join(location, '../solenoid.config'))
+        if len(config.sections()) >= 1:
+            if len(config.sections()) > 1:
+                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', _source)
+            section = config.sections()[0]
+            args = (
+                config.get(section, 'ip'),
+                int(config.get(section, 'port')),
+                config.get(section, 'username'),
+                config.get(section, 'password')
                 )
-            )
-            sys.exit(1)
-    except IOError:
-        logger.error('You must have a solenoid.config file.', _source)
+            if config.get(section, 'transport').lower() == 'grpc':
+                return CiscoGRPCClient(*args)
+            if config.get(section, 'transport').lower() == 'restconf':
+                return JSONRestCalls(*args)
+        else:
+            raise ValueError
+    except (ConfigParser.Error, ValueError), e:
+        logger.critical(
+            'Something is wrong with your config file: {}'.format(
+                e.message
+            ),
+            _source
+        )
+        sys.exit(1)
 
 def get_exa():
     #Opens file that announcements are stored and returns the last line
