@@ -1,11 +1,14 @@
-import json
 import sys
 import os
 import ConfigParser
+import json
 import argparse
 
-from netaddr import IPNetwork, AddrFormatError
 from jinja2 import Environment, PackageLoader
+from netaddr import IPNetwork, AddrFormatError
+
+from grpc_cisco.cisco_grpc_client import CiscoGRPCClient
+from grpc_cisco import ems_grpc_pb2
 from rest.jsonRestClient import JSONRestCalls
 from logs.logger import Logger
 
@@ -13,12 +16,112 @@ _source = 'solenoid'
 logger = Logger()
 
 
+def create_transport_object():
+    """Create a grpc channel object.
+        Reads in a file containing username, password, and
+        ip address:port, in that order.
+        :returns: grpc object
+        :rtype: grpc class object
+    """
+    location = os.path.dirname(os.path.realpath(__file__))
+    config = ConfigParser.ConfigParser()
+    try:
+        config.read(os.path.join(location, '../solenoid.config'))
+        if len(config.sections()) >= 1:
+            if len(config.sections()) > 1:
+                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', _source)
+            section = config.sections()[0]
+            args = (
+                config.get(section, 'ip'),
+                int(config.get(section, 'port')),
+                config.get(section, 'username'),
+                config.get(section, 'password')
+                )
+            if config.get(section, 'transport').lower() == 'grpc':
+                return CiscoGRPCClient(*args)
+            if config.get(section, 'transport').lower() == 'restconf':
+                return JSONRestCalls(*args)
+        else:
+            raise ValueError
+    except (ConfigParser.Error, ValueError), e:
+        logger.critical(
+            'Something is wrong with your config file: {}'.format(
+                e.message
+            ),
+            _source
+        )
+        sys.exit(1)
+
+
+def get_status(response):
+    """Get the status of the response object.
+    :param response: Response object
+    :type: depends on the type of transport used
+    """
+    if isinstance(response, ems_grpc_pb2.ConfigReply):
+        return response.errors
+    elif isinstance(response, JSONRestCalls):
+        return response.content
+
+
+def rib_announce(rendered_config):
+    """Add networks to the RIB table using HTTP PATCH over RESTconf.
+    :param rendered_config: Jinja2 rendered configuration file
+    :type rendered_config: unicode
+    """
+    transport_object = create_transport_object()
+    response = transport_object.patch(rendered_config)
+    status = get_status(response)
+    if status == '':
+        logger.info('ANNOUNCE | {code} '.format(
+            code='OK'
+            ),
+            _source
+        )
+    else:
+        logger.warning('ANNOUNCE | {code} | {reason}'.format(
+            code='FAIL',
+            reason=status
+            ),
+            _source
+        )
+
+
+def rib_withdraw(withdrawn_prefixes):
+    """Remove the withdrawn prefix from the RIB table.
+        :param new_config: The prefix and prefix-length to be removed
+        :type new_config: str
+    """
+    transport_object = create_transport_object()
+    # Delete each prefix one at a time.
+    for withdrawn_prefix in withdrawn_prefixes:
+        if isinstance(transport_object, CiscoGRPCClient):
+            url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}]}}}}}}}}}}}}}}'
+        else:  # Right now there is only gRPC and RESTconf, more elif will be required w/ more options
+            url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={bgp-prefix},{prefix-length}'
+        bgp_prefix, prefix_length = withdrawn_prefix.split('/')
+        url = url.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
+        response = transport_object.delete(url)
+        status = get_status(response)
+        if status == '':
+            logger.info('WITHDRAW | {code}'.format(
+                code='OK'
+                ),
+                _source
+            )
+        else:
+            logger.warning('WITHDRAW | {code} | {reason}'.format(
+                code='FAIL',
+                reason=status
+                ),
+                _source
+            )
+
+
 def render_config(json_update):
     """Take a BGP command and translate it into yang formatted JSON
-
     :param json_update: JSON dictionary
     :type json_update: dict
-
     """
     # Check if any filtering has been applied to the prefixes.
     try:
@@ -64,103 +167,6 @@ def render_config(json_update):
         logger.error('Not a valid update message type', _source)
 
 
-def create_rest_object():
-    """Create a restCalls object.
-        Reads in a file containing username, password, and
-        ip address:port, in that order.
-
-        This method could be eliminated and the restCalls(username, password,
-        ip_address:port) replace all calls to create_rest_object().
-        This method exists in order to separate passwords from github.
-
-        :returns: restCalls object
-        :rtype: restCalls class object
-    """
-    location = os.path.dirname(os.path.realpath(__file__))
-    config = ConfigParser.ConfigParser()
-    try:
-        config.read(os.path.join(location, '../solenoid.config'))
-        if len(config.sections()) >= 1:
-            if len(config.sections()) > 1:
-                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', _source)
-            section = config.sections()[0]
-            return JSONRestCalls(
-                config.get(section, 'ip'),
-                int(config.get(section, 'port')),
-                config.get(section, 'username'),
-                config.get(section, 'password')
-            )
-        else:
-            raise ValueError
-    except (ConfigParser.Error, ValueError), e:
-        logger.critical(
-            'Something is wrong with your config file: {}'.format(
-                e.message
-            ),
-            _source
-        )
-        sys.exit(1)
-
-
-def rib_announce(rendered_config):
-    """Add networks to the RIB table using HTTP PATCH over RESTconf.
-
-    :param rendered_config: Jinja2 rendered configuration file
-    :type rendered_config: unicode
-
-    """
-    rest_object = create_rest_object()
-    response = rest_object.patch(
-        rendered_config,
-        'Cisco-IOS-XR-ip-static-cfg:router-static'
-    )
-    status = response.status_code
-    if status in xrange(200, 300):
-        logger.info('ANNOUNCE | {code} | {reason}'.format(
-            code=status,
-            reason=response.reason
-            ),
-            _source
-        )
-    else:
-        logger.warning('ANNOUNCE | {code} | {reason}'.format(
-            code=status,
-            reason=response.reason
-            ),
-            _source
-        )
-
-
-def rib_withdraw(withdrawn_prefixes):
-    """Remove the prefixes from the RIB table.
-
-        :param withdrawn_prefixes: The prefix and prefix-length to be removed
-        :type withdrawn_prefixes: list
-    """
-    rest_object = create_rest_object()
-    # Delete each prefix one at a time.
-    for withdrawn_prefix in withdrawn_prefixes:
-        url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={},{}'
-        bgp_prefix, prefix_length = withdrawn_prefix.split('/')
-        url = url.format(bgp_prefix, prefix_length)
-        response = rest_object.delete(url)
-        status = response.status_code
-        if status in xrange(200, 300):
-            logger.info('WITHDRAW | {code} | {reason}'.format(
-                code=status,
-                reason=response.reason
-                ),
-                _source
-            )
-        else:
-            logger.warning('WITHDRAW | {code} | {reason}'.format(
-                code=status,
-                reason=response.reason
-                ),
-                _source
-            )
-
-
 def filter_prefixes(prefixes):
     """Filters out prefixes that do not fall in ranges indicated in filter.txt
 
@@ -200,10 +206,8 @@ def update_file(raw_update):
 
 def update_validator(raw_update):
     """Translate update to JSON and send it to be rendered.
-
         :param raw_update: Raw exaBGP message.
         :type raw_update: JSON
-
     """
     try:
         json_update = json.loads(raw_update)
@@ -232,4 +236,3 @@ if __name__ == "__main__":
     global filepath
     filepath = args.f
     update_watcher()
-

@@ -39,7 +39,7 @@ def _exa_raw(test):
             return lines[6].strip()
 
 
-class RibTestCase(unittest.TestCase, object):
+class RestRibTestCase(unittest.TestCase, object):
 
     def setUp(self):
         #Set global variable
@@ -168,18 +168,18 @@ class RibTestCase(unittest.TestCase, object):
     #                       edit_rib.filter_prefixes,
     #                       start_prefixes)
 
-    def test_create_rest_object_correct_class_created(self):
-        restObject = edit_rib.create_rest_object()
-        self.assertIsInstance(restObject, edit_rib.JSONRestCalls)
+    def test_create_transport_object_correct_class_created(self):
+        transportObject = edit_rib.create_transport_object()
+        self.assertIsInstance(transportObject, edit_rib.JSONRestCalls)
 
-    def test_create_rest_object_no_config_file(self):
+    def test_create_transport_object_no_config_file(self):
         if os.path.isfile(os.path.join(location, '../../solenoid.config')):
             os.rename(
                 os.path.join(location, '../../solenoid.config'),
                 os.path.join(location, '../../solenoidtest.config')
             )
         with self.assertRaises(SystemExit):
-            edit_rib.create_rest_object()
+            edit_rib.create_transport_object()
         self.assertIn('Something is wrong with your config file:',
                       self._check_errorlog()[0])
         if os.path.isfile(os.path.join(location, '../../solenoidtest.config')):
@@ -188,7 +188,7 @@ class RibTestCase(unittest.TestCase, object):
                 os.path.join(location, '../../solenoid.config')
             )
 
-    def test_create_rest_object_missing_object(self):
+    def test_create_transport_object_missing_object(self):
         #check if a solenoid.config already exists and move it
         if os.path.isfile(os.path.join(location, '../../solenoid.config')):
             os.rename(
@@ -202,7 +202,7 @@ class RibTestCase(unittest.TestCase, object):
             f.write('username: user')
             f.write('password: admin')
         with self.assertRaises(SystemExit):
-            edit_rib.create_rest_object()
+            edit_rib.create_transport_object()
         self.assertIn('Something is wrong with your config file:',
                       self._check_errorlog()[0])
         os.remove(os.path.join(location, '../../solenoid.config'))
@@ -213,7 +213,7 @@ class RibTestCase(unittest.TestCase, object):
                 os.path.join(location, '../../solenoid.config')
             )
 
-    def test_create_rest_object_missing_section(self):
+    def test_create_transport_object_missing_section(self):
         #check if a solenoid.config already exists and move it
         if os.path.isfile(os.path.join(location, '../../solenoid.config')):
             os.rename(
@@ -226,7 +226,7 @@ class RibTestCase(unittest.TestCase, object):
             f.write('username: user')
             f.write('password: admin')
         with self.assertRaises(SystemExit):
-            edit_rib.create_rest_object()
+            edit_rib.create_transport_object()
         self.assertIn('Something is wrong with your config file:',
                       self._check_errorlog()[0])
         os.remove(os.path.join(location, '../../solenoid.config'))
@@ -237,7 +237,7 @@ class RibTestCase(unittest.TestCase, object):
                 os.path.join(location, '../../solenoid.config')
             )
 
-    def test_create_rest_object_multiple_sections(self):
+    def test_create_transport_object_multiple_sections(self):
         #check if a solenoid.config already exists and move it
         if os.path.isfile(os.path.join(location, '../../solenoid.config')):
             os.rename(
@@ -255,8 +255,8 @@ class RibTestCase(unittest.TestCase, object):
             f.write('port: 80\n')
             f.write('username: user\n')
             f.write('password: admin\n')
-        restObject = edit_rib.create_rest_object()
-        self.assertIsInstance(restObject, edit_rib.JSONRestCalls)
+        transportObject = edit_rib.create_transport_object()
+        self.assertIsInstance(transportObject, edit_rib.JSONRestCalls)
         self.assertIn('Multiple routers not currently supported in the configuration file',
                       self._check_debuglog()[0])
         os.remove(os.path.join(location, '../../solenoid.config'))
@@ -267,41 +267,22 @@ class RibTestCase(unittest.TestCase, object):
                 os.path.join(location, '../../solenoid.config')
             )
 
-    # @patch('solenoid.edit_rib.ConfigParser.ConfigParser.read')
-    # def test_create_rest_object_no_config_file(self, mock_read):
-    #     mock_read.side_effect = IOError
-    #     self.assertRaises(IOError, edit_rib.create_rest_object())
-    #     self.assertIn('You must have a solenoid.config file.',
-    #                   self._check_errorlog()[0])
-
-    # @patch('solenoid.edit_rib.ConfigParser.ConfigParser.get')
-    # def test_create_rest_object_error_in_file(self, mock_get):
-    #     mock_get.side_effect = edit_rib.ConfigParser.Error
-    #     with self.assertRaises(SystemExit):
-    #         edit_rib.create_rest_object()
-    #     self.assertIn('Something is wrong with your config file:',
-    #                   self._check_errorlog()[0])
-
     @patch('solenoid.edit_rib.JSONRestCalls.patch')
-    def test_rib_announce(self, mock_patch):
+    def test_rib_announce_rest(self, mock_patch):
         with open(os.path.join(location, 'examples/rendered_announce.txt')) as f:
             rendered_announce = f.read()
         edit_rib.rib_announce(rendered_announce)
-        mock_patch.assert_called_with(
-            rendered_announce,
-            'Cisco-IOS-XR-ip-static-cfg:router-static'
-            )
+        mock_patch.assert_called_with(rendered_announce)
         self.assertIn('| ANNOUNCE | ', self._check_debuglog()[0])
 
     @patch('solenoid.edit_rib.JSONRestCalls.delete')
-    def test_rib_withdraw(self, mock_delete):
+    def test_rib_withdraw_rest(self, mock_delete):
         edit_rib.rib_withdraw(withdraw_prefixes)
         url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix='
         comma_list = [prefix.replace('/', ',') for prefix in withdraw_prefixes]
         calls = map(call, map(lambda x: url+x, comma_list))
         mock_delete.assert_has_calls(calls, any_order=True)
         self.assertIn('| WITHDRAW | ', self._check_debuglog()[0])
-
 
 if __name__ == '__main__':
     unittest.main()

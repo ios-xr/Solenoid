@@ -66,8 +66,7 @@ target/
 .python-version
 
 #Custom
-./rib-change/edit_rib.config
-restCalls.config
+*.config
 tester.py
 updates.txt
 
