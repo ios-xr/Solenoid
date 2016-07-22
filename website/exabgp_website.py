@@ -11,7 +11,7 @@ import sys
 import os
 import ConfigParser
 from solenoid import CiscoGRPCClient
-
+from solenoid import JSONRestCalls
 app = Flask(__name__)
 
 @app.route("/", methods=['GET', 'POST'])
@@ -50,9 +50,12 @@ def get_rib():
         :rtype: dict
     """
     transport_object = create_transport_object()
-    response = transport_object.get('{"Cisco-IOS-XR-ip-static-cfg:router-static": [null]}')
-    return json.loads(response)
-
+    if isinstance(transport_object, CiscoGRPCClient):
+        response = transport_object.get('{"Cisco-IOS-XR-ip-static-cfg:router-static": [null]}')
+        return json.loads(response)
+    else:
+        response = transport_object.get('Cisco-IOS-XR-ip-static-cfg:router-static')
+        return response.json()
 def create_transport_object():
     """Create a grpc channel object.
         Reads in a file containing username, password, and

@@ -72,7 +72,8 @@ def rib_announce(rendered_config):
     transport_object = create_transport_object()
     response = transport_object.patch(rendered_config)
     status = get_status(response)
-    if status == '':
+    print status
+    if status == '' or status == None:
         logger.info('ANNOUNCE | {code} '.format(
             code='OK'
             ),
@@ -94,13 +95,19 @@ def rib_withdraw(withdrawn_prefixes):
     """
     transport_object = create_transport_object()
     # Delete each prefix one at a time.
-    for withdrawn_prefix in withdrawn_prefixes:
-        if isinstance(transport_object, CiscoGRPCClient):
-            url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}]}}}}}}}}}}}}}}'
-        else:  # Right now there is only gRPC and RESTconf, more elif will be required w/ more options
-            url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={bgp-prefix},{prefix-length}'
-        bgp_prefix, prefix_length = withdrawn_prefix.split('/')
-        url = url.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
+
+    if isinstance(transport_object, CiscoGRPCClient):
+        url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{withdraw}]}}}}}}}}}}}}}}'
+        prefix = '{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}'
+        withdraw = None
+        for withdrawn_prefix in withdrawn_prefixes:
+            bgp_prefix, prefix_length = withdrawn_prefix.split('/')
+            withdrawn = prefix.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
+            if withdraw == None:
+                withdraw = withdrawn
+            else:
+                withdraw = withdraw + ', ' + withdrawn
+        url = url.format(withdraw=withdraw)
         response = transport_object.delete(url)
         status = get_status(response)
         if status == '':
@@ -116,7 +123,26 @@ def rib_withdraw(withdrawn_prefixes):
                 ),
                 _source
             )
-
+    else:  # Right now there is only gRPC and RESTconf, more elif will be required w/ more options
+        for withdrawn_prefix in withdrawn_prefixes:
+            url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={bgp_prefix},{prefix_length}'
+            bgp_prefix, prefix_length = withdrawn_prefix.split('/')
+            url = url.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
+            response = transport_object.delete(url)
+            status = get_status(response)
+            if status == None:
+                logger.info('WITHDRAW | {code}'.format(
+                    code='OK'
+                    ),
+                    _source
+                )
+            else:
+                logger.warning('WITHDRAW | {code} | {reason}'.format(
+                    code='FAIL',
+                    reason=status
+                    ),
+                    _source
+                )
 
 def render_config(json_update):
     """Take a BGP command and translate it into yang formatted JSON
