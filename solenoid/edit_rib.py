@@ -7,10 +7,10 @@ import argparse
 from jinja2 import Environment, PackageLoader
 from netaddr import IPNetwork, AddrFormatError
 
-from grpc_cisco.grpcClient import CiscoGRPCClient
-from grpc_cisco import ems_grpc_pb2
-from rest.jsonRestClient import JSONRestCalls
-from logs.logger import Logger
+from solenoid.grpc_cisco.grpcClient import CiscoGRPCClient
+from solenoid.grpc_cisco import ems_grpc_pb2
+from solenoid.rest.jsonRestClient import JSONRestCalls
+from solenoid.logs.logger import Logger
 
 _source = 'solenoid'
 logger = Logger()
@@ -31,16 +31,16 @@ def create_transport_object():
             if len(config.sections()) > 1:
                 logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', _source)
             section = config.sections()[0]
-            args = (
+            arguments = (
                 config.get(section, 'ip'),
                 int(config.get(section, 'port')),
                 config.get(section, 'username'),
                 config.get(section, 'password')
                 )
             if config.get(section, 'transport').lower() == 'grpc':
-                return CiscoGRPCClient(*args)
+                return CiscoGRPCClient(*arguments)
             if config.get(section, 'transport').lower() == 'restconf':
-                return JSONRestCalls(*args)
+                return JSONRestCalls(*arguments)
         else:
             raise ValueError
     except (ConfigParser.Error, ValueError), e:
@@ -72,8 +72,7 @@ def rib_announce(rendered_config):
     transport_object = create_transport_object()
     response = transport_object.patch(rendered_config)
     status = get_status(response)
-    print status
-    if status == '' or status == None:
+    if status == '' or status is None:
         logger.info('ANNOUNCE | {code} '.format(
             code='OK'
             ),
@@ -94,54 +93,47 @@ def rib_withdraw(withdrawn_prefixes):
         :type new_config: str
     """
     transport_object = create_transport_object()
-    # Delete each prefix one at a time.
+    # Delete the prefixes in bulk with gRPC.
     if isinstance(transport_object, CiscoGRPCClient):
         url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{withdraw}]}}}}}}}}}}}}}}'
-        prefix = '{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}'
-        withdraw = None
+        prefix_info = '{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}'
+        prefix_list = []
         for withdrawn_prefix in withdrawn_prefixes:
             bgp_prefix, prefix_length = withdrawn_prefix.split('/')
-            withdrawn = prefix.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
-            if withdraw == None:
-                withdraw = withdrawn
-            else:
-                withdraw = withdraw + ', ' + withdrawn
-        url = url.format(withdraw=withdraw)
+            prefix_list += [
+            prefix_info.format(
+                bgp_prefix=bgp_prefix,
+                prefix_length=prefix_length
+                )
+            ]
+            prefix_str = ', '.join(prefix_list)
+        url = url.format(withdraw=prefix_str)
         response = transport_object.delete(url)
         status = get_status(response)
-        if status == '':
-            logger.info('WITHDRAW | {code}'.format(
-                code='OK'
-                ),
-                _source
-            )
-        else:
-            logger.warning('WITHDRAW | {code} | {reason}'.format(
-                code='FAIL',
-                reason=status
-                ),
-                _source
-            )
-    else:  # Right now there is only gRPC and RESTconf, more elif will be required w/ more options
+    else:  # Right now there is only gRPC and RESTconf, more elif will be required w/ more options.
+    # Delete the prefixes one at a time with RESTconf.
         for withdrawn_prefix in withdrawn_prefixes:
             url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={bgp_prefix},{prefix_length}'
             bgp_prefix, prefix_length = withdrawn_prefix.split('/')
-            url = url.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
+            url = url.format(
+                bgp_prefix=bgp_prefix,
+                prefix_length=prefix_length
+            )
             response = transport_object.delete(url)
             status = get_status(response)
-            if status == None:
-                logger.info('WITHDRAW | {code}'.format(
-                    code='OK'
-                    ),
-                    _source
-                )
-            else:
-                logger.warning('WITHDRAW | {code} | {reason}'.format(
-                    code='FAIL',
-                    reason=status
-                    ),
-                    _source
-                )
+    if status is None or status == '':
+        logger.info('WITHDRAW | {code}'.format(
+            code='OK'
+            ),
+            _source
+        )
+    else:
+        logger.warning('WITHDRAW | {code} | {reason}'.format(
+            code='FAIL',
+            reason=status
+            ),
+            _source
+        )
 
 def render_config(json_update):
     """Take a BGP command and translate it into yang formatted JSON
@@ -150,10 +142,7 @@ def render_config(json_update):
     """
     # Check if any filtering has been applied to the prefixes.
     try:
-        if filepath is not None and os.path.getsize(filepath) > 0:
-            filt = True
-        else:
-            filt = False
+        filt = bool(FILEPATH is not None and os.path.getsize(FILEPATH) > 0)
     except OSError:
         filt = False
 
@@ -164,7 +153,7 @@ def render_config(json_update):
             update_type = json_update['neighbor']['message']['update']
             # Check if it is an announcement or withdrawal.
             if ('announce' in update_type
-                and 'null' not in update_type['announce']['ipv4 unicast']):
+                    and 'null' not in update_type['announce']['ipv4 unicast']):
                 updated_prefixes = update_type['announce']['ipv4 unicast']
                 next_hop = updated_prefixes.keys()[0]
                 prefixes = updated_prefixes.values()[0].keys()
@@ -173,13 +162,13 @@ def render_config(json_update):
                 # Set env variable for Jinja2.
                 env = Environment(loader=PackageLoader('solenoid',
                                                        'templates')
-                                  )
+                                 )
                 env.filters['to_json'] = json.dumps
                 template = env.get_template('static.json')
                 # Render the template and make the announcement.
                 rib_announce(template.render(next_hop=next_hop,
                                              prefixes=prefixes)
-                             )
+                            )
             elif 'withdraw' in update_type:
                 bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
                 # Filter the prefixes if needed.
@@ -191,7 +180,7 @@ def render_config(json_update):
     except KeyError:
         logger.error('Not a valid update message type', _source)
 
- 
+
 def filter_prefixes(prefixes):
     """Filters out prefixes that do not fall in ranges indicated in filter.txt
 
@@ -199,9 +188,7 @@ def filter_prefixes(prefixes):
     :type prefixes: list of strings
 
     """
-    # TODO: Add the capability of only have 1 IP, not a range.
-    print 'in filter_prefixes'
-    with open(filepath) as filterf:
+    with open(FILEPATH) as filterf:
         final = []
         try:
             prefixes = map(IPNetwork, prefixes)
@@ -210,22 +197,23 @@ def filter_prefixes(prefixes):
                     # Convert it all to IPNetwork for comparison.
                     ip1, ip2 = map(IPNetwork, line.split('-'))
                     final += [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
-                    print final
                 else:
-                    ip = IPNetwork(line)
-                    final += [str(ip)]
-                    print final
+                    ip1 = IPNetwork(line)
+                    final += [str(ip1)]
             return final
         except AddrFormatError, e:
-            print e
             logger.error('FILTER | {}'.format(e), _source)
 
 
 def update_file(raw_update):
+    """Update the updates.txt file with the newest exaBGP JSON string.
+        :param raw_update: The JSON string from exaBGP
+        :type raw_update: str
+    """
     # Add the change to the update file.
     here = os.path.dirname(os.path.realpath(__file__))
-    filepath = os.path.join(here, 'updates.txt')
-    with open(filepath, 'a') as f:
+    updates_filepath = os.path.join(here, 'updates.txt')
+    with open(updates_filepath, 'a') as f:
         f.write(str(raw_update) + '\n')
 
 
@@ -255,9 +243,9 @@ def update_watcher():
         update_validator(raw_update)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-f', type=str)
-    args = parser.parse_args()
-    global filepath
-    filepath = args.f
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument('-f', type=str)
+    ARGS = PARSER.parse_args()
+    global FILEPATH
+    FILEPATH = ARGS.f
     update_watcher()
