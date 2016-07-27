@@ -191,8 +191,8 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_correct_class_created(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf_good.config'),
-            os.path.join(LOCATION,'../../../solenoid.config')
+            os.path.join(LOCATION, '../examples/config/restconf/restconf_good.config'),
+            os.path.join(LOCATION, '../../../solenoid.config')
         )
         transport_object = edit_rib.create_transport_object()
         self.assertIsInstance(transport_object, edit_rib.JSONRestCalls)
@@ -205,7 +205,7 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_missing_object(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf_no_port.config'),
+            os.path.join(LOCATION, '../examples/config/restconf/no_port.config'),
             os.path.join(LOCATION, '../../../solenoid.config')
         )
         with self.assertRaises(SystemExit):
@@ -215,7 +215,7 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_missing_section(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf_no_section.config'),
+            os.path.join(LOCATION, '../examples/config/restconf/no_section.config'),
             os.path.join(LOCATION, '../../../solenoid.config')
         )
         with self.assertRaises(SystemExit):
@@ -225,7 +225,7 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_multiple_sections(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf_multiple_sections.config'),
+            os.path.join(LOCATION, '../examples/config/restconf/multiple_sections.config'),
             os.path.join(LOCATION, '../../../solenoid.config')
         )
         transport_object = edit_rib.create_transport_object()
@@ -236,7 +236,7 @@ class RestRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.JSONRestCalls.patch')
     def test_rib_announce(self, mock_patch):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf_good.config'),
+            os.path.join(LOCATION, '../examples/config/restconf/restconf_good.config'),
             os.path.join(LOCATION, '../../../solenoid.config')
         )
         with open(os.path.join(LOCATION, '../examples/rendered_announce.txt')) as f:
@@ -248,7 +248,7 @@ class RestRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.JSONRestCalls.delete')
     def test_rib_withdraw(self, mock_delete):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf_good.config'),
+            os.path.join(LOCATION, '../examples/config/restconf/restconf_good.config'),
             os.path.join(LOCATION, '../../../solenoid.config')
         )
         edit_rib.rib_withdraw(WITHDRAW_PREFIXES)
