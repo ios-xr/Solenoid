@@ -69,3 +69,21 @@
   setInterval(getInfo1, 1000);
   setInterval(getInfo, 2000);
 }());
+function getprefix(){
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+  var newData = ""
+      var lines = xhttp.responseText.split('\n');
+      for (var line in lines){
+    newData += "<tr><td>" + lines[line] + "</td>";
+  }
+
+$('#prefix tbody').html(newData);
+
+    }
+  };
+  xhttp.open('GET', '/prefix_change', true);
+  xhttp.send();
+}
+$(document).ready(getprefix)

@@ -16,9 +16,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=['GET', 'POST'])
 def template_test():
-    ip_address = request.form.get('ip_address', ' ')
-    network = request.form.get('network', ' ')
-    filter_list = prefix_change(network, ip_address)
+    filter_list = prefix_change()
     rib = get_rib()
     return render_template('index.html',
         Title = 'Solenoid Demo on IOS-XRv',
@@ -35,8 +33,10 @@ def get_rib_json():
 #Used for refreshing of object
 def get_exa_json():
     return get_exa()
-
-def prefix_change(method, prefix):
+@app.route("/prefix_change", methods=['GET'])
+def prefix_change():
+    prefix = request.form.get('ip_address', ' ')
+    method = request.form.get('network', ' ')
     #Push Network to Second ExaBGP instance, change URL to appropriate http api
     here = os.path.dirname(os.path.realpath(__file__))
     filepath = os.path.join(here, '../filter.txt')
@@ -65,6 +65,8 @@ def prefix_change(method, prefix):
                 if line != prefix + '\n':
                     filterf.write(line)
             filterf.truncate()
+            filter_list = filterf.read()
+            return filter_list
         if not found:
             print 'The prefix was not in the prefix list'
     else:

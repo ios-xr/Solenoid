@@ -194,3 +194,7 @@ td {
   border-radius: 3px;
   box-shadow: -5px -5px 5px #888
 }
+
+#table-prefix td{
+  padding:5px;
+}
