@@ -18,12 +18,12 @@ app = Flask(__name__)
 def template_test():
     ip_address = request.form.get('ip_address', ' ')
     network = request.form.get('network', ' ')
-    message = network + ' route ' + ip_address + ' next-hop self'
-#    push_exabgp(message)
+    filter_list = prefix_change(network, ip_address)
     rib = get_rib()
     return render_template('index.html',
         Title = 'Solenoid Demo on IOS-XRv',
         content2 = rib,
+        prefix_list = filter_list
         )
 
 @app.route("/get_rib_json", methods=['GET'])
@@ -36,12 +36,42 @@ def get_rib_json():
 def get_exa_json():
     return get_exa()
 
-def push_exabgp(network, ip_address):
-    #Push Network to Second ExaBGP instance, change URL to appropriate http api 
-    message = network + ' route ' + ip_address + ' next-hop self' #Formats announcement got api
-    url='http://192.168.1.3:55780' #Change this URL to your second exabgp instances HTTP api URL
-    response = requests.post(url, data = {'command':message}, headers={'Content-Type':'application/x-www-form-urlencoded'})
-    return
+def prefix_change(method, prefix):
+    #Push Network to Second ExaBGP instance, change URL to appropriate http api
+    here = os.path.dirname(os.path.realpath(__file__))
+    filepath = os.path.join(here, '../filter.txt')
+    if method == 'add':
+        with open(filepath, 'a+') as filterf:
+            found = False
+            for line in filterf:
+                if prefix in line:
+                    print 'error this prefix is already in the filter file'
+                    found = True
+            if not found:
+                filterf.write(prefix + '\n')
+                print 'successfully added prefix '
+                filter_list = filterf.read()
+                return filter_list
+    elif method == 'remove':
+        with open(filepath, 'r+') as filterf:
+            found = False
+            prefix_list = []
+            for line in filterf:
+                prefix_list.append(line)
+                if prefix in line:
+                    found = True
+            filterf.seek(0)
+            for line in prefix_list:
+                if line != prefix + '\n':
+                    filterf.write(line)
+            filterf.truncate()
+        if not found:
+            print 'The prefix was not in the prefix list'
+    else:
+        with open(filepath) as filterf:
+            filter_list = filterf.read()
+            return filter_list
+
 
 
 def get_rib():
@@ -102,4 +132,5 @@ def get_exa():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=57780)
+
 

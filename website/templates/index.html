@@ -27,8 +27,8 @@
               <form id="myform" class='myForm' name="ip_address_form">
                 <fieldset>
                 <legend>Prefix</legend>
-                <p><label class="choice"> <input type="radio" id='network' name="network" required value="announce"> Option 1 </label>
-                <label class="choice"> <input type="radio" id='network' name="network" required value="withdraw"> Option 2</label></p>
+                <p><label class="choice"> <input type="radio" id='network' name="network" required value="add"> Add </label>
+                <label class="choice"> <input type="radio" id='network' name="network" required value="remove"> Remove</label></p>
                 </fieldset>
                 </br>
                 <label>Prefix: 
@@ -36,6 +36,20 @@
                 </label>
                 <input id="submit_b" name="submit_b" type="submit" value="Submit"/>
               </form>
+              <div id="table-prefix">
+              <table id="prefix">
+                <thead>
+                   <tr>
+                      <th>Prefix List</th>
+                   </tr>
+                <thead>
+                <tbody>
+                   <tr>
+                      <td>{{prefix_list}}</td>
+                   </tr>
+                 </tbody>
+              </table>
+              </div>
             </p>
             <hr>
             <h3>Latest Update on ExaBGP</h3>
