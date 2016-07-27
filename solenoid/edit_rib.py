@@ -98,7 +98,7 @@ def rib_withdraw(withdrawn_prefixes):
         if isinstance(transport_object, CiscoGRPCClient):
             url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}]}}}}}}}}}}}}}}'
         else:  # Right now there is only gRPC and RESTconf, more elif will be required w/ more options
-            url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={bgp-prefix},{prefix-length}'
+            url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix={bgp_prefix},{prefix_length}'
         bgp_prefix, prefix_length = withdrawn_prefix.split('/')
         url = url.format(bgp_prefix=bgp_prefix, prefix_length=prefix_length)
         response = transport_object.delete(url)
@@ -166,7 +166,7 @@ def render_config(json_update):
     except KeyError:
         logger.error('Not a valid update message type', _source)
 
-
+ 
 def filter_prefixes(prefixes):
     """Filters out prefixes that do not fall in ranges indicated in filter.txt
 
