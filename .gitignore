@@ -69,6 +69,7 @@ target/
 solenoid.config
 tester.py
 updates.txt
+*.DS_Store
 
 #Vagrantfiles
 vagrant/.vagrant
