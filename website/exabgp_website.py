@@ -14,16 +14,34 @@ from solenoid import JSONRestCalls
 
 app = Flask(__name__)
 
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
 @app.route("/", methods=['GET', 'POST'])
 def template_test():
-    filter_list = prefix_change()
     rib = get_rib()
     return render_template('index.html',
         Title = 'Solenoid Demo on IOS-XRv',
         content2 = rib,
-        prefix_list = filter_list
         )
-
 @app.route("/get_rib_json", methods=['GET'])
 #Used for refreshing of object
 def get_rib_json():
@@ -35,8 +53,8 @@ def get_exa_json():
     return get_exa()
 @app.route("/prefix_change", methods=['GET'])
 def prefix_change():
-    prefix = request.form.get('ip_address', ' ')
-    method = request.form.get('network', ' ')
+    prefix = request.args.get('ip_address')
+    method = request.args.get('network')
     #Push Network to Second ExaBGP instance, change URL to appropriate http api
     here = os.path.dirname(os.path.realpath(__file__))
     filepath = os.path.join(here, '../filter.txt')
@@ -45,11 +63,9 @@ def prefix_change():
             found = False
             for line in filterf:
                 if prefix in line:
-                    print 'error this prefix is already in the filter file'
-                    found = True
+                    raise InvalidUsage('Error cannot add: This prefix is already in the filter file.')
             if not found:
                 filterf.write(prefix + '\n')
-                print 'successfully added prefix '
                 filter_list = filterf.read()
                 return filter_list
     elif method == 'remove':
@@ -58,17 +74,17 @@ def prefix_change():
             prefix_list = []
             for line in filterf:
                 prefix_list.append(line)
-                if prefix in line:
-                    found = True
             filterf.seek(0)
             for line in prefix_list:
                 if line != prefix + '\n':
                     filterf.write(line)
+                else:
+                    found = True
             filterf.truncate()
             filter_list = filterf.read()
-            return filter_list
         if not found:
-            print 'The prefix was not in the prefix list'
+            raise InvalidUsage('Error cannot remove: The prefix was not in the prefix list')
+        return filter_list
     else:
         with open(filepath) as filterf:
             filter_list = filterf.read()
