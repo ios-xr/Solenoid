@@ -7,10 +7,10 @@ import argparse
 from jinja2 import Environment, PackageLoader
 from netaddr import IPNetwork, AddrFormatError
 
-from solenoid.grpc_cisco.grpcClient import CiscoGRPCClient
-from solenoid.grpc_cisco import ems_grpc_pb2
-from solenoid.rest.jsonRestClient import JSONRestCalls
-from solenoid.logs.logger import Logger
+from grpc_cisco.grpcClient import CiscoGRPCClient
+from grpc_cisco import ems_grpc_pb2
+from rest.jsonRestClient import JSONRestCalls
+from logs.logger import Logger
 
 _source = 'solenoid'
 logger = Logger()
