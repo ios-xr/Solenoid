@@ -26,7 +26,7 @@ WITHDRAW_PREFIXES = ['1.1.1.8/32',
                      '1.1.1.4/32']
 
 def _exa_raw(test):
-    with open(os.path.join(LOCATION, '../examples/exa/exa-raw.json')) as f:
+    with open(_add_location('../examples/exa/exa-raw.json')) as f:
         lines = f.readlines()
         if test == 'announce_g':
             exa_line = lines[0].strip()
@@ -45,39 +45,42 @@ def _exa_raw(test):
         return exa_line
 
 def _check_errorlog():
-    with open(os.path.join(LOCATION, '../../logs/errors.log')) as err_log:
+    with open(_add_location('../../logs/errors.log')) as err_log:
         return err_log.readlines()
 
 def _check_debuglog():
-    with open(os.path.join(LOCATION, '../../logs/debug.log')) as debug_log:
+    with open(_add_location('../../logs/debug.log')) as debug_log:
         return debug_log.readlines()
 
+def _add_location(filepath):
+    new_filepath = os.path.join(LOCATION, filepath)
+    return new_filepath
 
 class RestRibTestCase(unittest.TestCase, object):
 
     def setUp(self):
         #Set global variable
-        edit_rib.filepath = os.path.join(LOCATION, '../examples/filter/filter-empty.txt')
+        edit_rib.FILEPATH = _add_location('../examples/filter/filter-empty.txt')
         #Clear out logging files.
-        open(os.path.join(LOCATION, '../../updates.txt'), 'w').close()
-        open(os.path.join(LOCATION, '../../logs/debug.log'), 'w').close()
-        open(os.path.join(LOCATION, '../../logs/errors.log'), 'w').close()
+        open(_add_location('../../updates.txt'), 'w').close()
+        open(_add_location('../../logs/debug.log'), 'w').close()
+        open(_add_location('../../logs/errors.log'), 'w').close()
         # Move the config file so it doesn't get edited
-        if os.path.isfile(os.path.join(LOCATION, '../../../solenoid.config')):
+        if os.path.isfile(_add_location('../../../solenoid.config')):
             os.rename(
-                os.path.join(LOCATION, '../../../solenoid.config'),
-                os.path.join(LOCATION, '../../../solenoidtest.config')
+                _add_location('../../../solenoid.config'),
+                _add_location('../../../solenoidtest.config')
             )
 
     def tearDown(self):
         # If a new config file was created, delete it
-        if os.path.isfile(os.path.join(LOCATION, '../../../solenoid.config')):
-            os.remove(os.path.join(LOCATION, '../../../solenoid.config'))
+        if os.path.isfile(_add_location('../../../solenoid.config')):
+            os.remove(_add_location('../../../solenoid.config'))
         # If the config file was moved, move it back
-        if os.path.isfile(os.path.join(LOCATION, '../../../solenoidtest.config')):
+        if os.path.isfile(_add_location('../../../solenoidtest.config')):
             os.rename(
-                os.path.join(LOCATION, '../../../solenoidtest.config'),
-                os.path.join(LOCATION, '../../../solenoid.config')
+                _add_location('../../../solenoidtest.config'),
+                _add_location('../../../solenoid.config')
             )
 
     @patch('sys.stdin', StringIO(_exa_raw('announce_g')))
@@ -123,7 +126,7 @@ class RestRibTestCase(unittest.TestCase, object):
                 'Restart': time.ctime()
             }
         )
-        with open(os.path.join(LOCATION, '../../updates.txt')) as f:
+        with open(_add_location('../../updates.txt')) as f:
             self.assertTrue(len(f.readlines()) == 1)
 
     @patch('solenoid.edit_rib.rib_announce')
@@ -147,7 +150,7 @@ class RestRibTestCase(unittest.TestCase, object):
     def test_render_config_announce_good(self, mock_announce):
         formatted_json = json.loads(_exa_raw('announce_g'))
         edit_rib.render_config(formatted_json)
-        with open(os.path.join(LOCATION, '../examples/rendered_announce.txt'), 'U') as f:
+        with open(_add_location('../examples/rendered_announce.txt'), 'U') as f:
             rendered_announce = f.read()
         mock_announce.assert_called_with(rendered_announce)
 
@@ -158,7 +161,7 @@ class RestRibTestCase(unittest.TestCase, object):
         mock_announce.assert_called_with(WITHDRAW_PREFIXES)
 
     def test_filter_prefix_good(self):
-        edit_rib.filepath = os.path.join(LOCATION, '../examples/filter/filter-full.txt')
+        edit_rib.FILEPATH = _add_location('../examples/filter/filter-full.txt')
         start_prefixes = ['1.1.1.9/32',
                           '192.168.3.1/28',
                           '1.1.1.2/32',
@@ -177,7 +180,7 @@ class RestRibTestCase(unittest.TestCase, object):
 
 # This test is wrong - the error is raising but assertRaises is failing
     # def test_filter_prefix_invalid(self):
-    #     edit_rib.filepath = os.path.join(LOCATION, 'examples/filter-invalid.txt')
+    #     edit_rib.filepath = _add_location('examples/filter-invalid.txt')
     #     start_prefixes = ['1.1.1.9/32',
     #                       '192.168.3.1/28',
     #                       '1.1.1.2/32',
@@ -191,8 +194,8 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_correct_class_created(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf/restconf_good.config'),
-            os.path.join(LOCATION, '../../../solenoid.config')
+            _add_location('../examples/config/restconf/restconf_good.config'),
+            _add_location('../../../solenoid.config')
         )
         transport_object = edit_rib.create_transport_object()
         self.assertIsInstance(transport_object, edit_rib.JSONRestCalls)
@@ -205,8 +208,8 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_missing_object(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf/no_port.config'),
-            os.path.join(LOCATION, '../../../solenoid.config')
+            _add_location('../examples/config/restconf/no_port.config'),
+            _add_location('../../../solenoid.config')
         )
         with self.assertRaises(SystemExit):
             edit_rib.create_transport_object()
@@ -215,8 +218,8 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_missing_section(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf/no_section.config'),
-            os.path.join(LOCATION, '../../../solenoid.config')
+            _add_location('../examples/config/restconf/no_section.config'),
+            _add_location('../../../solenoid.config')
         )
         with self.assertRaises(SystemExit):
             edit_rib.create_transport_object()
@@ -225,8 +228,8 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_multiple_sections(self):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf/multiple_sections.config'),
-            os.path.join(LOCATION, '../../../solenoid.config')
+            _add_location('../examples/config/restconf/multiple_sections.config'),
+            _add_location('../../../solenoid.config')
         )
         transport_object = edit_rib.create_transport_object()
         self.assertIsInstance(transport_object, edit_rib.JSONRestCalls)
@@ -236,10 +239,10 @@ class RestRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.JSONRestCalls.patch')
     def test_rib_announce(self, mock_patch):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf/restconf_good.config'),
-            os.path.join(LOCATION, '../../../solenoid.config')
+            _add_location('../examples/config/restconf/restconf_good.config'),
+            _add_location('../../../solenoid.config')
         )
-        with open(os.path.join(LOCATION, '../examples/rendered_announce.txt')) as f:
+        with open(_add_location('../examples/rendered_announce.txt')) as f:
             rendered_announce = f.read()
         edit_rib.rib_announce(rendered_announce)
         mock_patch.assert_called_with(rendered_announce)
@@ -248,8 +251,8 @@ class RestRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.JSONRestCalls.delete')
     def test_rib_withdraw(self, mock_delete):
         shutil.copy(
-            os.path.join(LOCATION, '../examples/config/restconf/restconf_good.config'),
-            os.path.join(LOCATION, '../../../solenoid.config')
+            _add_location('../examples/config/restconf/restconf_good.config'),
+            _add_location('../../../solenoid.config')
         )
         edit_rib.rib_withdraw(WITHDRAW_PREFIXES)
         url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix='
