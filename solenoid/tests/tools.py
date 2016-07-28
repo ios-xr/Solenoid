@@ -1,7 +1,7 @@
 import os
 
 def exa_raw(test):
-    with open(add_location('../examples/exa/exa-raw.json')) as f:
+    with open(add_location('examples/exa/exa-raw.json')) as f:
         lines = f.readlines()
         if test == 'announce_g':
             exa_line = lines[0].strip()
@@ -20,11 +20,11 @@ def exa_raw(test):
         return exa_line
 
 def check_errorlog():
-    with open(add_location('../../logs/errors.log')) as err_log:
+    with open(add_location('../logs/errors.log')) as err_log:
         return err_log.readlines()
 
 def check_debuglog():
-    with open(add_location('../../logs/debug.log')) as debug_log:
+    with open(add_location('../logs/debug.log')) as debug_log:
         return debug_log.readlines()
 
 def add_location(filepath):

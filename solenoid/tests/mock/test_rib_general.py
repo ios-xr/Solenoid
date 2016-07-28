@@ -6,18 +6,18 @@ import sys
 from StringIO import StringIO
 from mock import patch, call
 from solenoid import edit_rib
-from solenoid.tests.mock import tools
+from solenoid.tests import tools
 
 
 class GeneralRibTestCase(unittest.TestCase, object):
 
     def setUp(self):
         #Set global variable
-        edit_rib.FILEPATH = tools.add_location('../examples/filter/filter-empty.txt')
+        edit_rib.FILEPATH = tools.add_location('examples/filter/filter-empty.txt')
         #Clear out logging files.
-        open(tools.add_location('../../updates.txt'), 'w').close()
-        open(tools.add_location('../../logs/debug.log'), 'w').close()
-        open(tools.add_location('../../logs/errors.log'), 'w').close()
+        open(tools.add_location('../updates.txt'), 'w').close()
+        open(tools.add_location('../logs/debug.log'), 'w').close()
+        open(tools.add_location('../logs/errors.log'), 'w').close()
     
     @patch('sys.stdin', StringIO(tools.exa_raw('announce_g')))
     @patch('solenoid.edit_rib.update_validator')
@@ -59,10 +59,10 @@ class GeneralRibTestCase(unittest.TestCase, object):
     def test_update_file(self):
         edit_rib.update_file(
             {
-                'Restart': time.ctime()
+                'Test': time.ctime()
             }
         )
-        with open(tools.add_location('../../updates.txt')) as f:
+        with open(tools.add_location('../updates.txt')) as f:
             self.assertTrue(len(f.readlines()) == 1)
 
     @patch('solenoid.edit_rib.rib_announce')
@@ -86,7 +86,7 @@ class GeneralRibTestCase(unittest.TestCase, object):
     def test_render_config_announce_good(self, mock_announce):
         formatted_json = json.loads(tools.exa_raw('announce_g'))
         edit_rib.render_config(formatted_json)
-        with open(tools.add_location('../examples/rendered_announce.txt'), 'U') as f:
+        with open(tools.add_location('examples/rendered_announce.txt'), 'U') as f:
             rendered_announce = f.read()
         mock_announce.assert_called_with(rendered_announce)
 
@@ -107,7 +107,7 @@ class GeneralRibTestCase(unittest.TestCase, object):
         mock_announce.assert_called_with(withdraw_prefixes)
 
     def test_filter_prefix_good(self):
-        edit_rib.FILEPATH = tools.add_location('../examples/filter/filter-full.txt')
+        edit_rib.FILEPATH = tools.add_location('examples/filter/filter-full.txt')
         start_prefixes = ['1.1.1.9/32',
                           '192.168.3.1/28',
                           '1.1.1.2/32',

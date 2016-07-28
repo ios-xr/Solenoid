@@ -8,7 +8,7 @@ import shutil
 
 from mock import patch, call
 from solenoid import edit_rib
-from solenoid.tests.mock import tools
+from solenoid.tests import tools
 
 
 class GRPCRibTestCase(unittest.TestCase, object):
@@ -16,32 +16,32 @@ class GRPCRibTestCase(unittest.TestCase, object):
     def setUp(self):
         #Set global variable
         edit_rib.FILEPATH = tools.add_location('../examples/filter/filter-empty.txt')
-        #Clear out logging files.
-        open(tools.add_location('../../updates.txt'), 'w').close()
-        open(tools.add_location('../../logs/debug.log'), 'w').close()
-        open(tools.add_location('../../logs/errors.log'), 'w').close()
+        #Clear out logging files.   
+        open(tools.add_location('../updates.txt'), 'w').close()
+        open(tools.add_location('../logs/debug.log'), 'w').close()
+        open(tools.add_location('../logs/errors.log'), 'w').close()
         # Move the config file so it doesn't get edited
-        if os.path.isfile(tools.add_location('../../../solenoid.config')):
+        if os.path.isfile(tools.add_location('../../solenoid.config')):
             os.rename(
-                tools.add_location('../../../solenoid.config'),
-                tools.add_location('../../../solenoidtest.config')
+                tools.add_location('../../solenoid.config'),
+                tools.add_location('../../solenoidtest.config')
             )
 
     def tearDown(self):
         # If a new config file was created, delete it
-        if os.path.isfile(tools.add_location('../../../solenoid.config')):
-            os.remove(tools.add_location('../../../solenoid.config'))
+        if os.path.isfile(tools.add_location('../../solenoid.config')):
+            os.remove(tools.add_location('../../solenoid.config'))
         # If the config file was moved, move it back
-        if os.path.isfile(tools.add_location('../../../solenoidtest.config')):
+        if os.path.isfile(tools.add_location('../../solenoidtest.config')):
             os.rename(
-                tools.add_location('../../../solenoidtest.config'),
-                tools.add_location('../../../solenoid.config')
+                tools.add_location('../../solenoidtest.config'),
+                tools.add_location('../../solenoid.config')
             )
 
     def test_create_transport_object_correct_class_created(self):
         shutil.copy(
-            tools.add_location('../examples/config/grpc/grpc_good.config'),
-            tools.add_location('../../../solenoid.config')
+            tools.add_location('examples/config/grpc/grpc_good.config'),
+            tools.add_location('../../solenoid.config')
         )
         transport_object = edit_rib.create_transport_object()
         self.assertIsInstance(transport_object, edit_rib.CiscoGRPCClient)
@@ -54,8 +54,8 @@ class GRPCRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_missing_object(self):
         shutil.copy(
-            tools.add_location('../examples/config/grpc/no_port.config'),
-            tools.add_location('../../../solenoid.config')
+            tools.add_location('examples/config/grpc/no_port.config'),
+            tools.add_location('../../solenoid.config')
         )
         with self.assertRaises(SystemExit):
             edit_rib.create_transport_object()
@@ -64,8 +64,8 @@ class GRPCRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_missing_section(self):
         shutil.copy(
-            tools.add_location('../examples/config/grpc/no_section.config'),
-            tools.add_location('../../../solenoid.config')
+            tools.add_location('examples/config/grpc/no_section.config'),
+            tools.add_location('../../solenoid.config')
         )
         with self.assertRaises(SystemExit):
             edit_rib.create_transport_object()
@@ -74,8 +74,8 @@ class GRPCRibTestCase(unittest.TestCase, object):
 
     def test_create_transport_object_multiple_sections(self):
         shutil.copy(
-            tools.add_location('../examples/config/grpc/multiple_sections.config'),
-            tools.add_location('../../../solenoid.config')
+            tools.add_location('examples/config/grpc/multiple_sections.config'),
+            tools.add_location('../../solenoid.config')
         )
         transport_object = edit_rib.create_transport_object()
         self.assertIsInstance(transport_object, edit_rib.CiscoGRPCClient)
@@ -85,10 +85,10 @@ class GRPCRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.CiscoGRPCClient.patch')
     def test_rib_announce(self, mock_patch):
         shutil.copy(
-            tools.add_location('../examples/config/grpc/grpc_good.config'),
-            tools.add_location('../../../solenoid.config')
+            tools.add_location('examples/config/grpc/grpc_good.config'),
+            tools.add_location('../../solenoid.config')
         )
-        with open(tools.add_location('../examples/rendered_announce.txt')) as f:
+        with open(tools.add_location('examples/rendered_announce.txt')) as f:
             rendered_announce = f.read()
         edit_rib.rib_announce(rendered_announce)
         mock_patch.assert_called_with(rendered_announce)
@@ -107,8 +107,8 @@ class GRPCRibTestCase(unittest.TestCase, object):
              '1.1.1.10/32',
              '1.1.1.4/32']
         shutil.copy(
-            tools.add_location('../examples/config/grpc/grpc_good.config'),
-            tools.add_location('../../../solenoid.config')
+            tools.add_location('examples/config/grpc/grpc_good.config'),
+            tools.add_location('../../solenoid.config')
         )
         edit_rib.rib_withdraw(withdraw_prefixes)
         url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{withdraw}]}}}}}}}}}}}}}}'
