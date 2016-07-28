@@ -4,27 +4,11 @@ calls are made to the router.
 
 import unittest
 import os
-import json
-import time
-import sys
 import shutil
 
-from StringIO import StringIO
 from mock import patch, call
 from solenoid import edit_rib
 from solenoid.tests.mock import tools
-
-
-WITHDRAW_PREFIXES = ['1.1.1.8/32',
-                     '1.1.1.5/32',
-                     '1.1.1.7/32',
-                     '1.1.1.9/32',
-                     '1.1.1.2/32',
-                     '1.1.1.1/32',
-                     '1.1.1.6/32',
-                     '1.1.1.3/32',
-                     '1.1.1.10/32',
-                     '1.1.1.4/32']
 
 
 class RestRibTestCase(unittest.TestCase, object):
@@ -112,13 +96,23 @@ class RestRibTestCase(unittest.TestCase, object):
 
     @patch('solenoid.edit_rib.JSONRestCalls.delete')
     def test_rib_withdraw(self, mock_delete):
+        withdraw_prefixes = ['1.1.1.8/32',
+                     '1.1.1.5/32',
+                     '1.1.1.7/32',
+                     '1.1.1.9/32',
+                     '1.1.1.2/32',
+                     '1.1.1.1/32',
+                     '1.1.1.6/32',
+                     '1.1.1.3/32',
+                     '1.1.1.10/32',
+                     '1.1.1.4/32']
         shutil.copy(
             tools.add_location('../examples/config/restconf/restconf_good.config'),
             tools.add_location('../../../solenoid.config')
         )
-        edit_rib.rib_withdraw(WITHDRAW_PREFIXES)
+        edit_rib.rib_withdraw(withdraw_prefixes)
         url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix='
-        comma_list = [prefix.replace('/', ',') for prefix in WITHDRAW_PREFIXES]
+        comma_list = [prefix.replace('/', ',') for prefix in withdraw_prefixes]
         calls = map(call, [url+x for x in comma_list])
         mock_delete.assert_has_calls(calls, any_order=True)
         self.assertIn('| WITHDRAW | ', tools.check_debuglog()[0])

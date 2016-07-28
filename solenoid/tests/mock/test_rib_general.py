@@ -9,17 +9,6 @@ from solenoid import edit_rib
 from solenoid.tests.mock import tools
 
 
-WITHDRAW_PREFIXES = ['1.1.1.8/32',
-                     '1.1.1.5/32',
-                     '1.1.1.7/32',
-                     '1.1.1.9/32',
-                     '1.1.1.2/32',
-                     '1.1.1.1/32',
-                     '1.1.1.6/32',
-                     '1.1.1.3/32',
-                     '1.1.1.10/32',
-                     '1.1.1.4/32']
-
 class GeneralRibTestCase(unittest.TestCase, object):
 
     def setUp(self):
@@ -103,9 +92,19 @@ class GeneralRibTestCase(unittest.TestCase, object):
 
     @patch('solenoid.edit_rib.rib_withdraw')
     def test_render_config_withdraw_good(self, mock_announce):
+        withdraw_prefixes = ['1.1.1.8/32',
+                     '1.1.1.5/32',
+                     '1.1.1.7/32',
+                     '1.1.1.9/32',
+                     '1.1.1.2/32',
+                     '1.1.1.1/32',
+                     '1.1.1.6/32',
+                     '1.1.1.3/32',
+                     '1.1.1.10/32',
+                     '1.1.1.4/32']
         formatted_json = json.loads(tools.exa_raw('withdraw_g'))
         edit_rib.render_config(formatted_json)
-        mock_announce.assert_called_with(WITHDRAW_PREFIXES)
+        mock_announce.assert_called_with(withdraw_prefixes)
 
     def test_filter_prefix_good(self):
         edit_rib.FILEPATH = tools.add_location('../examples/filter/filter-full.txt')
