@@ -10,16 +10,16 @@ class RestRibTestCase(unittest.TestCase, object):
         #Set global variable
         edit_rib.filepath = tools.add_location('examples/filter-empty.txt')
         #Clear out logging files.
-        open(tools.add_location('../../updates.txt'), 'w').close()
-        open(tools.add_location('../../logs/debug.log'), 'w').close()
-        open(tools.add_location('../../logs/errors.log'), 'w').close()
+        open(tools.add_location('../updates.txt'), 'w').close()
+        open(tools.add_location('../logs/debug.log'), 'w').close()
+        open(tools.add_location('../logs/errors.log'), 'w').close()
 
     def test_create_transport_object_correct_class_created(self):
         transport_object = edit_rib.create_transport_object()
         self.assertIsInstance(transport_object, edit_rib.JSONRestCalls)
 
     def test_rib_announce_rest(self):
-        with open(tools.add_location('../examples/integration/rendered_announce.txt')) as f:
+        with open(tools.add_location('examples/integration/rendered_announce.txt')) as f:
             rendered_announce = f.read()
         edit_rib.rib_announce(rendered_announce)
         self.assertIn('| ANNOUNCE | ', tools.check_debuglog()[0])
@@ -33,13 +33,13 @@ class RestRibTestCase(unittest.TestCase, object):
         self.assertIn('| WITHDRAW | ', tools.check_debuglog()[0])
 
     def test_rib_announce_rest_json(self):
-        with open(tools.add_location('../examples/integration/exa-announce.json')) as f:
+        with open(tools.add_location('examples/integration/exa-announce.json')) as f:
             exa_announce = f.read()
         edit_rib.render_config(json.loads(exa_announce))
         self.assertIn('| ANNOUNCE | ', tools.check_debuglog()[0])
 
     def test_rib_withdraw_rest_json(self):
-        with open(tools.add_location('../examples/integration/exa-withdraw.json')) as f:
+        with open(tools.add_location('examples/integration/exa-withdraw.json')) as f:
             exa_withdraw = f.read()
         edit_rib.render_config(json.loads(exa_withdraw))
         self.assertIn('| WITHDRAW | ', tools.check_debuglog()[0])
