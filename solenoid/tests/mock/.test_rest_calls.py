@@ -5,7 +5,7 @@ import ConfigParser
 import mock
 from requests import Response
 
-from rest.jsonRestClient import JSONRestCalls
+from solenoid.rest.jsonRestClient import JSONRestCalls
 
 
 class JSONRestCallsCase(unittest.TestCase):
