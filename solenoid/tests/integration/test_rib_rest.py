@@ -8,7 +8,7 @@ from solenoid.tests import tools
 class RestRibTestCase(unittest.TestCase, object):
     def setUp(self):
         #Set global variable
-        edit_rib.filepath = tools.add_location('examples/filter-empty.txt')
+        edit_rib.FILEPATH = tools.add_location('examples/filter-empty.txt')
         #Clear out logging files.
         open(tools.add_location('../updates.txt'), 'w').close()
         open(tools.add_location('../logs/debug.log'), 'w').close()
