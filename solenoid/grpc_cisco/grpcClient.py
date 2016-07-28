@@ -23,6 +23,16 @@ class CiscoGRPCClient(object):
         self._timeout = int(timeout)
         self._metadata = [('username', user), ('password', password)]
 
+    def __repr__(self):
+        return '%s(Server = %s, Port = %s, User = %s, Password = %s, Timeout = %s)' % (
+            self.__class__.__name__,
+            self._server,
+            self._port,
+            self._metadata[0][1],
+            self._metadata[1][1],
+            self._timeout
+        )
+
     def get(self, path):
         """Get grpc call
             :param data: JSON
