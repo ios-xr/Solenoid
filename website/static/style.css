@@ -2,8 +2,11 @@ body {
   margin:0;
   padding:0;
   line-height: 1.5em;
-  background: background: linear-gradient(to bottom right, blue, green);
+  background: #46A040; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(left top, #46A040, #0096D6); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(bottom right, #46A040, #0096D6); /* For Opera 11.1 to 12.0 */
   background: -moz-linear-gradient(bottom right, #46A040, #0096D6); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to bottom right, #46A040, #0096D6); /* Standard syntax */
 }
 
 h1 {
@@ -132,11 +135,12 @@ nav ul a {
 .myForm {
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: 0.8em;
-  padding: 1em;
+  padding: 5px 5px 15px 5px;
   border: 1px solid #ccc;
   border-radius: 3px;
   box-shadow: -5px -5px 5px #888;
-  width: 400px;
+  width: 255px;
+  background: white;
 }
 
 .myForm * {
@@ -158,7 +162,7 @@ nav ul a {
 
 table {
   border-collapse: collapse;
-  width: auto;
+  width: 100%;
   border: 1px solid #ccc;
   box-shadow: -5px -5px 5px #888;
   border-radius: 3px;
@@ -184,4 +188,21 @@ td {
   border: 1px solid #ccc;
   border-radius: 3px;
   box-shadow: -5px -5px 5px #888;
+}
+
+#table-prefix{
+  background: white;
+  margin-top: 20px;
+  width: 265px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: -5px -5px 5px #888
+}
+
+#table-prefix td{
+  padding:5px;
+}
+
+input:required {
+  box-shadow: none;
 }

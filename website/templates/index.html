@@ -20,24 +20,6 @@
       <main>
         <div id="content">
           <div class="innertube">
-            <h3>Prefix Filtering</h3>
-            <p>Here is a place holder for the new filtering component of Solenoid</p>
-            <p>This will cause Solenoid to only pass the designated prefix specified. </p>
-            <p>
-              <form id="myform" class='myForm' name="ip_address_form">
-                <fieldset>
-                <legend>Prefix</legend>
-                <p><label class="choice"> <input type="radio" id='network' name="network" required value="announce"> Option 1 </label>
-                <label class="choice"> <input type="radio" id='network' name="network" required value="withdraw"> Option 2</label></p>
-                </fieldset>
-                </br>
-                <label>Prefix: 
-                  <input type="text" id='ip_address' name="ip_address" placeholder='1.1.1.1/32' required>
-                </label>
-                <input id="submit_b" name="submit_b" type="submit" value="Submit"/>
-              </form>
-            </p>
-            <hr>
             <h3>Latest Update on ExaBGP</h3>
             <p>Solenoid is currently listening to the updates that Exabgp recieves. It will then inject the announce and withdraw request into the rib table. A controller of any sort can be in place of exabgp.  </p>
             <p>
@@ -95,6 +77,37 @@
           <img src={{url_for('static', filename='Topology.png')}} alt="Topology" style='width:261px; height:auto;'>
           <p> A BGP network is shown above. Networks are automatically announced and withdrawn by another bgp speaker  at a fixed interval. </p>
           <p> Solenoid is running in an Ubuntu container, that is sitting on an IOS-XRv image.</p>
+            <h3>Prefix Filtering</h3>
+            <p>Solenoid can use filtering to only pass designated prefixes that fall in a prefix range or indivdual prefix</p>
+            <p>In the website you can add or remove prefixes or a prefix range using the toggle key and input box </p>
+            <p>
+              <form id="myform" class='myForm' name="ip_address_form">
+                <fieldset>
+                <legend>Prefix</legend>
+                <p><label class="choice"> <input type="radio" id='network' name="network" required value="add"> Add </label>
+                <label class="choice"> <input type="radio" id='network' name="network" required value="remove"> Remove</label></p>
+                </fieldset>
+                </br>
+                <label>Prefix:
+                  <input type="text" id='ip_address' name="ip_address" placeholder='1.1.1.1/32' required>
+                </label>
+                <input id="submit_b" name="submit_b" type="submit" value="Submit"/>
+              </form>
+              <div id="table-prefix">
+              <table id="prefix">
+                <thead>
+                   <tr>
+                      <th>Prefix List</th>
+                   </tr>
+                <thead>
+                <tbody>
+                   <tr>
+                      <td></td>
+                   </tr>
+                 </tbody>
+              </table>
+              </div>
+            </p>
         </div>
       </nav>
 
@@ -115,8 +128,8 @@
                 $("#myform").on("submit", function(e) {
                     e.preventDefault();
                     $.ajax({
-                        url: $(this).attr("action"),
-                        type: 'POST',
+                        url: "/prefix_change",
+                        type: 'GET',
                         data: $(this).serialize(),
                         beforeSend: function() {
                          $("#sumbit_b").prop('disabled', true);
@@ -125,7 +138,11 @@
                             $("#submit_b").prop("disabled", false);
                             $("#response").html(data);
                             $("#ip_address").val("")
-      }
+                            getprefix();
+                        },
+                        error: function(data) {
+                            alert(JSON.parse(data.responseText)['message']);
+                        }
                     });
                 });
             });
