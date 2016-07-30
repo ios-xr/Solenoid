@@ -12,7 +12,7 @@ from grpc_cisco import ems_grpc_pb2
 from rest.jsonRestClient import JSONRestCalls
 from logs.logger import Logger
 
-_source = 'solenoid'
+SOURCE = 'solenoid'
 logger = Logger()
 
 
@@ -29,7 +29,7 @@ def create_transport_object():
         config.read(os.path.join(location, '../solenoid.config'))
         if len(config.sections()) >= 1:
             if len(config.sections()) > 1:
-                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', _source)
+                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', SOURCE)
             section = config.sections()[0]
             arguments = (
                 config.get(section, 'ip'),
@@ -48,7 +48,7 @@ def create_transport_object():
             'Something is wrong with your config file: {}'.format(
                 e.message
             ),
-            _source
+            SOURCE
         )
         sys.exit(1)
 
@@ -76,14 +76,14 @@ def rib_announce(rendered_config):
         logger.info('ANNOUNCE | {code} '.format(
             code='OK'
             ),
-            _source
+            SOURCE
         )
     else:
         logger.warning('ANNOUNCE | {code} | {reason}'.format(
             code='FAIL',
             reason=status
             ),
-            _source
+            SOURCE
         )
 
 
@@ -125,14 +125,14 @@ def rib_withdraw(withdrawn_prefixes):
         logger.info('WITHDRAW | {code}'.format(
             code='OK'
             ),
-            _source
+            SOURCE
         )
     else:
         logger.warning('WITHDRAW | {code} | {reason}'.format(
             code='FAIL',
             reason=status
             ),
-            _source
+            SOURCE
         )
 
 def render_config(json_update):
@@ -176,9 +176,9 @@ def render_config(json_update):
                     bgp_prefixes = filter_prefixes(bgp_prefixes)
                 rib_withdraw(bgp_prefixes)
         else:
-            logger.info('EOR message', _source)
+            logger.info('EOR message', SOURCE)
     except KeyError:
-        logger.error('Not a valid update message type', _source)
+        logger.error('Not a valid update message type', SOURCE)
 
 
 def filter_prefixes(prefixes):
@@ -202,7 +202,7 @@ def filter_prefixes(prefixes):
                     final += [str(ip1)]
             return final
         except AddrFormatError, e:
-            logger.error('FILTER | {}'.format(e), _source)
+            logger.error('FILTER | {}'.format(e), SOURCE)
 
 
 def update_file(raw_update):
@@ -230,9 +230,9 @@ def update_validator(raw_update):
             # Add the update to a file to keep track.
             update_file(raw_update)
     except ValueError:
-        logger.error('Failed JSON conversion for BGP update', _source)
+        logger.error('Failed JSON conversion for BGP update', SOURCE)
     except KeyError:
-        logger.debug('Not a valid update message type', _source)
+        logger.debug('Not a valid update message type', SOURCE)
 
 
 def update_watcher():
