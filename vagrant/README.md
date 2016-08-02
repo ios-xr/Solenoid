@@ -6,6 +6,8 @@
 ### Overview
 This is a Vagrant box set up to demo the Solenoid application. This Vagrant uses two virtualbox VMs, an IOS-XRv image and an Ubuntu/trusty64 image. The plumbing and demo functions are brought up through bash scripts to allow you to use the Solenoid application without hassle, and demo it to others.
 
+![Solenoid Vagrant Diagram](SolenoidDiagram.png)
+
 ### Set Up
 
 To install the application.
