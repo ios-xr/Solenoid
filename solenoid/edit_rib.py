@@ -64,13 +64,12 @@ def get_status(response):
         return response.content
 
 
-def rib_announce(rendered_config):
+def rib_announce(rendered_config, transport):
     """Add networks to the RIB table using HTTP PATCH over RESTconf.
     :param rendered_config: Jinja2 rendered configuration file
     :type rendered_config: unicode
     """
-    transport_object = create_transport_object()
-    response = transport_object.patch(rendered_config)
+    response = transport.patch(rendered_config)
     status = get_status(response)
     if status == '' or status is None:
         logger.info('ANNOUNCE | {code} '.format(
@@ -87,14 +86,13 @@ def rib_announce(rendered_config):
         )
 
 
-def rib_withdraw(withdrawn_prefixes):
+def rib_withdraw(withdrawn_prefixes, transport):
     """Remove the withdrawn prefix from the RIB table.
         :param new_config: The prefix and prefix-length to be removed
         :type new_config: str
     """
-    transport_object = create_transport_object()
     # Delete the prefixes in bulk with gRPC.
-    if isinstance(transport_object, CiscoGRPCClient):
+    if isinstance(transport, CiscoGRPCClient):
         url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{withdraw}]}}}}}}}}}}}}}}'
         prefix_info = '{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}'
         prefix_list = []
@@ -108,7 +106,7 @@ def rib_withdraw(withdrawn_prefixes):
             ]
             prefix_str = ', '.join(prefix_list)
         url = url.format(withdraw=prefix_str)
-        response = transport_object.delete(url)
+        response = transport.delete(url)
         status = get_status(response)
     else:  # Right now there is only gRPC and RESTconf, more elif will be required w/ more options.
     # Delete the prefixes one at a time with RESTconf.
@@ -119,7 +117,7 @@ def rib_withdraw(withdrawn_prefixes):
                 bgp_prefix=bgp_prefix,
                 prefix_length=prefix_length
             )
-            response = transport_object.delete(url)
+            response = transport.delete(url)
             status = get_status(response)
     if status is None or status == '':
         logger.info('WITHDRAW | {code}'.format(
@@ -135,7 +133,7 @@ def rib_withdraw(withdrawn_prefixes):
             SOURCE
         )
 
-def render_config(json_update):
+def render_config(json_update, transport):
     """Take a BGP command and translate it into yang formatted JSON
     :param json_update: JSON dictionary
     :type json_update: dict
@@ -167,14 +165,15 @@ def render_config(json_update):
                 template = env.get_template('static.json')
                 # Render the template and make the announcement.
                 rib_announce(template.render(next_hop=next_hop,
-                                             prefixes=prefixes)
+                                             prefixes=prefixes),
+                            transport
                             )
             elif 'withdraw' in update_type:
                 bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
                 # Filter the prefixes if needed.
                 if filt:
                     bgp_prefixes = filter_prefixes(bgp_prefixes)
-                rib_withdraw(bgp_prefixes)
+                rib_withdraw(bgp_prefixes, transport)
         else:
             logger.info('EOR message', SOURCE)
     except KeyError:
@@ -217,7 +216,7 @@ def update_file(raw_update):
         f.write(str(raw_update) + '\n')
 
 
-def update_validator(raw_update):
+def update_validator(raw_update, transport):
     """Translate update to JSON and send it to be rendered.
         :param raw_update: Raw exaBGP message.
         :type raw_update: JSON
@@ -226,7 +225,7 @@ def update_validator(raw_update):
         json_update = json.loads(raw_update)
         # If it is an update, make the RIB changes.
         if json_update['type'] == 'update':
-            render_config(json_update)
+            render_config(json_update, transport)
             # Add the update to a file to keep track.
             update_file(raw_update)
     except ValueError:
@@ -238,9 +237,10 @@ def update_validator(raw_update):
 def update_watcher():
     """Watches for BGP updates and triggers a RIB change when update is heard."""
     # Continuously listen for updates.
+    transport = create_transport_object()
     while 1:
         raw_update = sys.stdin.readline().strip()
-        update_validator(raw_update)
+        update_validator(raw_update, transport)
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser()
