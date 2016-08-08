@@ -77,14 +77,12 @@ password: vagrant
 
 
 ####Container running Solenoid
-From XR Bash (see instructions above):
+From your laptop's vagrant folder:
 
-    ssh cisco@192.168.1.2
+    ssh -p 58822 ubuntu@localhost
+    
+Password: ubuntu
 
-password: cisco
-
-
-####Ubuntu Container on IOS-XRv
 
 To see the actual Solenoid application running, enter the following from the container (see instructions above) in order to enter the running [screen](https://www.gnu.org/software/screen/manual/screen.html):
     
@@ -98,7 +96,7 @@ To see the website running, enter the following from the container (see instruct
 ####Ubuntu Devbox
 From the vagrant folder:
 
-    vagrant ssh ubuntu
+    vagrant ssh devbox
 
 From this vagrant box, to access exaBGP enter the [screen](https://www.gnu.org/software/screen/manual/screen.html) that is currently running:
 
