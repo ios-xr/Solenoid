@@ -37,11 +37,13 @@ virtualenv venv
 source venv/bin/activate
 ```
 
-Step 3: Install gRPC.
+Step 3: Install gRPC (if you are using gRPC).
 
 `pip install grpcio`
 
-Step 4: Run ```python setup.py install``` to install the Solenoid application. You may have to use sudo for it.
+Step 4: Install Solenoid.
+
+```python setup.py install```
 
 Step 5 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. Please refer to the Config File section of the wiki for more information.
 
