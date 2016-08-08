@@ -24,7 +24,7 @@ And follow the instructions to add the base box:
 
 
 
-Step 4. Download the latest release tarball from [the release page](https://cto-github.cisco.com/lisroach/Solenoid/releases) and add it the directory `/Solenoid/vagrant/xrv/`. This is the container image that will sit on the IOS-XRv box.
+Step 4. Download the latest release tarball from [the release page](https://cto-github.cisco.com/lisroach/Solenoid/releases) and add it the directory `/Solenoid/vagrant/xrv/`. This is the container image that will sit on the IOS-XRv box. You can also create your own tarball, using the instructions [here].
 
 
     mv solenoid.tgz Solenoid/vagrant/xrv/

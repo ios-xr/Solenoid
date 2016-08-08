@@ -6,7 +6,7 @@
 
 cd /misc/app_host/
 sudo mv /home/vagrant/solenoid.tgz .
-tar -zvxf solenoid.tgz > /dev/null
+tar -zvxf solenoid.tgz -C solenoid/ > /dev/null
 sudo -i virsh create /home/vagrant/demo.xml
 
 ## Apply a blind config ##
