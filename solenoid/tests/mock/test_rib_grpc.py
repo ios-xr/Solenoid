@@ -16,7 +16,7 @@ class GRPCRibTestCase(unittest.TestCase, object):
     def setUp(self):
         #Set global variable
         edit_rib.FILEPATH = tools.add_location('../examples/filter/filter-empty.txt')
-        #Clear out logging files.   
+        #Clear out logging files.
         open(tools.add_location('../updates.txt'), 'w').close()
         open(tools.add_location('../logs/debug.log'), 'w').close()
         open(tools.add_location('../logs/errors.log'), 'w').close()
@@ -29,7 +29,9 @@ class GRPCRibTestCase(unittest.TestCase, object):
 
     def tearDown(self):
         # If a new config file was created, delete it
-        if os.path.isfile(tools.add_location('../../solenoid.config')):
+        if (os.path.isfile(tools.add_location('../../solenoid.config'))
+            and os.path.isfile(tools.add_location('../../solenoidtest.config'))
+            ):
             os.remove(tools.add_location('../../solenoid.config'))
         # If the config file was moved, move it back
         if os.path.isfile(tools.add_location('../../solenoidtest.config')):
@@ -90,7 +92,8 @@ class GRPCRibTestCase(unittest.TestCase, object):
         )
         with open(tools.add_location('examples/rendered_announce.txt')) as f:
             rendered_announce = f.read()
-        edit_rib.rib_announce(rendered_announce)
+        edit_rib.transport = edit_rib.create_transport_object()
+        edit_rib.rib_announce(rendered_announce, edit_rib.transport)
         mock_patch.assert_called_with(rendered_announce)
         self.assertIn('| ANNOUNCE | ', tools.check_debuglog()[0])
 
@@ -110,7 +113,8 @@ class GRPCRibTestCase(unittest.TestCase, object):
             tools.add_location('examples/config/grpc/grpc_good.config'),
             tools.add_location('../../solenoid.config')
         )
-        edit_rib.rib_withdraw(withdraw_prefixes)
+        edit_rib.transport = edit_rib.create_transport_object()
+        edit_rib.rib_withdraw(withdraw_prefixes, edit_rib.transport)
         url = '{{"Cisco-IOS-XR-ip-static-cfg:router-static": {{"default-vrf": {{"address-family": {{"vrfipv4": {{"vrf-unicast": {{"vrf-prefixes": {{"vrf-prefix": [{withdraw}]}}}}}}}}}}}}}}'
         prefix_info = '{{"prefix": "{bgp_prefix}","prefix-length": {prefix_length}}}'
         prefix_list = []

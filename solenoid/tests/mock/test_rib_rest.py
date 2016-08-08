@@ -21,7 +21,7 @@ class RestRibTestCase(unittest.TestCase, object):
         open(tools.add_location('../logs/debug.log'), 'w').close()
         open(tools.add_location('../logs/errors.log'), 'w').close()
         # Move the config file so it doesn't get edited
-        if os.path.isfile(tools.add_location('../../../solenoid.config')):
+        if os.path.isfile(tools.add_location('../../solenoid.config')):
             os.rename(
                 tools.add_location('../../solenoid.config'),
                 tools.add_location('../../solenoidtest.config')
@@ -29,7 +29,9 @@ class RestRibTestCase(unittest.TestCase, object):
 
     def tearDown(self):
         # If a new config file was created, delete it
-        if os.path.isfile(tools.add_location('../../solenoid.config')):
+        if (os.path.isfile(tools.add_location('../../solenoid.config'))
+            and os.path.isfile(tools.add_location('../../solenoidtest.config'))
+            ):
             os.remove(tools.add_location('../../solenoid.config'))
         # If the config file was moved, move it back
         if os.path.isfile(tools.add_location('../../solenoidtest.config')):
@@ -90,7 +92,8 @@ class RestRibTestCase(unittest.TestCase, object):
         )
         with open(tools.add_location('examples/rendered_announce.txt')) as f:
             rendered_announce = f.read()
-        edit_rib.rib_announce(rendered_announce)
+        edit_rib.transport = edit_rib.create_transport_object()
+        edit_rib.rib_announce(rendered_announce, edit_rib.transport)
         mock_patch.assert_called_with(rendered_announce)
         self.assertIn('| ANNOUNCE | ', tools.check_debuglog()[0])
 
@@ -110,7 +113,8 @@ class RestRibTestCase(unittest.TestCase, object):
             tools.add_location('examples/config/restconf/restconf_good.config'),
             tools.add_location('../../solenoid.config')
         )
-        edit_rib.rib_withdraw(withdraw_prefixes)
+        edit_rib.transport = edit_rib.create_transport_object()
+        edit_rib.rib_withdraw(withdraw_prefixes, edit_rib.transport)
         url = 'Cisco-IOS-XR-ip-static-cfg:router-static/default-vrf/address-family/vrfipv4/vrf-unicast/vrf-prefixes/vrf-prefix='
         comma_list = [prefix.replace('/', ',') for prefix in withdraw_prefixes]
         calls = map(call, [url+x for x in comma_list])
