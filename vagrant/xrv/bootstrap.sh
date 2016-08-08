@@ -5,6 +5,7 @@
 ## Install Deploy Container ##
 
 cd /misc/app_host/
+sudo mkdir solenoid
 sudo mv /home/vagrant/solenoid.tgz .
 tar -zvxf solenoid.tgz -C solenoid/ > /dev/null
 sudo -i virsh create /home/vagrant/demo.xml
