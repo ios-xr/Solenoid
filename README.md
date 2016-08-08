@@ -20,7 +20,7 @@ for BGP RIB changes. As a temporary workaround, I can only add static routes
 to the RIB.
 
 
-RESTconf is not available on public images of the IOS-XR 6.X. If you are interested in testing RESTconf, please reach out to your Cisco account team or contact me directly.
+RESTconf is not available on public images of the IOS-XR 6.X. If you are interested in testing RESTconf, please reach out to your Cisco account team or contact Lisa Roach directly.
 
 
 ### Usage:
