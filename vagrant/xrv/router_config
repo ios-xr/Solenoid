@@ -1,6 +1,6 @@
 
 interface GigabitEthernet 0/0/0/0
- ipv4 address 192.168.1.2 255.255.255.0
+ ipv4 address 11.1.1.10 255.255.255.0
  no shut
 !
 interface Loopback1

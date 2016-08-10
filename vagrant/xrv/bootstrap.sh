@@ -36,9 +36,9 @@ else
     exit 1
 fi
 
-sshpass -p "cisco" ssh -o StrictHostKeyChecking=no -T cisco@192.168.1.2 "bash -s" << EOF
-touch /home/cisco/temp.txt
-screen -S exabgp -dm bash -c '/opt/exabgp-3.4.16/sbin/exabgp router.ini'
-cd Solenoid/website
-screen -S website -dm bash -c 'python exabgp_website.py'
+sleep 2m
+
+sshpass -p "ubuntu" ssh -p 58822 -o StrictHostKeyChecking=no  -T ubuntu@11.1.1.10 "bash -s" << EOF
+screen -S exabgp -dm bash -c 'cd Solenoid ; source venv/bin/activate; cd .. ; exabgp router.ini'
+screen -S website -dm bash -c 'cd Solenoid ; source venv/bin/activate; cd website; python exabgp_website.py'
 EOF

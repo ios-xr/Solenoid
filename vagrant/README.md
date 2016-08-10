@@ -16,7 +16,7 @@ Step 1. Set up Virtualbox and Vagrant on your device
 
 Step 2. Clone this repo
 
-Step 3. Download the IOS-XRv vagrant box through the following link: 
+Step 3. Download the IOS-XRv vagrant box through the following link:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Download: https://xrdocs.github.io/getting-started/steps-download-iosxr-vagrant
 
@@ -29,23 +29,23 @@ And follow the instructions to add the base box:
 Step 4. Download the latest release tarball from [the release page](https://cto-github.cisco.com/lisroach/Solenoid/releases) and add it the directory `/Solenoid/vagrant/xrv/`. This is the container image that will sit on the IOS-XRv box. You can also create your own tarball if you want a more up-to-date version, using the instructions [here](https://cto-github.cisco.com/lisroach/Solenoid/wiki/Create-your-own-Solenoid-LXC-tarball).
 
 
-    mv solenoid.tgz Solenoid/vagrant/xrv/
+    mv solenoid.tgz Solenoid/vagrant/
 
 Step 5. In a terminal screen change directory into the vagrant directory of the repository. The vagrant file is located here.<br />
-    
+
     cd Solenoid/vagrant
 
-Step 6. ```vagrant up``` 
+Step 6. ```vagrant up```
 
-This is all you need to get Solenoid working! 
+This is all you need to get Solenoid working!
 
 ### How to use this demo.
 
 After completing the initial ```vagrant up```, the application is already up and running. If you navigate to:
 
      localhost:57780
-    
-on your browser, you will see the routes being added and withdrawn from the IOS-XRv's RIB table. To view the application running on the box, reference the instructions below on how to navigate the vagrant environment. 
+
+on your browser, you will see the routes being added and withdrawn from the IOS-XRv's RIB table. To view the application running on the box, reference the instructions below on how to navigate the vagrant environment.
 
 
 ### Navigating the Vagrant environment
@@ -72,7 +72,7 @@ XR CLI and Solenoid is accessed in from XR bash
 
 ####XR CLI
 From XR Bash (see instructions above):
-    
+
     ssh 10.1.1.5
 
 password: vagrant
@@ -82,12 +82,12 @@ password: vagrant
 From your laptop's vagrant folder:
 
     ssh -p 58822 ubuntu@localhost
-    
+
 Password: ubuntu
 
 
 To see the actual Solenoid application running, enter the following from the container (see instructions above) in order to enter the running [screen](https://www.gnu.org/software/screen/manual/screen.html):
-    
+
     screen -r exabgp
 
 To see the website running, enter the following from the container (see instructions above) in order to enter the running [screen](https://www.gnu.org/software/screen/manual/screen.html):
