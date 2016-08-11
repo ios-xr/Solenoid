@@ -5,13 +5,12 @@ import ConfigParser
 import mock
 from requests import Response
 
-from rest.jsonRestClient import JSONRestCalls
+from solenoid.rest.jsonRestClient import JSONRestCalls
 
 
 class JSONRestCallsCase(unittest.TestCase):
     def setUp(self):
-        # Can be absolute or relative.
-        obj = os.environ['BGP_FILTER_CONFIG']
+        #This needs to be rewritten
         config = ConfigParser.ConfigParser()
         config.readfp(open(os.path.expanduser(obj)))
         self.ip = config.get('default', 'ip'),

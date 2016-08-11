@@ -1,23 +1,22 @@
 # Solenoid
 ### Route Injection Agent
+<<<<<<< HEAD
 ##### Author: Lisa Roach & Karthik Kumaravel
 ##### Contact: Please use the Issues page to ask questions or open bugs and feature requests. 
+=======
+##### Author: Lisa Roach and Karthik Kumaravel
+##### Contact: Please use the Issues page to ask questions or open bugs and feature requests.
+>>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 ## Description:
 
-The end goal of this Route injector app is to be able to take any given logic and 
+The end goal of this Route injector app is to be able to take any given logic and
 make changes to the prefixes on a RIB table.
 
 The changes to the RIB are accomplished by using RESTconf calls to send JSON modeled by YANG. The YANG model I am currently using is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). This model will likely change in the future, see Limitations.
 
 For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exabgp). Exabgp allows me to monitor BGP network announcements, withdrawals, etc. and trigger the RESTconf changes based on these updates. exaBGP acts completely as a listener, if you with to send BGP updates directly to Solenoid that should work as well (examples and documentation coming soon)
 
-### Work in Progress:
-
-
-Test at scale.
-
-Change from RESTconf backend to [gRPC](http://www.grpc.io/docs/tutorials/basic/python.html) for enhanced performance.
 
 #### Current Limitations:
 
@@ -26,10 +25,14 @@ for BGP RIB changes. As a temporary workaround, I can only add static routes
 to the RIB.
 
 
+RESTconf is not available on public images of the IOS-XR 6.X. If you are interested in testing RESTconf, please reach out to your Cisco account team or contact Lisa Roach directly.
+
+
 ### Usage:
 
 Step 1: Clone this repo and cd into Solenoid.
 
+<<<<<<< HEAD
 Step 2: Run ```python setup.py install``` to install the Solenoid application. You may have to use sudo for it. If you see this error: 
 
 `SyntaxError: '<' operator not allowed in environment markers`
@@ -37,16 +40,42 @@ Step 2: Run ```python setup.py install``` to install the Solenoid application. Y
 You need to upgrade your version of setuptools to version 17.1 or above. See: http://docs.openstack.org/developer/pbr/compatibility.html#evaluate-marker
 
 Step 3 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. (If you are running this in an IOS-XR container, your IP address should be the loopback address in use for your container):
+=======
+Step 2: It is highly recommended you install and use a [virtualenv](https://virtualenv.pypa.io/en/stable/).
+
+```
+pip install virtualenv
+
+virtualenv venv
+
+source venv/bin/activate
+```
+
+Step 3: Install gRPC (if you are using gRPC).
+
+`pip install grpcio`
+
+Step 4: Install Solenoid.
+
+```python setup.py install```
+
+Step 5 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. Please refer to the Config File section of the wiki for more information.
+>>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 ```
 [default]
-ip: ip_address
-port: port number
-username: username
-password: password
+transport: transport  # Either gRPC or RESTconf
+ip: ip_address        # IP address of the destination RIB table
+port: port number     # Depends on what is configured for your gRPC or RESTconf servers
+username: username    # Username for the router
+password: password    # Password for the router
 ```
 
+<<<<<<< HEAD
 Step 4 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Single prefixes are also acceptable. Example:
+=======
+Step 6 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Single prefixes are also acceptable. Example:
+>>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 ```
 1.1.1.0/32-1.1.2.0/32
@@ -55,9 +84,15 @@ Step 4 (optional): Create a filter.txt file to include the ranges of prefixes to
 192.168.1.0/28-192.168.2.0/28
 ```
 
+<<<<<<< HEAD
 Step 5: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
 
 Step 6: Make sure RESTconf calls are working from your device to the RIB table
+=======
+Step 7: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network.
+
+Step 8: Make sure RESTconf calls are working from your device to the RIB table
+>>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 Example test (you should receive your device's whole configuration):
 
@@ -65,7 +100,11 @@ Example test (you should receive your device's whole configuration):
 curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" --user username:password http://<YOUR IP>/restconf/data/?content=config
 ```
 
+<<<<<<< HEAD
 Step 7: Change your exaBGP configuration file to run the edit_rib.py script. The important part is the process monitor-neighbors section, the rest is basic exaBGP configuration.
+=======
+Step 9: Change your exaBGP configuration file to run the edit_rib.py script. The important part is the process monitor-neighbors section, the rest is basic exaBGP configuration.
+>>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 
 Example:
@@ -100,14 +139,26 @@ If you chose to add a filter file, you must add the path to the file in the run 
 run /your/python/location /path/to//solenoid/solenoid/edit_rib.py -f '/path/to/filter/file';
 ```
 
+<<<<<<< HEAD
 Step 8: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
+=======
+Step 10: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful.
+>>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 ###Testing
 
-To test the code, run the following command from the Solenoid/ directory:
+To unit test the code, run the following command from the Solenoid/ directory:
 
 ```
-python -m unittest solenoid.tests.test_rib
+python -m unittest discover solenoid.tests.mock
 ```
 
-If you receive a status of "OK" you are good to go. 
+To run integration testing, run the following command from the Solenoid/ directory. **CAUTION This will make changes to your router's RIB table! Do not run this code in a production environment!**
+
+For these tests to run, you must provide a properly formatted solenoid.config file, as described in step 3.
+
+```
+python -m unittest discover solenoid.tests.integration
+```
+
+If you receive a status of "OK" you are good to go!

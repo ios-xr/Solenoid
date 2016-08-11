@@ -67,7 +67,7 @@ class RestCalls(object):
         res = self._session.post(url, data=data)
         return res
 
-    def patch(self, data, endpoint):
+    def patch(self, data, endpoint='Cisco-IOS-XR-ip-static-cfg:router-static'):
         """PATCH RESTconf call
             :param data: JSON or XML with config changes
             :type data: str
