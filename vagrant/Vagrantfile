@@ -1,19 +1,17 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 Vagrant.configure(2) do |config|
-
+  
   config.vm.define "xrv", primary: true do |xrv|
-    xrv.vm.box = "IOS-XRv"
+    xrv.vm.box = "IOS XRv"
     xrv.vm.network :private_network, virtualbox__intnet: "connection", auto_config: false
     xrv.vm.network "forwarded_port", guest: 57780, host: 57780
     xrv.vm.network "forwarded_port", guest: 58822, host: 58822
-
     xrv.vm.provider "virtualbox" do |v|
             v.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
             v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
     end
 
-    xrv.vm.provision "file", source: "solenoid.tgz", destination: "/home/vagrant/solenoid.tgz"
     xrv.vm.provision "file", source: "xrv/demo.xml", destination: "/home/vagrant/demo.xml"
     xrv.vm.provision "file", source: "xrv/router_config", destination: "/home/vagrant/router_config"
     xrv.vm.provision :shell, path: "xrv/bootstrap.sh"

@@ -2,6 +2,8 @@
 
 ### Configs ###
 
+curl -L 'https://cisco.box.com/shared/static/9no4xqjtm8q05ofmsa5dhe52hv3tmof7.tgz' -o 'solenoid.tgz'
+
 ## Install Deploy Container ##
 
 cd /misc/app_host/
