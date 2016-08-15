@@ -66,10 +66,10 @@ target/
 .python-version
 
 #Custom
-./rib-change/edit_rib.config
-restCalls.config
+solenoid.config
 tester.py
 updates.txt
+*.DS_Store
 
 #Vagrantfiles
 vagrant/.vagrant
