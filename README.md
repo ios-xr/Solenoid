@@ -1,12 +1,9 @@
 # Solenoid
 ### Route Injection Agent
-<<<<<<< HEAD
+
 ##### Author: Lisa Roach & Karthik Kumaravel
 ##### Contact: Please use the Issues page to ask questions or open bugs and feature requests. 
-=======
-##### Author: Lisa Roach and Karthik Kumaravel
-##### Contact: Please use the Issues page to ask questions or open bugs and feature requests.
->>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
+
 
 ## Description:
 
@@ -32,15 +29,6 @@ RESTconf is not available on public images of the IOS-XR 6.X. If you are interes
 
 Step 1: Clone this repo and cd into Solenoid.
 
-<<<<<<< HEAD
-Step 2: Run ```python setup.py install``` to install the Solenoid application. You may have to use sudo for it. If you see this error: 
-
-`SyntaxError: '<' operator not allowed in environment markers`
-
-You need to upgrade your version of setuptools to version 17.1 or above. See: http://docs.openstack.org/developer/pbr/compatibility.html#evaluate-marker
-
-Step 3 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. (If you are running this in an IOS-XR container, your IP address should be the loopback address in use for your container):
-=======
 Step 2: It is highly recommended you install and use a [virtualenv](https://virtualenv.pypa.io/en/stable/).
 
 ```
@@ -60,7 +48,6 @@ Step 4: Install Solenoid.
 ```python setup.py install```
 
 Step 5 : Create a solenoid.config file in your top-level solenoid directory and fill in the values in the key:value pair. Please refer to the Config File section of the wiki for more information.
->>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 ```
 [default]
@@ -71,11 +58,7 @@ username: username    # Username for the router
 password: password    # Password for the router
 ```
 
-<<<<<<< HEAD
-Step 4 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Single prefixes are also acceptable. Example:
-=======
 Step 6 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Single prefixes are also acceptable. Example:
->>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 ```
 1.1.1.0/32-1.1.2.0/32
@@ -84,15 +67,9 @@ Step 6 (optional): Create a filter.txt file to include the ranges of prefixes to
 192.168.1.0/28-192.168.2.0/28
 ```
 
-<<<<<<< HEAD
-Step 5: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network. 
-
-Step 6: Make sure RESTconf calls are working from your device to the RIB table
-=======
 Step 7: Set up [exaBGP] (https://github.com/Exa-Networks/exabgp). Form a neighborship with your BGP network.
 
 Step 8: Make sure RESTconf calls are working from your device to the RIB table
->>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 Example test (you should receive your device's whole configuration):
 
@@ -100,11 +77,7 @@ Example test (you should receive your device's whole configuration):
 curl -X GET -H "Accept:application/yang.data+json,application/yang.errors+json" --user username:password http://<YOUR IP>/restconf/data/?content=config
 ```
 
-<<<<<<< HEAD
-Step 7: Change your exaBGP configuration file to run the edit_rib.py script. The important part is the process monitor-neighbors section, the rest is basic exaBGP configuration.
-=======
 Step 9: Change your exaBGP configuration file to run the edit_rib.py script. The important part is the process monitor-neighbors section, the rest is basic exaBGP configuration.
->>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 
 Example:
@@ -139,11 +112,7 @@ If you chose to add a filter file, you must add the path to the file in the run 
 run /your/python/location /path/to//solenoid/solenoid/edit_rib.py -f '/path/to/filter/file';
 ```
 
-<<<<<<< HEAD
-Step 8: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful. 
-=======
 Step 10: Launch your exaBGP instance. You should see the syslog HTTP status codes if it is successful.
->>>>>>> 33d88c331c538d01dc78172639e7014b2dd51a26
 
 ###Testing
 
