@@ -26,7 +26,7 @@ And follow the instructions to add the base box:
 
 
 
-Step 4 (optional). The Solenoid LXC tarball is downloaded for you (see vagrant/xrv/bootstrap.sh), but you can also create your own tarball if you want use the latest code. Use the instructions [here](https://cto-github.cisco.com/lisroach/Solenoid/wiki/Create-your-own-Solenoid-LXC-tarball).
+Step 4 (optional). The Solenoid LXC tarball is downloaded for you (see vagrant/xrv/bootstrap.sh), but you can also create your own tarball if you want use the latest code. Follow the instructions [here](https://cto-github.cisco.com/lisroach/Solenoid/wiki/Create-your-own-Solenoid-LXC-tarball).
 
 
 Step 5. In a terminal screen change directory into the vagrant directory of the repository. The vagrant file is located here.<br />
