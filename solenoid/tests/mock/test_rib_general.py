@@ -137,6 +137,14 @@ class GeneralRibTestCase(unittest.TestCase, object):
                         '10.1.6.1/24']
         self.assertEqual(filtered_list, end_prefixes)
 
+    def test_filter_all_prefixes(self):
+        edit_rib.FILEPATH = tools.add_location('examples/filter/filter-all.txt')
+        start_prefixes = ['2.2.2.0/32',
+                          '10.2.1.1/24']
+        filtered_list = edit_rib.filter_prefixes(start_prefixes)
+        end_prefixes = []
+        self.assertEqual(filtered_list, end_prefixes)
+
 # This test is wrong - the error is raising but assertRaises is failing
     # def test_filter_prefix_invalid(self):
     #     edit_rib.filepath = tools.add_location('examples/filter-invalid.txt')
