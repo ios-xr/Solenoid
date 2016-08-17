@@ -137,6 +137,14 @@ class GeneralRibTestCase(unittest.TestCase, object):
                         '10.1.6.1/24']
         self.assertEqual(filtered_list, end_prefixes)
 
+    @patch('solenoid.edit_rib.filter_prefixes')
+    @patch('solenoid.edit_rib.rib_withdraw')
+    def test_filter_empty(self, mock_withdraw, mock_filter):
+        # The Setup configures us to have an empty filter file
+        formatted_json = json.loads(tools.exa_raw('withdraw_g'))
+        edit_rib.render_config(formatted_json, edit_rib.transport)
+        mock_filter.assert_not_called()
+
     def test_filter_all_prefixes(self):
         edit_rib.FILEPATH = tools.add_location('examples/filter/filter-all.txt')
         start_prefixes = ['2.2.2.0/32',
