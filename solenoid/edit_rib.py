@@ -176,7 +176,7 @@ def render_config(json_update, transport):
                 # Filter the prefixes if needed.
                 if filt:
                     bgp_prefixes = filter_prefixes(bgp_prefixes)
-                if len(prefixes) > 0:
+                if len(bgp_prefixes) > 0:
                     rib_withdraw(bgp_prefixes, transport)
                 else:
                     return
