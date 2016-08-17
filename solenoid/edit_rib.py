@@ -158,22 +158,28 @@ def render_config(json_update, transport):
                 if filt:
                     prefixes = filter_prefixes(prefixes)
                 # Set env variable for Jinja2.
-                env = Environment(loader=PackageLoader('solenoid',
-                                                       'templates')
-                                 )
-                env.filters['to_json'] = json.dumps
-                template = env.get_template('static.json')
-                # Render the template and make the announcement.
-                rib_announce(template.render(next_hop=next_hop,
-                                             prefixes=prefixes),
-                            transport
-                            )
+                if len(prefixes) > 0:
+                    env = Environment(loader=PackageLoader('solenoid',
+                                                           'templates')
+                                     )
+                    env.filters['to_json'] = json.dumps
+                    template = env.get_template('static.json')
+                    # Render the template and make the announcement.
+                    rib_announce(template.render(next_hop=next_hop,
+                                                 prefixes=prefixes),
+                                transport
+                                )
+                else:
+                    return
             elif 'withdraw' in update_type:
                 bgp_prefixes = update_type['withdraw']['ipv4 unicast'].keys()
                 # Filter the prefixes if needed.
                 if filt:
                     bgp_prefixes = filter_prefixes(bgp_prefixes)
-                rib_withdraw(bgp_prefixes, transport)
+                if len(prefixes) > 0:
+                    rib_withdraw(bgp_prefixes, transport)
+                else:
+                    return
         else:
             logger.info('EOR message', SOURCE)
     except KeyError:
@@ -197,8 +203,8 @@ def filter_prefixes(prefixes):
                     ip1, ip2 = map(IPNetwork, line.split('-'))
                     final += [str(prefix) for prefix in prefixes if ip1 <= prefix <= ip2]
                 else:
-                    ip1 = IPNetwork(line)
-                    final += [str(ip1)]
+                    ip = IPNetwork(line)
+                    final += [str(prefix) for prefix in prefixes if prefix == ip]
             return final
         except AddrFormatError, e:
             logger.error('FILTER | {}'.format(e), SOURCE)
