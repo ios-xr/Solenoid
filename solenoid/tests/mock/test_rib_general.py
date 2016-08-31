@@ -104,7 +104,7 @@ class GeneralRibTestCase(unittest.TestCase, object):
         mock_announce.assert_called_with(rendered_announce, edit_rib.transport)
 
     @patch('solenoid.edit_rib.rib_withdraw')
-    def test_render_config_withdraw_good(self, mock_announce):
+    def test_render_config_withdraw_good(self, mock_withdraw):
         withdraw_prefixes = ['1.1.1.8/32',
                      '1.1.1.5/32',
                      '1.1.1.7/32',
@@ -117,7 +117,7 @@ class GeneralRibTestCase(unittest.TestCase, object):
                      '1.1.1.4/32']
         formatted_json = json.loads(tools.exa_raw('withdraw_g'))
         edit_rib.render_config(formatted_json, edit_rib.transport)
-        mock_announce.assert_called_with(withdraw_prefixes, edit_rib.transport)
+        mock_withdraw.assert_called_with(withdraw_prefixes, edit_rib.transport)
 
     def test_filter_prefix_good(self):
         edit_rib.FILEPATH = tools.add_location('examples/filter/filter-full.txt')
@@ -136,6 +136,36 @@ class GeneralRibTestCase(unittest.TestCase, object):
                         '10.1.1.1/32',
                         '10.1.6.1/24']
         self.assertEqual(filtered_list, end_prefixes)
+
+    @patch('solenoid.edit_rib.filter_prefixes')
+    @patch('solenoid.edit_rib.rib_withdraw')
+    def test_filter_empty(self, mock_withdraw, mock_filter):
+        # The Setup configures us to have an empty filter file
+        formatted_json = json.loads(tools.exa_raw('withdraw_g'))
+        edit_rib.render_config(formatted_json, edit_rib.transport)
+        mock_filter.assert_not_called()
+
+    def test_filter_all_prefixes(self):
+        edit_rib.FILEPATH = tools.add_location('examples/filter/filter-all.txt')
+        start_prefixes = ['2.2.2.0/32',
+                          '10.2.1.1/24']
+        filtered_list = edit_rib.filter_prefixes(start_prefixes)
+        end_prefixes = []
+        self.assertEqual(filtered_list, end_prefixes)
+
+    @patch('solenoid.edit_rib.rib_withdraw')
+    def test_render_config_prefixes_all_filtered_withdraw(self, mock_withdraw):
+        edit_rib.FILEPATH = tools.add_location('examples/filter/filter-all.txt')
+        formatted_json = json.loads(tools.exa_raw('withdraw_g'))
+        edit_rib.render_config(formatted_json, edit_rib.transport)
+        mock_withdraw.assert_not_called()
+
+    @patch('solenoid.edit_rib.rib_announce')
+    def test_render_config_prefixes_all_filtered_announce(self, mock_announce):
+        edit_rib.FILEPATH = tools.add_location('examples/filter/filter-all.txt')
+        formatted_json = json.loads(tools.exa_raw('announce_g'))
+        edit_rib.render_config(formatted_json, edit_rib.transport)
+        mock_announce.assert_not_called()
 
 # This test is wrong - the error is raising but assertRaises is failing
     # def test_filter_prefix_invalid(self):
