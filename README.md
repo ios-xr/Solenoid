@@ -10,7 +10,7 @@
 The end goal of this Route injector app is to be able to take any given logic and
 make changes to the prefixes on a RIB table.
 
-The changes to the RIB are accomplished by using gRPC calls to send JSON modeled by YANG. The YANG model I am currently using is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). This model will likely change in the future, see Limitations.
+The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model I am currently using is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). This model will likely change in the future, see Limitations.
 
 For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exabgp). Exabgp allows me to monitor BGP network announcements, withdrawals, etc. and trigger the gRPC changes based on these updates. 
 
@@ -24,6 +24,9 @@ to the RIB.
 
 RESTconf is not available on public images of the IOS-XR 6.X. If you are interested in testing RESTconf, please reach out to your Cisco account team or contact Lisa Roach directly.
 
+### Vagrant:
+
+For an easy Solenoid-in-a-box demonstration, please refer to the [vagrant](https://cto-github.cisco.com/lisroach/Solenoid/tree/master/vagrant) directory. Here you will be able to download a fully functional vagrant environment that has Solenoid up and running already. 
 
 ### Usage:
 
