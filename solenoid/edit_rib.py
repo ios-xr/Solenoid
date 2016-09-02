@@ -184,6 +184,7 @@ def render_config(json_update, transport):
             logger.info('EOR message', SOURCE)
     except KeyError:
         logger.error('Not a valid update message type', SOURCE)
+        raise
 
 
 def filter_prefixes(prefixes):
@@ -208,6 +209,7 @@ def filter_prefixes(prefixes):
             return final
         except AddrFormatError, e:
             logger.error('FILTER | {}'.format(e), SOURCE)
+            raise
 
 
 def update_file(raw_update):
@@ -236,8 +238,10 @@ def update_validator(raw_update, transport):
             update_file(raw_update)
     except ValueError:
         logger.error('Failed JSON conversion for BGP update', SOURCE)
+        raise
     except KeyError:
         logger.debug('Not a valid update message type', SOURCE)
+        raise
 
 
 def update_watcher():

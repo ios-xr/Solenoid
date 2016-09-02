@@ -42,11 +42,8 @@ class GeneralRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.render_config')
     def test_update_validator_bad_json_conversion(self, mock_render):
         raw_b_json = tools.exa_raw('invalid_json')
-        self.assertRaises(ValueError,
-                          edit_rib.update_validator(
-                              raw_b_json,
-                              edit_rib.transport)
-                         )
+        with self.assertRaises(ValueError):
+          edit_rib.update_validator(raw_b_json, edit_rib.transport)
         # Check the logs.
         self.assertIn('Failed JSON conversion for BGP update\n',
                       tools.check_errorlog()[0])
@@ -55,11 +52,8 @@ class GeneralRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.render_config')
     def test_update_validator_incorrect_model(self, mock_render):
         raw_b_json = tools.exa_raw('invalid_i_model')
-        self.assertRaises(KeyError,
-                          edit_rib.update_validator(
-                              raw_b_json,
-                              edit_rib.transport)
-                         )
+        with self.assertRaises(KeyError):
+            edit_rib.update_validator(raw_b_json, edit_rib.transport)
         # Check the logs.
         self.assertTrue('Not a valid update message type\n',
                         tools.check_debuglog()[0])
@@ -78,11 +72,8 @@ class GeneralRibTestCase(unittest.TestCase, object):
     def test_render_config_normal_model_missing_value(self, mock_announce):
         formatted_json = json.loads(tools.exa_raw('invalid_n_model'))
         edit_rib.rib_announce = mock_announce
-        self.assertRaises(KeyError,
-                          edit_rib.render_config(
-                              formatted_json,
-                              edit_rib.transport)
-                         )
+        with self.assertRaises(KeyError):
+            edit_rib.render_config(formatted_json, edit_rib.transport)
         self.assertIn('Not a valid update message type\n',
                       tools.check_errorlog()[0])
         self.assertFalse(mock_announce.called)
@@ -168,18 +159,18 @@ class GeneralRibTestCase(unittest.TestCase, object):
         mock_announce.assert_not_called()
 
 # This test is wrong - the error is raising but assertRaises is failing
-    # def test_filter_prefix_invalid(self):
-    #     edit_rib.filepath = tools.add_location('examples/filter-invalid.txt')
-    #     start_prefixes = ['1.1.1.9/32',
-    #                       '192.168.3.1/28',
-    #                       '1.1.1.2/32',
-    #                       '1.1.1.1/32',
-    #                       '10.1.1.1/32',
-    #                       '1.1.1.10/32',
-    #                       '10.1.6.1/24']
-    #     self.assertRaises(edit_rib.AddrFormatError,
-    #                       edit_rib.filter_prefixes,
-    #                       start_prefixes)
+    def test_filter_prefix_invalid(self):
+        edit_rib.FILEPATH = tools.add_location('examples/filter/filter-invalid.txt')
+        start_prefixes = ['1.1.1.9/32',
+                          '192.168.3.1/28',
+                          '1.1.1.2/32',
+                          '1.1.1.1/32',
+                          '10.1.1.1/32',
+                          '1.1.1.10/32',
+                          '10.1.6.1/24']
+        from netaddr import AddrFormatError
+        with self.assertRaises(AddrFormatError):
+            edit_rib.filter_prefixes(start_prefixes)
 
 if __name__ == '__main__':
     unittest.main()
