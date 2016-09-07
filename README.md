@@ -72,7 +72,7 @@ username: vagrant
 password: vagrant
 ```
 
-Step 6 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. Single prefixes are also acceptable. Example:
+Step 6 (optional): Create a filter.txt file to include the ranges of prefixes to be filtered with. This is a whitelist of prefixes, so all of these will be accepted and all others will be dropped. Single prefixes are also acceptable. Example:
 
 ```
 1.1.1.0/32-1.1.2.0/32
