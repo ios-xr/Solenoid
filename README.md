@@ -148,87 +148,9 @@ The following is expected output from the unit tests:
 
 ```
 python -m unittest discover solenoid.tests.mock
-...Tue, 20 Sep 2016 14:50:39 | ERROR    | 20549  | solenoid      | FILTER | invalid IPNetwork 1.1.1.0/43
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 204, in filter_prefixes
-    ip1, ip2 = map(IPNetwork, line.split('-'))
-  File "/Users/lisroach/Workspace/XRv/Solenoid/venv/lib/python2.7/site-packages/netaddr-0.7.18-py2.7.egg/netaddr/ip/__init__.py", line 933, in __init__
-    raise AddrFormatError('invalid IPNetwork %s' % addr)
-AddrFormatError: invalid IPNetwork 1.1.1.0/43
-..Tue, 20 Sep 2016 14:50:39 | INFO     | 20549  | solenoid      | EOR message
-.Tue, 20 Sep 2016 14:50:39 | ERROR    | 20549  | solenoid      | Not a valid update message type
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 154, in render_config
-    and 'null' not in update_type['announce']['ipv4 unicast']):
-KeyError: 'ipv4 unicast'
-.....Tue, 20 Sep 2016 14:50:39 | ERROR    | 20549  | solenoid      | Failed JSON conversion for BGP update
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 233, in update_validator
-    json_update = json.loads(raw_update)
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/json/__init__.py", line 338, in loads
-    return _default_decoder.decode(s)
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/json/decoder.py", line 369, in decode
-    raise ValueError(errmsg("Extra data", s, end, len(s)))
-ValueError: Extra data: line 1 column 531 - line 1 column 534 (char 530 - 533)
-.....Tue, 20 Sep 2016 14:50:39 | CRITICAL | 20549  | solenoid      | Something is wrong with your config file: No option 'port' in section: 'default'
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 36, in create_transport_object
-    int(config.get(section, 'port')),
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 618, in get
-    raise NoOptionError(option, section)
-NoOptionError: No option 'port' in section: 'default'
-.Tue, 20 Sep 2016 14:50:39 | CRITICAL | 20549  | solenoid      | Something is wrong with your config file: File contains no section headers.
-file: /Users/lisroach/Workspace/XRv/Solenoid/solenoid/../solenoid.config, line: 1
-'transport: GRPC\n'
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 29, in create_transport_object
-    config.read(os.path.join(location, '../solenoid.config'))
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 305, in read
-    self._read(fp, filename)
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 512, in _read
-    raise MissingSectionHeaderError(fpname, lineno, line)
-MissingSectionHeaderError: File contains no section headers.
-file: /Users/lisroach/Workspace/XRv/Solenoid/solenoid/../solenoid.config, line: 1
-'transport: GRPC\n'
-.Tue, 20 Sep 2016 14:50:39 | WARNING  | 20549  | solenoid      | Multiple routers not currently supported in the configuration file. Using first router.
-.Tue, 20 Sep 2016 14:50:39 | CRITICAL | 20549  | solenoid      | Something is wrong with your config file:
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 45, in create_transport_object
-    raise ValueError
-ValueError
-.Tue, 20 Sep 2016 14:50:39 | INFO     | 20549  | solenoid      | ANNOUNCE | OK
-.Tue, 20 Sep 2016 14:50:39 | INFO     | 20549  | solenoid      | WITHDRAW | OK
-..Tue, 20 Sep 2016 14:50:39 | CRITICAL | 20549  | solenoid      | Something is wrong with your config file: No option 'port' in section: 'default'
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 36, in create_transport_object
-    int(config.get(section, 'port')),
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 618, in get
-    raise NoOptionError(option, section)
-NoOptionError: No option 'port' in section: 'default'
-.Tue, 20 Sep 2016 14:50:39 | CRITICAL | 20549  | solenoid      | Something is wrong with your config file: File contains no section headers.
-file: /Users/lisroach/Workspace/XRv/Solenoid/solenoid/../solenoid.config, line: 1
-'transport: Restconf \n'
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 29, in create_transport_object
-    config.read(os.path.join(location, '../solenoid.config'))
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 305, in read
-    self._read(fp, filename)
-  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ConfigParser.py", line 512, in _read
-    raise MissingSectionHeaderError(fpname, lineno, line)
-MissingSectionHeaderError: File contains no section headers.
-file: /Users/lisroach/Workspace/XRv/Solenoid/solenoid/../solenoid.config, line: 1
-'transport: Restconf \n'
-.Tue, 20 Sep 2016 14:50:39 | WARNING  | 20549  | solenoid      | Multiple routers not currently supported in the configuration file. Using first router.
-.Tue, 20 Sep 2016 14:50:39 | CRITICAL | 20549  | solenoid      | Something is wrong with your config file:
-Traceback (most recent call last):
-  File "solenoid/edit_rib.py", line 45, in create_transport_object
-    raise ValueError
-ValueError
-.Tue, 20 Sep 2016 14:50:39 | INFO     | 20549  | solenoid      | ANNOUNCE | OK
-.Tue, 20 Sep 2016 14:50:39 | INFO     | 20549  | solenoid      | WITHDRAW | OK
-.
+............................
 ----------------------------------------------------------------------
-Ran 29 tests in 0.096s
+Ran 28 tests in 0.042s
 
 OK
 ```
