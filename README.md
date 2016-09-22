@@ -157,4 +157,19 @@ For these tests to run, you must provide a properly formatted solenoid.config fi
 python -m unittest discover solenoid.tests.integration
 ```
 
+Expected output:
 
+```
+python -m unittest discover solenoid.tests.int
+Thu, 01 Sep 2016 22:21:41 | INFO     | 19738  | solenoid      | ANNOUNCE | OK
+.Thu, 01 Sep 2016 22:21:41 | INFO     | 19738  | solenoid      | WITHDRAW | OK
+.Thu, 01 Sep 2016 22:21:42 | INFO     | 19738  | solenoid      | ANNOUNCE | OK
+.Thu, 01 Sep 2016 22:21:42 | INFO     | 19738  | solenoid      | WITHDRAW | OK
+.Thu, 01 Sep 2016 22:21:42 | INFO     | 19738  | solenoid      | EOR message
+.
+----------------------------------------------------------------------
+Ran 5 tests in 0.890s
+
+OK
+
+```
