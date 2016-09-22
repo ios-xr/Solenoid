@@ -11,18 +11,18 @@ Solenoid is licensed under the [BSD license](https://opensource.org/licenses/BSD
 
 ## Bug Reports
 
-For bug reports or requests [submit an issue](https://cto-github.cisco.com/lisroach/Solenoid/issues).
+For bug reports or requests [submit an issue](https://github.com/ios-xr/Solenoid/issues).
 
 ## Pull Requests
 
 The preferred way to contribute is to fork the
-[main repository](https://cto-github.cisco.com/lisroach/Solenoid) on GitHub.
+[main repository](https://github.com/ios-xr/Solenoid.git) on GitHub.
 
-1. Fork the [main repository](https://cto-github.cisco.com/lisroach/Solenoid).  Click on the 'Fork' button near the top of the page.  This creates a copy of the code under your account on the GitHub server.
+1. Fork the [main repository]https://github.com/ios-xr/Solenoid.git).  Click on the 'Fork' button near the top of the page.  This creates a copy of the code under your account on the GitHub server.
 
 2. Clone this copy to your local disk:
 
-        $ git clone git@github.com:YourLogin/solenoid.git
+        $ git clone https://github.com/ios-xr/Solenoid.git
         $ cd solenoid
 
 3. Create a branch to hold your changes and start making changes. Don't work in the `master` branch! If you are adding a feature, use the format 'feature/my-feature', for a bug use 'bug/issue-id'.
