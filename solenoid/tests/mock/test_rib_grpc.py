@@ -3,42 +3,14 @@ calls are made to the router.
 """
 
 import unittest
-import os
 import shutil
 
-from mock import patch, call
+from mock import patch
 from solenoid import edit_rib
 from solenoid.tests import tools
 
 
-class GRPCRibTestCase(unittest.TestCase, object):
-
-    def setUp(self):
-        #Set global variable
-        edit_rib.FILEPATH = tools.add_location('../examples/filter/filter-empty.txt')
-        #Clear out logging files.
-        open(tools.add_location('../updates.txt'), 'w').close()
-        open(tools.add_location('../logs/debug.log'), 'w').close()
-        open(tools.add_location('../logs/errors.log'), 'w').close()
-        # Move the config file so it doesn't get edited
-        if os.path.isfile(tools.add_location('../../solenoid.config')):
-            os.rename(
-                tools.add_location('../../solenoid.config'),
-                tools.add_location('../../solenoidtest.config')
-            )
-
-    def tearDown(self):
-        # If a new config file was created, delete it
-        if (os.path.isfile(tools.add_location('../../solenoid.config'))
-            and os.path.isfile(tools.add_location('../../solenoidtest.config'))
-            ):
-            os.remove(tools.add_location('../../solenoid.config'))
-        # If the config file was moved, move it back
-        if os.path.isfile(tools.add_location('../../solenoidtest.config')):
-            os.rename(
-                tools.add_location('../../solenoidtest.config'),
-                tools.add_location('../../solenoid.config')
-            )
+class GRPCRibTestCase(tools.TestBookends, object):
 
     def test_create_transport_object_correct_class_created(self):
         shutil.copy(
@@ -48,11 +20,6 @@ class GRPCRibTestCase(unittest.TestCase, object):
         transport_object = edit_rib.create_transport_object()
         self.assertIsInstance(transport_object, edit_rib.CiscoGRPCClient)
 
-    def test_create_transport_object_no_config_file(self):
-        with self.assertRaises(SystemExit):
-            edit_rib.create_transport_object()
-        self.assertIn('Something is wrong with your config file:',
-                      tools.check_errorlog()[0])
 
     def test_create_transport_object_missing_object(self):
         shutil.copy(
@@ -100,15 +67,15 @@ class GRPCRibTestCase(unittest.TestCase, object):
     @patch('solenoid.edit_rib.CiscoGRPCClient.delete')
     def test_rib_withdraw(self, mock_delete):
         withdraw_prefixes = ['1.1.1.8/32',
-             '1.1.1.5/32',
-             '1.1.1.7/32',
-             '1.1.1.9/32',
-             '1.1.1.2/32',
-             '1.1.1.1/32',
-             '1.1.1.6/32',
-             '1.1.1.3/32',
-             '1.1.1.10/32',
-             '1.1.1.4/32']
+                             '1.1.1.5/32',
+                             '1.1.1.7/32',
+                             '1.1.1.9/32',
+                             '1.1.1.2/32',
+                             '1.1.1.1/32',
+                             '1.1.1.6/32',
+                             '1.1.1.3/32',
+                             '1.1.1.10/32',
+                             '1.1.1.4/32']
         shutil.copy(
             tools.add_location('examples/config/grpc/grpc_good.config'),
             tools.add_location('../../solenoid.config')
