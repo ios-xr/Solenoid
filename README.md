@@ -160,7 +160,7 @@ python -m unittest discover solenoid.tests.integration
 Expected output:
 
 ```
-python -m unittest discover solenoid.tests.int
+python -m unittest discover solenoid.tests.integration
 Thu, 01 Sep 2016 22:21:41 | INFO     | 19738  | solenoid      | ANNOUNCE | OK
 .Thu, 01 Sep 2016 22:21:41 | INFO     | 19738  | solenoid      | WITHDRAW | OK
 .Thu, 01 Sep 2016 22:21:42 | INFO     | 19738  | solenoid      | ANNOUNCE | OK
