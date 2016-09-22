@@ -1,6 +1,5 @@
 import os
 import unittest
-import shutil
 from solenoid import edit_rib
 
 class TestBookends(unittest.TestCase, object):
@@ -16,10 +15,6 @@ class TestBookends(unittest.TestCase, object):
                 add_location('../../solenoid.config'),
                 add_location('../../solenoidtest.config')
             )
-        shutil.copy(
-            add_location('examples/config/restconf/restconf_good.config'),
-            add_location('../../solenoid.config')
-        )
 
     def setUp(self):
         #Set global variable.
