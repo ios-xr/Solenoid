@@ -131,7 +131,7 @@ python -m unittest discover solenoid.tests.mock
 If you only wish to use RESTconf and will not be testing the gRPC code, feel free to run the following individual tests:
 
 ```
-python -m unittest solenoid.tests.mock.test_rib
+python -m unittest solenoid.tests.mock.test_rib_rest
 
 python -m unittest solenoid.tests.mock.test_general
 ```
