@@ -24,7 +24,7 @@ RESTconf is not available on public images of the IOS-XR 6.X. If you are interes
 
 ### Vagrant:
 
-For an easy Solenoid-in-a-box demonstration, please refer to the [vagrant](https://cto-github.cisco.com/lisroach/Solenoid/tree/master/vagrant) directory. Here you will be able to download a fully functional vagrant environment that has Solenoid up and running already. 
+For an easy Solenoid-in-a-box demonstration, please refer to the [vagrant](https://github.com/ios-xr/Solenoid/tree/master/vagrant) directory. Here you will be able to download a fully functional vagrant environment that has Solenoid up and running already. 
 
 ### Usage:
 
