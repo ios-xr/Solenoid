@@ -14,7 +14,7 @@ setup(
     version='1.0',
     author='Lisa Roach',
     author_email='lisroach@cisco.com',
-    url='https://cto-github.cisco.com/lisroach/Solenoid',
+    url='https://github.com/ios-xr/Solenoid.git',
     description='''
         Injects routes into Cisco's IOS-XR RIB table, based on some
         outside logic.
