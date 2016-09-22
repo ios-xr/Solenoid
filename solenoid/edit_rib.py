@@ -13,7 +13,7 @@ from rest.jsonRestClient import JSONRestCalls
 from logs.logger import Logger
 
 SOURCE = 'solenoid'
-logger = Logger()
+LOGGER = Logger()
 
 
 def create_transport_object():
@@ -29,7 +29,7 @@ def create_transport_object():
         config.read(os.path.join(location, '../solenoid.config'))
         if len(config.sections()) >= 1:
             if len(config.sections()) > 1:
-                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', SOURCE)
+                LOGGER.warning('Multiple routers not currently supported in the configuration file. Using first router.', SOURCE)
             section = config.sections()[0]
             arguments = (
                 config.get(section, 'ip'),
@@ -44,7 +44,7 @@ def create_transport_object():
         else:
             raise ValueError
     except (ConfigParser.Error, ValueError), e:
-        logger.critical(
+        LOGGER.critical(
             'Something is wrong with your config file: {}'.format(
                 e.message
             ),
@@ -72,13 +72,13 @@ def rib_announce(rendered_config, transport):
     response = transport.patch(rendered_config)
     status = get_status(response)
     if status == '' or status is None:
-        logger.info('ANNOUNCE | {code} '.format(
+        LOGGER.info('ANNOUNCE | {code} '.format(
             code='OK'
             ),
             SOURCE
         )
     else:
-        logger.warning('ANNOUNCE | {code} | {reason}'.format(
+        LOGGER.warning('ANNOUNCE | {code} | {reason}'.format(
             code='FAIL',
             reason=status
             ),
@@ -120,13 +120,13 @@ def rib_withdraw(withdrawn_prefixes, transport):
             response = transport.delete(url)
             status = get_status(response)
     if status is None or status == '':
-        logger.info('WITHDRAW | {code}'.format(
+        LOGGER.info('WITHDRAW | {code}'.format(
             code='OK'
             ),
             SOURCE
         )
     else:
-        logger.warning('WITHDRAW | {code} | {reason}'.format(
+        LOGGER.warning('WITHDRAW | {code} | {reason}'.format(
             code='FAIL',
             reason=status
             ),
@@ -181,9 +181,9 @@ def render_config(json_update, transport):
                 else:
                     return
         else:
-            logger.info('EOR message', SOURCE)
+            LOGGER.info('EOR message', SOURCE)
     except KeyError:
-        logger.error('Not a valid update message type', SOURCE)
+        LOGGER.error('Not a valid update message type', SOURCE)
         raise
 
 
@@ -208,7 +208,7 @@ def filter_prefixes(prefixes):
                     final += [str(prefix) for prefix in prefixes if prefix == ip]
             return final
         except AddrFormatError, e:
-            logger.error('FILTER | {}'.format(e), SOURCE)
+            LOGGER.error('FILTER | {}'.format(e), SOURCE)
             raise
 
 
@@ -237,10 +237,10 @@ def update_validator(raw_update, transport):
             # Add the update to a file to keep track.
             update_file(raw_update)
     except ValueError:
-        logger.error('Failed JSON conversion for BGP update', SOURCE)
+        LOGGER.error('Failed JSON conversion for BGP update', SOURCE)
         raise
     except KeyError:
-        logger.debug('Not a valid update message type', SOURCE)
+        LOGGER.debug('Not a valid update message type', SOURCE)
         raise
 
 
