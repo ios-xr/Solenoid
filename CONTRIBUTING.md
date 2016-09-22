@@ -15,10 +15,9 @@ For bug reports or requests [submit an issue](https://github.com/ios-xr/Solenoid
 
 ## Pull Requests
 
-The preferred way to contribute is to fork the
-[main repository](https://github.com/ios-xr/Solenoid.git) on GitHub.
+The preferred way to contribute is to fork the [main repository](https://github.com/ios-xr/Solenoid.git) on GitHub.
 
-1. Fork the [main repository]https://github.com/ios-xr/Solenoid.git).  Click on the 'Fork' button near the top of the page.  This creates a copy of the code under your account on the GitHub server.
+1. Fork the [main repository](https://github.com/ios-xr/Solenoid.git).  Click on the 'Fork' button near the top of the page.  This creates a copy of the code under your account on the GitHub server.
 
 2. Clone this copy to your local disk:
 
