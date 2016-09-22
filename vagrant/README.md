@@ -35,7 +35,28 @@ Step 5. In a terminal screen change directory into the vagrant directory of the 
 
 Step 6. ```vagrant up```
 
-This is all you need to get Solenoid working!
+This is all you need to get Solenoid working! It will take a few minutes, and you will see a number of ugly looking messages like these:
+
+```
+==> xrv: tar: dev/audio2: Cannot mknod: Operation not permitted
+==> xrv: tar: dev/sequencer: Cannot mknod: Operation not permitted
+==> xrv: tar: dev/midi3: Cannot mknod: Operation not permitted
+==> xrv: tar: dev/mixer3: Cannot mknod: Operation not permitted
+==> xrv: tar: dev/smpte3: Cannot mknod: Operation not permitted
+==> xrv: tar: dev/mpu401data: Cannot mknod: Operation not permitted
+```
+
+But don't worry, your vagrant boxes are working perfectly. Once you see the following message you wil know you are done:
+
+```
+==> xrv: Machine 'xrv' has a post `vagrant up` message. This is a message
+==> xrv: from the creator of the Vagrantfile, and not from Vagrant itself:
+==> xrv:
+==> xrv:
+==> xrv:     Welcome to the IOS XRv (64-bit) VirtualBox.
+...
+```
+
 
 ### How to use this demo.
 
