@@ -136,14 +136,6 @@ python -m unittest solenoid.tests.mock.test_rib
 python -m unittest solenoid.tests.mock.test_general
 ```
 
-To run integration testing, run the following command from the Solenoid/ directory. **CAUTION This will make changes to your router's RIB table! Do not run this code in a production environment!**
-
-For these tests to run, you must provide a properly formatted solenoid.config file, as described in step 3.
-
-```
-python -m unittest discover solenoid.tests.integration
-```
-
 The following is expected output from the unit tests:
 
 ```
@@ -156,5 +148,13 @@ OK
 ```
 
 If you recieve the final status of 'OK' you are good to go!
+
+To run integration testing, run the following command from the Solenoid/ directory. **CAUTION This will make changes to your router's RIB table! Do not run this code in a production environment!**
+
+For these tests to run, you must provide a properly formatted solenoid.config file, as described in step 3.
+
+```
+python -m unittest discover solenoid.tests.integration
+```
 
 
