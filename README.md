@@ -10,7 +10,7 @@
 The end goal of this Route injector app is to be able to take any given logic and
 make changes to the prefixes on a RIB table.
 
-The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model currently in use is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang).
+The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model currently in use is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). See [Current Limitations](#current-limitations)
 
 [exaBGP] (https://github.com/Exa-Networks/exabgp) is used for reading BGP updates. Exabgp is a tool for monitoring BGP network announcements, withdrawals, etc. and it triggers the gRPC changes based on these updates. 
 
