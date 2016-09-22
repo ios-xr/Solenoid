@@ -151,7 +151,7 @@ If you recieve the final status of 'OK' you are good to go!
 
 To run integration testing, run the following command from the Solenoid/ directory. **CAUTION This will make changes to your router's RIB table! Do not run this code in a production environment!**
 
-For these tests to run, you must provide a properly formatted solenoid.config file, as described in step 3.
+For these tests to run, you must provide a properly formatted solenoid.config file, as described in step 3, and ensure that no other instance of Solenoid is currently running.
 
 ```
 python -m unittest discover solenoid.tests.integration
