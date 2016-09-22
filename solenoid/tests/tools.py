@@ -1,4 +1,47 @@
 import os
+import unittest
+import shutil
+from solenoid import edit_rib
+
+class TestBookends(unittest.TestCase, object):
+    @classmethod
+    def setUpClass(cls):
+        #Silence stream logger.
+        streamhandler = edit_rib.LOGGER._streamhandler
+        streamhandler.close()
+        edit_rib.LOGGER._logger.removeHandler(streamhandler)
+        # Move the config file so it doesn't get edited
+        if os.path.isfile(add_location('../../solenoid.config')):
+            os.rename(
+                add_location('../../solenoid.config'),
+                add_location('../../solenoidtest.config')
+            )
+        shutil.copy(
+            add_location('examples/config/restconf/restconf_good.config'),
+            add_location('../../solenoid.config')
+        )
+
+    def setUp(self):
+        #Set global variable.
+        edit_rib.FILEPATH = add_location('examples/filter/filter-empty.txt')
+        #Clear out logging files.
+        open(add_location('../updates.txt'), 'w').close()
+        open(add_location('../logs/debug.log'), 'w').close()
+        open(add_location('../logs/errors.log'), 'w').close()
+
+    @classmethod
+    def tearDownClass(cls):
+        # If a new config file was created, delete it
+        if (os.path.isfile(add_location('../../solenoid.config'))
+                and os.path.isfile(add_location('../../solenoidtest.config'))
+           ):
+            os.remove(add_location('../../solenoid.config'))
+        # If the config file was moved, move it back
+        if os.path.isfile(add_location('../../solenoidtest.config')):
+            os.rename(
+                add_location('../../solenoidtest.config'),
+                add_location('../../solenoid.config')
+            )
 
 def exa_raw(test):
     with open(add_location('examples/exa/exa-raw.json')) as f:
