@@ -10,16 +10,14 @@
 The end goal of this Route injector app is to be able to take any given logic and
 make changes to the prefixes on a RIB table.
 
-The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model I am currently using is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang). This model will likely change in the future, see Limitations.
+The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model currently in use is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang).
 
-For reading BGP changes I am using [exaBGP] (https://github.com/Exa-Networks/exabgp). Exabgp allows me to monitor BGP network announcements, withdrawals, etc. and trigger the gRPC changes based on these updates. 
+[exaBGP] (https://github.com/Exa-Networks/exabgp) is used for reading BGP updates. Exabgp is a tool for monitoring BGP network announcements, withdrawals, etc. and it triggers the gRPC changes based on these updates. 
 
 
 #### Current Limitations:
 
-As of now, the IOS-XR 6.0 device I am using does not have completed YANG models
-for BGP RIB changes. As a temporary workaround, I can only add static routes
-to the RIB.
+As of now, the IOS-XR does not support YANG models that can add true BGP or Application routes to the RIB table. As a workaround, static routes are added instead. Be aware of the limits of static routes before using this application.
 
 
 RESTconf is not available on public images of the IOS-XR 6.X. If you are interested in testing RESTconf, please reach out to your Cisco account team or contact Lisa Roach directly.
@@ -55,7 +53,7 @@ Step 5 : Create a solenoid.config file in your top-level solenoid directory and 
 ```
 [default]
 transport: transport  # Either gRPC or RESTconf
-ip: ip_address        # IP address of the destination RIB table
+ip: ip_address        # IP address of the destination RIB table (the XR device you intend to control)
 port: port number     # Depends on what is configured for your gRPC or RESTconf servers
 username: username    # Username for the router
 password: password    # Password for the router
