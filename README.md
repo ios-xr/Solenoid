@@ -133,7 +133,7 @@ If you only wish to use RESTconf and will not be testing the gRPC code, feel fre
 ```
 python -m unittest solenoid.tests.mock.test_rib_rest
 
-python -m unittest solenoid.tests.mock.test_general
+python -m unittest solenoid.tests.mock.test_rib_general
 ```
 
 The following is expected output from the unit tests:
