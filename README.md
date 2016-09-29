@@ -7,8 +7,7 @@
 
 ## Description:
 
-The end goal of this Route injector app is to be able to take any given logic and
-make changes to the prefixes on a RIB table.
+Solenoid takes a third-party BGP protocol and sends the BGP updates to Cisco's RIB table on the IOS-XR devices, allowing for increased flexibility over the BGP protocols used on the box.
 
 The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model currently in use is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang), see [Current Limitations](#current-limitations) for more information.
 
