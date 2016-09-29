@@ -13,6 +13,7 @@ The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) cal
 
 [exaBGP] (https://github.com/Exa-Networks/exabgp) is used for reading BGP updates. Exabgp is a tool for monitoring BGP network announcements, withdrawals, etc. and it triggers the gRPC changes based on these updates. 
 
+Please refer to the [Wiki](https://github.com/ios-xr/Solenoid/wiki) for further documentation.
 
 #### Current Limitations:
 
