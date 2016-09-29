@@ -11,7 +11,7 @@ Solenoid takes a third-party BGP protocol and sends the BGP updates to Cisco's R
 
 The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model currently in use is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang), see [Current Limitations](#current-limitations) for more information.
 
-[exaBGP] (https://github.com/Exa-Networks/exabgp) is used for reading BGP updates. Exabgp is a tool for monitoring BGP network announcements, withdrawals, etc. and it triggers the gRPC changes based on these updates. 
+[exaBGP] (https://github.com/Exa-Networks/exabgp) is used for reading BGP updates. exaBGP is a tool for monitoring BGP network announcements, withdrawals, etc. and it triggers the gRPC changes based on these updates. 
 
 Please refer to the [Wiki](https://github.com/ios-xr/Solenoid/wiki) for further documentation.
 
@@ -27,6 +27,8 @@ RESTconf is not available on public images of the IOS-XR 6.X. If you are interes
 For an easy Solenoid-in-a-box demonstration, please refer to the [vagrant](https://github.com/ios-xr/Solenoid/tree/master/vagrant) directory. Here you will be able to download a fully functional vagrant environment that has Solenoid up and running already. 
 
 ### Usage:
+
+This installation and testing process (minus the integration tests) can run in any Linux environment. To fully use the application, it must be connected to a running IOS-XR 6.1+ device. It is recommended that Solenoid be run in an LXC on the IOS-XR you wish to control, see [Creating a Solenoid LXC tarball](https://github.com/ios-xr/Solenoid/wiki/Create-your-own-Solenoid-LXC-tarball) for information about creating your own LXC.
 
 Step 1: Clone this repo and cd into Solenoid.
 
