@@ -7,13 +7,13 @@
 
 ## Description:
 
-The end goal of this Route injector app is to be able to take any given logic and
-make changes to the prefixes on a RIB table.
+Solenoid takes a third-party BGP protocol and sends the BGP updates to Cisco's RIB table on the IOS-XR devices, allowing for increased flexibility over the BGP protocols used on the box.
 
 The changes to the RIB are accomplished by using [gRPC](http://www.grpc.io/) calls to send JSON modeled by YANG. The YANG model currently in use is [Cisco-IOS-XR-ip-static-cfg] (https://github.com/YangModels/yang/blob/master/vendor/cisco/xr/600/Cisco-IOS-XR-ip-static-cfg.yang), see [Current Limitations](#current-limitations) for more information.
 
-[exaBGP] (https://github.com/Exa-Networks/exabgp) is used for reading BGP updates. Exabgp is a tool for monitoring BGP network announcements, withdrawals, etc. and it triggers the gRPC changes based on these updates. 
+[exaBGP] (https://github.com/Exa-Networks/exabgp) is used for reading BGP updates. exaBGP is a tool for monitoring BGP network announcements, withdrawals, etc. and it triggers the gRPC changes based on these updates. 
 
+Please refer to the [Wiki](https://github.com/ios-xr/Solenoid/wiki) for further documentation.
 
 #### Current Limitations:
 
@@ -27,6 +27,9 @@ RESTconf is not available on public images of the IOS-XR 6.X. If you are interes
 For an easy Solenoid-in-a-box demonstration, please refer to the [vagrant](https://github.com/ios-xr/Solenoid/tree/master/vagrant) directory. Here you will be able to download a fully functional vagrant environment that has Solenoid up and running already. 
 
 ### Usage:
+Check the out [XR-Docs](https://xrdocs.github.io/application-hosting/tutorials/2016-09-28-solenoid-inject-routes-into-cisco-s-rib-table-using-grpc/) tutorial for a walkthrough of setting up a Solenoid LXC and playing with the demo.
+
+This installation and testing process (minus the integration tests) can run in any Linux environment. To fully use the application, it must be connected to a running IOS-XR 6.1+ device. It is recommended that Solenoid be run in an LXC on the IOS-XR you wish to control, see [Creating a Solenoid LXC tarball](https://github.com/ios-xr/Solenoid/wiki/Create-your-own-Solenoid-LXC-tarball) for information about creating your own LXC.
 
 Step 1: Clone this repo and cd into Solenoid.
 
