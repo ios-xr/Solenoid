@@ -117,8 +117,6 @@ def create_transport_object():
     try:
         config.read(os.path.join(location, '../solenoid.config'))
         if len(config.sections()) >= 1:
-            if len(config.sections()) > 1:
-                logger.warning('Multiple routers not currently supported in the configuration file. Using first router.', _source)
             section = config.sections()[0]
             args = (
                 config.get(section, 'ip'),
@@ -133,12 +131,6 @@ def create_transport_object():
         else:
             raise ValueError
     except (ConfigParser.Error, ValueError), e:
-        logger.critical(
-            'Something is wrong with your config file: {}'.format(
-                e.message
-            ),
-            _source
-        )
         sys.exit(1)
 
 def get_exa():
