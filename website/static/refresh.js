@@ -32,12 +32,22 @@
         var old_time = Table.rows[1].cells[4].innerHTML;
         if (time != old_time){
           var  row = Table.insertRow(1)
-          row.style.color = exa['color'];
-          row.insertCell(0).innerHTML = exa['peer_ip'];
-          row.insertCell(1).innerHTML = exa['update_type'];
-          row.insertCell(2).innerHTML = exa['nexthop'];
-          row.insertCell(3).innerHTML = exa['network'];
-          row.insertCell(4).innerHTML = time;
+          row.insertCell(0).innerHTML = exa['neighbor']['ip'];
+          var counter = Object.keys(exa['neighbor']['message']['update']).length - 1
+          var update = Object.keys(exa['neighbor']['message']['update'])[counter];
+          row.insertCell(1).innerHTML = update;
+          var nexthop = Object.keys(exa['neighbor']['message']['update'][update]['ipv4 unicast']);
+          if (counter == 0){
+            row.insertCell(2).innerHTML = " ";
+            var network = Object.keys(exa['neighbor']['message']['update'][update]['ipv4 unicast'][nexthop]);
+            row.insertCell(3).innerHTML = nexthop;
+            row.insertCell(4).innerHTML = time;
+         } else {
+            row.insertCell(2).innerHTML = nexthop;
+            var network = Object.keys(exa['neighbor']['message']['update'][update]['ipv4 unicast'][nexthop]);
+            row.insertCell(3).innerHTML = network;
+            row.insertCell(4).innerHTML = time;
+         }
         }
       }
     };
