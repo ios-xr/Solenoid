@@ -10,7 +10,6 @@ import json
 import sys
 import os
 import ConfigParser
-from netaddr import IPNetwork, AddrFormatError
 from solenoid import CiscoGRPCClient
 from solenoid import JSONRestCalls
 app = Flask(__name__)
@@ -139,51 +138,8 @@ def get_exa():
         f.seek(-2,2)
         while f.read(1) != b"\n": # Until EOL is found...
             f.seek(-2, 1)         # ...jump back the read byte plus one more.
-        update = f.readline()       # Read last line.
-    update = json.loads(update)
-    time = update['time']
-    peer_ip = update['neighbor']['ip']
-    for key in update['neighbor']['message']['update'].keys():
-        update_type = key
-    for key in update['neighbor']['message']['update'][update_type]['ipv4 unicast'].keys():
-        if update_type == 'announce':
-            nexthop = key
-            for key in update['neighbor']['message']['update'][update_type]['ipv4 unicast'][key].keys():
-                network = key
-        else:
-            nexthop = ''
-            network = key
-    color = check_filter(network)
-    exa = {}
-    exa['time'] = time
-    exa['peer_ip'] = peer_ip
-    exa['update_type'] = update_type
-    exa['nexthop'] = nexthop
-    exa['network'] = network
-    exa['color'] = color
-    exa = json.dumps(exa)
-    return exa
-
-def check_filter(network):
-    here = os.path.dirname(os.path.realpath(__file__))
-    filepath = os.path.join(here, '../filter.txt')
-    color = 'black'
-    with open(filepath) as filterf:
-        try:
-            for line in filterf:
-                if '-' in line:
-                    # Convert it all to IPNetwork for comparison.
-                    ip1, ip2 = line.split('-')
-                    if IPNetwork(ip1) <= IPNetwork(network) <= IPNetwork(ip2):
-                        color = 'black'
-                    else:
-                        color = 'red'
-                else:
-                    if IPNetwork(network) != IPNetwork(line):
-                        color = 'red'
-        except AddrFormatError, e:
-            print e
-    return color
+        last = f.readline()       # Read last line.
+    return last
 
 
 
