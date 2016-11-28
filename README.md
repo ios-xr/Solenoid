@@ -43,7 +43,7 @@ virtualenv venv
 source venv/bin/activate
 ```
 
-Step 3: Install gRPC (if you are using gRPC).
+Step 3: Install gRPC (if you are using gRPC). Note: if you experience errors at this step and are not using a virtualenv, we encourage reconsidering using virtualenv. It often makes these problems go away. Otherwise, please consult [grpcio documentation](https://pypi.python.org/pypi/grpcio) for assistance.
 
 `pip install grpcio`
 
